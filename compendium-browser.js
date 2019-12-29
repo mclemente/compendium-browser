@@ -275,7 +275,6 @@ class SpellBrowser extends Application {
             let setting = ev.target.dataset.setting;
             let value = ev.target.checked;
             if (setting === 'spell-compendium-setting') {
-                console.log('changing spells');
                 let key = ev.target.dataset.key;
                 this.settings.loadedSpellCompendium[key].load = value;
                 this.loadSpells().then((spells) => {
@@ -284,7 +283,6 @@ class SpellBrowser extends Application {
                 });
                 ui.notifications.info("Settings Saved. Spell Compendiums are being reloaded.");
             } else if (setting === 'npc-compendium-setting') {
-                console.log('changing npcs');
                 let key = ev.target.dataset.key;
                 this.settings.loadedNpcCompendium[key].load = value;
                 this.loadNpcs().then((npcs) => {
@@ -429,10 +427,6 @@ class SpellBrowser extends Application {
             let operator = $(ev.target).parents('.filter').find('select').val();
             let value = $(ev.target).parents('.filter').find('input').val();
 
-            console.log(operator, value);
-            console.log(value === '');
-            console.log(operator === 'null');                      
-
             let filterTarget = `${itemType}Filters`;
 
             if (value === '' || operator === 'null') {
@@ -466,7 +460,6 @@ class SpellBrowser extends Application {
             list.sort((a, b) => {
                 let aName = $(a).find('.spell-name a')[0].innerHTML;
                 let bName = $(b).find('.spell-name a')[0].innerHTML;
-                //console.log(`${aName} vs ${bName}`);
                 if (aName < bName) return -1;
                 if (aName > bName) return 1;
                 return 0;
@@ -475,7 +468,6 @@ class SpellBrowser extends Application {
             list.sort((a, b) => {
                 let aVal = $(a).find('input[name=level]').val();
                 let bVal = $(b).find('input[name=level]').val();
-                console.log(aVal, bVal);
                 if (aVal < bVal) return -1;
                 if (aVal > bVal) return 1;
                 if (aVal == bVal) {
@@ -547,8 +539,6 @@ class SpellBrowser extends Application {
         for (let filterKey in filters) {
             let filter = filters[filterKey];
             let prop = getProperty(subject, filter.path);
-            console.log(filter);
-            console.log(prop);
             if (filter.type === 'numberCompare') {
 
                 switch (filter.operator) {
@@ -577,7 +567,6 @@ class SpellBrowser extends Application {
                     if (filter.value && prop.indexOf(filter.value) === -1) {
                         return false;
                     } else {
-                        console.log(prop, filter.values);
                         for (let val of filter.values) {
                             if (prop.indexOf(val) !== -1) {
                                 continue;
