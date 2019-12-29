@@ -117,7 +117,7 @@ class SpellBrowser extends Application {
 
                             // getting damage types
                             spell.damageTypes = [];
-                            if (spell.data.damage.parts.length > 0) {
+                            if (spell.data.damage && spell.data.damage.parts.length > 0) {
                                 for (let part of spell.data.damage.parts) {
                                     let type = part[1];
                                     if (spell.damageTypes.indexOf(type) === -1) {
@@ -180,7 +180,7 @@ class SpellBrowser extends Application {
                             if (item.type == 'spell') {
                                 npc.hasSpells = true;
                             }
-                            if (item.data.damage.parts.length > 0) {
+                            if (item.data.damage && item.data.damage.parts.length > 0) {
                                 for (let part of item.data.damage.parts) {
                                     let type = part[1];
                                     if (npc.damageDealt.indexOf(type) === -1) {
@@ -564,9 +564,11 @@ class SpellBrowser extends Application {
                 }
             } else {
                 if (typeof prop === 'object') {
-                    if (filter.value && prop.indexOf(filter.value) === -1) {
-                        return false;
-                    } else {
+                    if (filter.value) {
+                        if (prop.indexOf(filter.value) === -1) {
+                            return false;
+                        }
+                    } else if(filter.values) {
                         for (let val of filter.values) {
                             if (prop.indexOf(val) !== -1) {
                                 continue;
