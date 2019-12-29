@@ -1,0 +1,32 @@
+<div class="settings tab" data-tab="setting" data-group="toplvl">
+    <div class="settings-group">
+        <h3>{{localize "CMPBrowser.generalSettings"}}</h3>
+        <label>
+            <input data-setting="allow-spell-browser" type="checkbox" {{#if settings.allowSpellBrowser}}checked{{/if}}>
+            <h4>{{localize "CMPBrowser.generalSettings"}}</h4>
+        </label>
+        <label>
+            <input data-setting="allow-npc-browser" type="checkbox" {{#if settings.allowNpcBrowser}}checked{{/if}}>
+            <h4>{{localize "CMPBrowser.generalSettings"}}</h4> 
+        </label>
+    </div>
+    
+    <div class="settings-group">
+        <h3>{{localize "CMPBrowser.compSettings"}}</h3>
+        {{#each settings.loadedSpellCompendium as |spellComp key|}}
+            <label>
+                <input data-setting="spell-compendium-setting" data-key="{{key}}" data-type="spell" type="checkbox"{{#if spellComp.load}}checked{{/if}}>
+                <h4>{{localize "CMPBrowser.load"}} {{spellComp.name}}</h4>
+            </label>
+        {{/each}}
+    </div>
+    <div class="settings-group">
+        <h3>Npc Compendium Settings</h3>
+        {{#each settings.loadedNpcCompendium as |npcComp key|}}
+            <label>
+                <input data-setting="npc-compendium-setting" data-key="{{key}}" data-type="npc" type="checkbox"{{#if npcComp.load}}checked{{/if}}>
+                <h4>{{localize "CMPBrowser.load"}} {{npcComp.name}}</h4>
+            </label>
+        {{/each}}
+    </div>
+</div>

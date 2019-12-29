@@ -1,0 +1,11 @@
+<div class="tabs" data-group="toplvl">
+    {{#if showSpellBrowser}}<a class="item" data-tab="spell">Spell Browser</a>{{/if}}
+    {{#if showNpcBrowser}}<a class="item" data-tab="npc">NPC Browser</a>{{/if}}
+    {{#if isGM}}<a class="item" data-tab="setting">Settings</a>{{/if}}
+</div>
+
+<div class="tabContainer">
+        {{#if showSpellBrowser}}{{> "modules/compendium-browser/template/spell-browser.html"}}{{/if}}
+        {{#if showNpcBrowser}}  {{> "modules/compendium-browser/template/npc-browser.html"}}{{/if}}
+        {{#if isGM}}            {{> "modules/compendium-browser/template/settings.html"}}{{/if}}
+</div>

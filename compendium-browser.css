@@ -1,0 +1,200 @@
+/*  core foundry changes  
+#compendium.flexcolumn.active {
+    display: flex;
+    flex-direction: column;
+}
+#compendium.flexcolumn > .directory-list {
+    width: 100%;
+    height: auto;
+    flex-basis: 0;
+    flex-grow: 1;
+}
+#compendium.flexcolumn > .directory-footer {
+    height: auto;
+}
+#compendium.flexcolumn > .directory-footer > * {
+    margin-top: 5px;
+}
+*/
+#compendium .directory-footer .compendium-browser-btn {
+  margin-top: 5px;
+}
+#compendium .directory-footer {
+  display: block;
+}
+/*  spellbrowser  */
+/*  resizing  */
+.compendium-browser {
+  max-width: 1100px;
+  max-height: 90vh;
+}
+.compendium-browser .tabs {
+  max-height: 2em;
+  border-bottom: solid #782e22;
+}
+.compendium-browser .tabContainer {
+  height: calc(100% - 2em);
+}
+.compendium-browser .tabContainer .tab {
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
+}
+.compendium-browser .control-area {
+  position: sticky;
+  display: block;
+  min-width: 250px;
+  width: 300px;
+  height: 100%;
+  padding-right: 5px;
+  overflow: scroll;
+}
+.compendium-browser .control-area .filtercontainer {
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  margin-top: 5px;
+  padding: 2px;
+}
+.compendium-browser .control-area .filtercontainer h3 {
+  margin: 0;
+  cursor: pointer;
+}
+.compendium-browser .control-area .filtercontainer dl,
+.compendium-browser .control-area .filtercontainer div {
+  margin: 5px 0;
+}
+.compendium-browser .control-area .filtercontainer dt {
+  display: inline-block;
+  width: 40%;
+  padding-left: 5px;
+}
+.compendium-browser .control-area .filtercontainer dd {
+  display: inline-block;
+  width: 58%;
+  margin-left: 0;
+}
+.compendium-browser .control-area .filtercontainer dd select {
+  width: 100%;
+}
+.compendium-browser .control-area .filtercontainer .multiselect {
+  border: 1px solid #bbb;
+  border-radius: 3px;
+}
+.compendium-browser .control-area .filtercontainer .multiselect label {
+  padding: 5px;
+}
+.compendium-browser .control-area .filtercontainer .small-input {
+  width: 144px;
+  height: 27px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #444;
+  border-radius: 3px;
+  padding: 0 3px;
+  text-overflow: ellipsis;
+}
+.compendium-browser .control-area .filtercontainer .small-select {
+  width: 40px;
+}
+.compendium-browser .browser .window-content {
+  overflow-y: hidden!important;
+}
+.compendium-browser .browser ul {
+  float: right;
+  display: block;
+  min-width: 335px;
+  width: 785px;
+  margin: 0;
+  height: 100%;
+  overflow: auto;
+  padding-left: 5px;
+}
+.compendium-browser .browser ul .filter-tags {
+  display: none;
+}
+.compendium-browser .browser .spacer {
+  display: inline-block;
+  min-width: 5px;
+}
+.compendium-browser .browser .spacer-large {
+  display: inline-block;
+  min-width: 15px;
+}
+.compendium-browser .spell-browser .spell {
+  cursor: default;
+  vertical-align: middle;
+  line-height: 32px;
+  margin: 2px 0;
+}
+.compendium-browser .spell-browser .spell .spell-image {
+  max-width: 32px;
+  height: 32px;
+}
+.compendium-browser .spell-browser .spell .spell-name {
+  height: 32px;
+  padding-left: 5px;
+}
+.compendium-browser .spell-browser .spell .spell-level {
+  text-align: center;
+  font-weight: 900;
+  max-width: 18px;
+  height: 32px;
+}
+.compendium-browser .spell-browser .spell .spell-tags {
+  text-align: right;
+  margin-right: 3px;
+  font-weight: 900;
+  max-width: 100px;
+  height: 32px;
+}
+.compendium-browser .npc-browser .npc {
+  cursor: default;
+  vertical-align: middle;
+  line-height: 64px;
+  margin: 4px 0;
+}
+.compendium-browser .npc-browser .npc .npc-image {
+  max-width: 64px;
+  height: 64px;
+}
+.compendium-browser .npc-browser .npc .npc-image img {
+  width: 64px;
+  height: 64px;
+  border: none;
+}
+.compendium-browser .npc-browser .npc .npc-line {
+  line-height: 25px;
+  padding: 9px 0 5px 5px;
+}
+.compendium-browser .npc-browser .npc .npc-name {
+  font-weight: bold;
+  font-size: 16px;
+}
+.compendium-browser .npc-browser .npc .cr {
+  display: inline-block;
+  width: 55px;
+}
+.compendium-browser .npc-browser .npc .size {
+  display: inline-block;
+  width: 75px;
+}
+.compendium-browser .npc-browser .npc .type {
+  display: inline-block;
+}
+.compendium-browser .settings .settings-group {
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  margin-top: 5px;
+  padding: 2px;
+}
+.compendium-browser .settings .settings-group h3 {
+  margin: 0;
+  cursor: pointer;
+}
+.compendium-browser .settings .settings-group label {
+  display: block;
+}
+.compendium-browser .settings .settings-group h4 {
+  display: inline-block;
+  vertical-align: middle;
+  height: 100%;
+}

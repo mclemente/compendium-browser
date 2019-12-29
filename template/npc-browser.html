@@ -1,0 +1,42 @@
+<div class="npc-browser browser tab flexrow" data-tab="npc" data-group="toplvl">
+    <div class="control-area">
+        <div class="filtercontainer" id="tagfilter">   
+            <div class="filter"  data-type="text" data-path="name">         
+                <input class="" name="textFilter" type="text" value="" data-dtype="String" placeholder="{{localize "Name"}}"/>
+            </div>
+            <dl id="sorter">
+                <dt>{{localize "CMPBrowser.sortBy"}}:</dt>
+                <dd><select name="sortorder">
+                    <option value="name" selected>{{localize "Name"}}</option>
+                    <option value="cr">{{localize "CMPBrowser.cr"}}</option>
+                    <option value="size">{{localize "DND5E.Size"}}</option>
+                </select></dd>
+            </dl>
+        </div>                
+        {{> "modules/compendium-browser/template/filter-container.html" filters=npcFilters}}
+    </div>
+    <ul>
+        {{#each npcs as |npc id|}}
+        <li class="npc flexrow draggable" data-entry-compendium="{{npc.compendium}}" data-entry-id="{{npc._id}}">
+            <div class="npc-image">
+                <img class="" src="{{npc.img}}" title="{{npc.name}}" width="32" height="32" />
+            </div>
+            <div class="npc-line">
+                <div class="npc-name">
+                    <span class="item-edit"><a>{{npc.name}}</a></span>
+                </div>
+                <div class="npc-tags">
+                    <span class="cr-display" title="Challange Rating">CR {{npc.displayCR}}</span>
+                    <span class="size-display">{{npc.displaySize}}</span>
+                    <span class="type">{{npc.data.details.type.value}}</span>
+                </div>
+                <div class="filter-tags">
+                    <input type="hidden" name="order.cr" value="{{npc.data.details.cr}}">
+                    <input type="hidden" name="order.size" value="{{npc.filterSize}}">
+                </div>
+            </div>
+        </li>
+        {{/each}}
+    </ul>
+
+</div>

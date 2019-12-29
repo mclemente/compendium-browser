@@ -1,0 +1,236 @@
+/*  core foundry changes  
+#compendium.flexcolumn.active {
+    display: flex;
+    flex-direction: column;
+}
+#compendium.flexcolumn > .directory-list {
+    width: 100%;
+    height: auto;
+    flex-basis: 0;
+    flex-grow: 1;
+}
+#compendium.flexcolumn > .directory-footer {
+    height: auto;
+}
+#compendium.flexcolumn > .directory-footer > * {
+    margin-top: 5px;
+}
+*/
+#compendium .directory-footer .compendium-browser-btn {
+    margin-top:5px;
+}
+
+#compendium .directory-footer {
+    display:block;
+}
+
+/*  spellbrowser  */
+/*  resizing  */
+.compendium-browser {
+    max-width:1100px;
+    max-height:90vh;
+    
+    .tabs {
+        max-height:2em;
+        border-bottom: solid #782e22;
+        a {
+        }
+    }
+    .tabContainer {
+        height:calc(100% - 2em);
+        .tab {
+            width: 100%;
+            height: 100%;
+            overflow:scroll;
+        }
+    }
+    
+    .control-area {
+        position:sticky;
+        display: block;
+        min-width: 250px;
+        width: 300px;
+        height:100%;
+        padding-right:5px;
+        overflow:scroll;
+        
+        .filtercontainer {    
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            margin-top: 5px;
+            padding:2px;
+            
+            h3 {
+                margin:0;
+                cursor:pointer;
+            }
+            
+            dl, div {
+                margin: 5px 0;
+            }
+            
+            dt {
+                display:inline-block;
+                width:40%;
+                padding-left:5px;
+            }
+            
+            dd {
+                display:inline-block;
+                width:58%;
+                margin-left:0;
+                
+                select {
+                    width:100%;
+                }
+            }
+            .multiselect {
+                border: 1px solid #bbb;
+                border-radius: 3px;
+                
+                label {
+                    padding:5px;
+                }
+            }
+            .small-input {
+                width: 144px;
+                height: 27px;
+                background: rgba(255, 255, 255, 0.8);
+                border: 1px solid #444;
+                border-radius: 3px;
+                padding: 0 3px;
+                text-overflow: ellipsis;
+            }
+            .small-select {
+                width: 40px;
+            }
+        }
+    }
+    
+    .browser {
+        
+        .window-content {
+            overflow-y: hidden!important;
+        }
+        
+        ul {
+            float:right;
+            display: block;
+            min-width: 335px;
+            width: 785px;
+            margin:0;
+            height: 100%;
+            overflow:auto;
+            padding-left: 5px;
+            
+            .filter-tags {
+                display:none;
+            }
+            
+        }
+        
+        .spacer {
+            display:inline-block;
+            min-width:5px;
+        } 
+        .spacer-large {
+            display:inline-block;
+            min-width:15px;
+        }
+    }
+    
+    .spell-browser {
+        .spell {
+            cursor:default;
+            vertical-align: middle;
+            line-height:32px;
+            margin:2px 0;
+            
+            .spell-image {
+                max-width:32px;
+                height:32px;
+            }
+            .spell-name {
+                height:32px;
+                padding-left:5px;
+            }
+            .spell-level {
+                text-align:center;
+                font-weight:900;
+                max-width:18px;
+                height:32px;
+            }
+            .spell-tags {
+                text-align:right;
+                margin-right:3px;
+                font-weight:900;
+                max-width:100px;
+                height:32px;
+            }
+        }
+    }
+    
+    .npc-browser {
+        .npc {
+            cursor:default;
+            vertical-align: middle;
+            line-height:64px;
+            margin:4px 0;
+            .npc-image {
+                max-width: 64px;
+                height: 64px;
+            }
+            .npc-image img {
+                width: 64px;
+                height: 64px;
+                border: none;
+            }
+
+            .npc-line {
+                line-height: 25px;
+                padding: 9px 0 5px 5px;
+            }
+            .npc-name {
+                font-weight:bold;
+                font-size:16px;
+            }
+            .cr {
+                display: inline-block;
+                width: 55px;
+            }
+            .size {
+                display: inline-block;
+                width: 75px;
+            }
+            .type {
+                display: inline-block;
+            }
+        }
+    }
+    
+    .settings {
+        .settings-group {            
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            margin-top: 5px;
+            padding:2px;
+            
+            h3 {
+                margin:0;
+                cursor:pointer;
+            }
+            
+            label {
+                display:block;
+            }
+            input {
+                
+            }
+            h4 {
+                display:inline-block;
+                vertical-align: middle;
+                height:100%;
+            }
+        }
+    }
+}
