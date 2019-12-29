@@ -1,6 +1,6 @@
 /**
  * @author Felix Müller aka syl3r86
- * @version 0.1.1
+ * @version 0.1.2
  */
 
 class SpellBrowser extends Application {
@@ -563,6 +563,7 @@ class SpellBrowser extends Application {
                     }
                 }
             } else {
+                if (prop === undefined) return false;
                 if (typeof prop === 'object') {
                     if (filter.value) {
                         if (prop.indexOf(filter.value) === -1) {
@@ -577,6 +578,7 @@ class SpellBrowser extends Application {
                         }
                     }
                 } else {
+                    console.log(prop);
                     for (let val of filter.values) {
                         if (prop === val) {
                             continue;
