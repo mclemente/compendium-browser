@@ -5,7 +5,7 @@ A module to easily browse and filter spells as well as npcs loaded from compendi
 ## Installation
 1. Copy this link and use it in Foundrys Module Manager to install the Module
 
-    > https://raw.githubusercontent.com/syl3r86//compendium-browser/master/module.json
+    > https://raw.githubusercontent.com/syl3r86/compendium-browser/master/module.json
     
 2. Enable the Module in your Worlds Module Settings
 
