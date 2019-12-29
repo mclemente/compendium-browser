@@ -1,0 +1,4 @@
+.gitattributes export-ignore
+README.md export-ignore
+preview.jpg export-ignore
+compendium-browser.less export-ignore
