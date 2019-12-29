@@ -1,6 +1,6 @@
 /**
  * @author Felix Müller aka syl3r86
- * @version 0.1
+ * @version 0.1.1
  */
 
 class SpellBrowser extends Application {
