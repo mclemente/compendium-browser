@@ -44,6 +44,7 @@
   position: sticky;
   display: block;
   min-width: 250px;
+  max-width: 400px;
   width: 300px;
   height: 100%;
   padding-right: 5px;
@@ -79,12 +80,18 @@
 .compendium-browser .control-area .filtercontainer .multiselect {
   border: 1px solid #bbb;
   border-radius: 3px;
+  vertical-align: middle;
+  line-height: 32px;
+  margin: 2px 0;
 }
 .compendium-browser .control-area .filtercontainer .multiselect label {
   padding: 5px;
 }
+.compendium-browser .control-area .filtercontainer .multiselect input {
+  vertical-align: middle;
+}
 .compendium-browser .control-area .filtercontainer .small-input {
-  width: 144px;
+  width: calc(100% - 44px);
   height: 27px;
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid #444;
@@ -110,6 +117,10 @@
 }
 .compendium-browser .browser ul .filter-tags {
   display: none;
+}
+.compendium-browser .browser ul li span {
+  white-space: nowrap;
+  overflow: hidden;
 }
 .compendium-browser .browser .spacer {
   display: inline-block;

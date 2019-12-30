@@ -2,7 +2,7 @@
 	"name": "compendium-browser",
 	"title": "Compendium Browser",
 	"description": "A module to easily browse and filter spells as well as npcs loaded from compendie.",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"author": "Felix#6196",
 	"systems": ["dnd5e"],
 	"scripts": ["./compendium-browser.js"],
@@ -14,6 +14,11 @@
           "lang": "en",
           "name": "English",
           "path": "lang/en.json"
+        },
+        {
+          "lang": "ja",
+          "name": "Japanese",
+          "path": "lang/ja.json"
         }
     ],
 	"url": "https://github.com/syl3r86/compendium-browser",

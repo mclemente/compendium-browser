@@ -12,7 +12,7 @@
     "CMPBrowser.verbal":"Verbal",
     "CMPBrowser.somatic":"Somatic",
     "CMPBrowser.material":"Material",
-    "CMPBrowser.cantip":"Cantip",
+    "CMPBrowser.cantip":"Cantrip",
     "CMPBrowser.school":"School",
     "CMPBrowser.castingTime":"Casting Time",
     "CMPBrowser.bonusAction":"Bonus Action",
@@ -51,5 +51,6 @@
     "CMPBrowser.abilities": "Abilities",
     "CMPBrowser.dmgInteraction": "Damage Interaction",
     "CMPBrowser.dmgDealt": "Damage Dealt",
+    "CMPBrowser.size": "Size",
     "CMPBrowser.cmpBrowser": "Compendium Browser"
 }
