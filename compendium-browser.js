@@ -1,6 +1,6 @@
-/**
- * @author Felix M�ller aka syl3r86
- * @version 0.1.3
+﻿/**
+ * @author Felix Müller aka syl3r86
+ * @version 0.1.4
  */
 
 class SpellBrowser extends Application {
@@ -116,7 +116,8 @@ class SpellBrowser extends Application {
                             spell.compendium = pack.collection;
 
                             // determining classes that can use the spell
-                            let cleanSpellName = spell.name.toLowerCase().replace(/[^a-zA-Z0-9\s:]/g, '').replace("'", '').replace(/ /g, '');
+                            let cleanSpellName = spell.name.toLowerCase().replace(/[^一-龠ぁ-ゔァ-ヴーa-zA-Z0-9ａ-ｚＡ-Ｚ０-９々〆〤]/g, '').replace("'", '').replace(/ /g, '');
+                            //let cleanSpellName = spell.name.toLowerCase().replace(/[^a-zA-Z0-9\s:]/g, '').replace("'", '').replace(/ /g, '');
                             if (this.classList[cleanSpellName] !== undefined) {
                                 let classes = this.classList[cleanSpellName];
                                 spell.data.classes = classes.split(',');
