@@ -1,4 +1,5 @@
 {
+    "CMPBrowser.compendiumBrowser":"辞典ブラウザ",
     "CMPBrowser.sortBy":"並び替え",
     "CMPBrowser.cr":"難易度",
     "CMPBrowser.generalSettings":"一般設定",
@@ -51,7 +52,5 @@
     "CMPBrowser.abilities": "能力値",
     "CMPBrowser.dmgInteraction": "ダメージ関連",
     "CMPBrowser.dmgDealt": "与えるダメージ種別",
-    "CMPBrowser.size": "サイズ",
-    "CMPBrowser.cmpBrowser": "辞典ブラウザ"
-    
+    "CMPBrowser.size": "サイズ"    
 }

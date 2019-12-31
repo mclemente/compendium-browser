@@ -1,6 +1,6 @@
 ﻿/**
  * @author Felix Müller aka syl3r86
- * @version 0.1.4
+ * @version 0.1.5
  */
 
 class SpellBrowser extends Application {
@@ -47,14 +47,14 @@ class SpellBrowser extends Application {
         options.height = 700;
         options.resizable = true;
         options.minimizable = true;
-        options.title = game.i18n.localize("Compendium Browser");
+        options.title = "Compendium Browser";
         return options;
     }
 
     hookCompendiumList() {
         Hooks.on('renderCompendiumDirectory', (app, html, data) => {
             if (game.user.isGM || this.settings.allowSpellBrowser || this.settings.allowNpcBrowser) {
-                const importButton = $(`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize("Compendium Browser")}</button>`);
+                const importButton = $(`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize("CMPBrowser.compendiumBrowser")}</button>`);
                 html.find('.compendium-browser-btn').remove();
 
                 // adding to directory-list since the footer doesn't exist if the user is not gm
@@ -210,6 +210,10 @@ class SpellBrowser extends Application {
     }
     
     activateListeners(html) {
+        // localizing title
+        $(html).parents('.app').find('.window-title')[0].innerText = game.i18n.localize("CMPBrowser.compendiumBrowser");
+
+
         // activating tabs/*
         let nav = $('.tabs[data-group="toplvl"]');
         new Tabs(nav, {

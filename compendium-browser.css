@@ -171,6 +171,7 @@
   width: 64px;
   height: 64px;
   border: none;
+  object-fit: contain;
 }
 .compendium-browser .npc-browser .npc .npc-line {
   line-height: 25px;
