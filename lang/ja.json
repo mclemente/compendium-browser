@@ -52,5 +52,8 @@
     "CMPBrowser.abilities": "能力値",
     "CMPBrowser.dmgInteraction": "ダメージ関連",
     "CMPBrowser.dmgDealt": "与えるダメージ種別",
-    "CMPBrowser.size": "サイズ"    
+    "CMPBrowser.size": "サイズ",
+    "CMPBrowser.spellBrowser":"呪文ブラいざ",
+    "CMPBrowser.npcBrowser":"NPCブラウザ",
+    "CMPBrowser.settings":"設定"
 }

@@ -52,5 +52,9 @@
     "CMPBrowser.abilities": "Abilities",
     "CMPBrowser.dmgInteraction": "Damage Interaction",
     "CMPBrowser.dmgDealt": "Damage Dealt",
-    "CMPBrowser.size": "Size"
+    "CMPBrowser.size": "Size",
+    "CMPBrowser.spellBrowser":"Spell Browser",
+    "CMPBrowser.npcBrowser":"NPC Browser",
+    "CMPBrowser.settings":"Settings"
+    
 }
