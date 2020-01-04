@@ -5,7 +5,8 @@
     "CMPBrowser.generalSettings":"一般設定",
     "CMPBrowser.allowSpellAcc":"プレイヤーに呪文辞典の使用を許可する。",
     "CMPBrowser.allowNpcAcc":"プレイヤーにNPC辞典の使用を許可する。",
-    "CMPBrowser.compSettings":"呪文辞典設定",
+    "CMPBrowser.compSettingsSpell":"呪文辞典設定",
+    "CMPBrowser.compSettingsNpc":"NPC辞典設定",
     "CMPBrowser.load":"追加",
     "CMPBrowser.lvl":"レベル",
     "CMPBrowser.ritual":"儀式",
@@ -53,7 +54,7 @@
     "CMPBrowser.dmgInteraction": "ダメージ関連",
     "CMPBrowser.dmgDealt": "与えるダメージ種別",
     "CMPBrowser.size": "サイズ",
-    "CMPBrowser.spellBrowser":"呪文ブラいざ",
+    "CMPBrowser.spellBrowser":"呪文ブラウザ",
     "CMPBrowser.npcBrowser":"NPCブラウザ",
     "CMPBrowser.settings":"設定"
 }

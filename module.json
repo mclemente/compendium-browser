@@ -2,7 +2,7 @@
 	"name": "compendium-browser",
 	"title": "Compendium Browser",
 	"description": "A module to easily browse and filter spells as well as npcs loaded from compendie.",
-	"version": "0.1.6",
+	"version": "0.1.7",
 	"author": "Felix#6196",
 	"systems": ["dnd5e"],
 	"scripts": ["./compendium-browser.js"],

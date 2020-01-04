@@ -12,7 +12,7 @@
     </div>
     
     <div class="settings-group">
-        <h3>{{localize "CMPBrowser.compSettings"}}</h3>
+        <h3>{{localize "CMPBrowser.compSettingsSpell"}}</h3>
         {{#each settings.loadedSpellCompendium as |spellComp key|}}
             <label>
                 <input data-setting="spell-compendium-setting" data-key="{{key}}" data-type="spell" type="checkbox"{{#if spellComp.load}}checked{{/if}}>
@@ -21,7 +21,7 @@
         {{/each}}
     </div>
     <div class="settings-group">
-        <h3>Npc Compendium Settings</h3>
+        <h3>{{localize "CMPBrowser.compSettingsNpc"}}</h3>
         {{#each settings.loadedNpcCompendium as |npcComp key|}}
             <label>
                 <input data-setting="npc-compendium-setting" data-key="{{key}}" data-type="npc" type="checkbox"{{#if npcComp.load}}checked{{/if}}>
