@@ -1,5 +1,7 @@
 # Compendium Browser
 
+> This version only works for Foundry v0.4.4 and up. To use the previous version please visit https://github.com/syl3r86/compendium-browser/tree/pre-0.4.4
+
 A module to easily browse and filter spells as well as npcs loaded from compendie.
 
 ## Installation
