@@ -1,6 +1,6 @@
 ﻿/**
  * @author Felix Müller aka syl3r86
- * @version 0.1.5
+ * @version 0.1.9
  */
 
 class SpellBrowser extends Application {
@@ -10,7 +10,9 @@ class SpellBrowser extends Application {
         
         // load settings
         Hooks.on('ready', e => {
-            this.initSettings();
+            if (this.settings === undefined) {
+                this.initSettings();
+            }
 
             this.loadSpells().then(obj => {
                 this.spells = obj
@@ -53,6 +55,9 @@ class SpellBrowser extends Application {
 
     hookCompendiumList() {
         Hooks.on('renderCompendiumDirectory', (app, html, data) => {
+            if (this.settings === undefined) {
+                this.initSettings();
+            }
             if (game.user.isGM || this.settings.allowSpellBrowser || this.settings.allowNpcBrowser) {
                 const importButton = $(`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize("CMPBrowser.compendiumBrowser")}</button>`);
                 html.find('.compendium-browser-btn').remove();
@@ -646,7 +651,7 @@ class SpellBrowser extends Application {
                 this.settings = settings;
             }
         });
-
+        
         // load settings from container and apply to default settings (available compendie might have changed)
         let settings = game.settings.get('compendiumBrowser', 'settings');
         for (let compKey in defaultSettings.loadedSpellCompendium) {
@@ -661,7 +666,7 @@ class SpellBrowser extends Application {
         }
         defaultSettings.allowSpellBrowser = settings.allowSpellBrowser;
         defaultSettings.allowNpcBrowser = settings.allowNpcBrowser;
-
+           
         game.settings.set('compendiumBrowser', 'settings', defaultSettings);
         this.settings = defaultSettings;
     }
