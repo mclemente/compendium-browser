@@ -1,6 +1,6 @@
 ﻿/**
  * @author Felix Müller aka syl3r86
- * @version 0.1.9
+ * @version 0.1.11
  */
 
 class SpellBrowser extends Application {
@@ -666,8 +666,9 @@ class SpellBrowser extends Application {
         }
         defaultSettings.allowSpellBrowser = settings.allowSpellBrowser;
         defaultSettings.allowNpcBrowser = settings.allowNpcBrowser;
-           
-        game.settings.set('compendiumBrowser', 'settings', defaultSettings);
+        if (game.user.isGM) {
+            game.settings.set('compendiumBrowser', 'settings', defaultSettings);
+        }   
         this.settings = defaultSettings;
     }
 
