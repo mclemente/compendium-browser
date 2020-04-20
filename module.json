@@ -27,7 +27,7 @@
     ],
     "url": "https://github.com/syl3r86/compendium-browser",
     "manifest": "https://raw.githubusercontent.com/syl3r86/compendium-browser/master/module.json",
-    "download": "https://github.com/syl3r86/compendium-browser/archive/master.zip",
+    "download": "https://github.com/syl3r86/compendium-browser/archive/v0.1.11.zip",
     "minimumCoreVersion": "0.5.5",
     "compatibleCoreVersion": "0.5.5"
 }
