@@ -1,4 +1,4 @@
-<div class="npc-browser browser tab flexrow" data-tab="npc" data-group="toplvl">
+<div class="npc-browser browser flexrow">
     <div class="control-area">
         <div class="filtercontainer" id="tagfilter">   
             <div class="filter"  data-type="text" data-path="name">         
@@ -12,6 +12,7 @@
                     <option value="size">{{localize "DND5E.Size"}}</option>
                 </select></dd>
             </dl>
+            <button id="reset-npc-filter">Reset NPC Filters</button>
         </div>                
         {{> "modules/compendium-browser/template/filter-container.html" filters=npcFilters}}
     </div>

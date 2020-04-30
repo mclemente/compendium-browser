@@ -1,4 +1,4 @@
-<div class="spell-browser browser tab flexrow" data-tab="spell" data-group="toplvl">
+<div class="spell-browser browser flexrow">
     <div class="control-area">
         <div class="filtercontainer" id="tagfilter">            
             <div class="filter"  data-type="text" data-path="name">
@@ -10,7 +10,8 @@
                     <option value="true" selected>{{localize "Name"}}</option>
                     <option value="false">{{localize "CMPBrowser.lvl"}}</option>
                 </select></dd>
-            </dl>              
+            </dl> 
+            <button id="reset-spell-filter">Reset Spell Filters</button>
         </div>
         {{> "modules/compendium-browser/template/filter-container.html" filters=spellFilters}}
     </div>

@@ -1,11 +1,13 @@
-<div class="tabs" data-group="toplvl">
-    {{#if showSpellBrowser}}<a class="item" data-tab="spell">{{localize "CMPBrowser.spellBrowser"}}</a>{{/if}}
-    {{#if showNpcBrowser}}<a class="item" data-tab="npc">{{localize "CMPBrowser.npcBrowser"}}</a>{{/if}}
-    {{#if isGM}}<a class="item" data-tab="setting">{{localize "CMPBrowser.settings"}}</a>{{/if}}
-</div>
+<div>
+    <div class="tabs">
+        {{#if showSpellBrowser}}<a class="item" data-tab="spell">{{localize "CMPBrowser.spellBrowser"}}</a>{{/if}}
+        {{#if showNpcBrowser}}<a class="item" data-tab="npc">{{localize "CMPBrowser.npcBrowser"}}</a>{{/if}}
+        {{#if isGM}}<a class="item" data-tab="setting">{{localize "CMPBrowser.settings"}}</a>{{/if}}
+    </div>
 
-<div class="tabContainer">
-        {{#if showSpellBrowser}}{{> "modules/compendium-browser/template/spell-browser.html"}}{{/if}}
-        {{#if showNpcBrowser}}  {{> "modules/compendium-browser/template/npc-browser.html"}}{{/if}}
-        {{#if isGM}}            {{> "modules/compendium-browser/template/settings.html"}}{{/if}}
+    <div class="content">
+            <div class="tab" data-tab="spell">{{#if showSpellBrowser}}{{> "modules/compendium-browser/template/spell-browser.html"}}{{/if}}</div>
+            <div class="tab" data-tab="npc">{{#if showNpcBrowser}}  {{> "modules/compendium-browser/template/npc-browser.html"}}{{/if}}</div>
+            <div class="tab" data-tab="setting">{{#if isGM}}            {{> "modules/compendium-browser/template/settings.html"}}{{/if}}</div>
+    </div>
 </div>

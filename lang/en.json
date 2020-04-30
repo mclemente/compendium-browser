@@ -22,6 +22,7 @@
     "CMPBrowser.spellType":"Spell Type",
     "CMPBrowser.damageType":"Damage Type",
     "CMPBrowser.class":"Class",
+	"CMPBrowser.artificer":"Artificer",
     "CMPBrowser.bard":"Bard",
     "CMPBrowser.cleric":"Cleric",
     "CMPBrowser.druid":"Druid",

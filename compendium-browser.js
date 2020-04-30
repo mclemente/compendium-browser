@@ -1,33 +1,28 @@
 ﻿/**
  * @author Felix Müller aka syl3r86
- * @version 0.1.11
+ * @version 0.2.0
  */
 
 class SpellBrowser extends Application {
-
-    constructor(app) {
-        super(app);
-        
+    
+    async initializeContent() {
         // load settings
-        Hooks.on('ready', e => {
-            if (this.settings === undefined) {
-                this.initSettings();
-            }
-
-            this.loadSpells().then(obj => {
-                this.spells = obj
-            });
-            this.loadNpcs().then(obj => {
-                this.npcs = obj
-            });
-
-            loadTemplates([
-                "modules/compendium-browser/template/spell-browser.html",
-                "modules/compendium-browser/template/npc-browser.html",
-                "modules/compendium-browser/template/filter-container.html",
-                "modules/compendium-browser/template/settings.html"                
-            ])
+        if (this.settings === undefined) {
+            this.initSettings();
+        }
+        this.loadSpells().then(obj => {
+            this.spells = obj;
         });
+        this.loadNpcs().then(obj => {
+            this.npcs = obj;
+        });
+        await loadTemplates([
+            "modules/compendium-browser/template/spell-browser.html",
+            "modules/compendium-browser/template/npc-browser.html",
+            "modules/compendium-browser/template/filter-container.html",
+            "modules/compendium-browser/template/settings.html"
+        ]);
+
         this.hookCompendiumList();
 
         this.spellFilters = {
@@ -38,18 +33,20 @@ class SpellBrowser extends Application {
             registeredFilterCategorys: {},
             activeFilters: {}
         };
-        
     }
 
     static get defaultOptions() {
         const options = super.defaultOptions;
-        options.classes = options.classes.concat('compendium-browser');
-        options.template = "modules/compendium-browser/template/template.html";
-        options.width = 800;
-        options.height = 700;
-        options.resizable = true;
-        options.minimizable = true;
-        options.title = "Compendium Browser";
+        mergeObject(options, {
+            tabs: [{ navSelector: ".tabs", contentSelector: ".content", initial: "spell" }],
+            classes: options.classes.concat('compendium-browser'),
+            template: "modules/compendium-browser/template/template.html",
+            width: 800,
+            height: 700,
+            resizable: true,
+            minimizable: true,
+            title: "Compendium Browser"
+        });
         return options;
     }
 
@@ -195,7 +192,7 @@ class SpellBrowser extends Application {
                             if (item.type == 'spell') {
                                 npc.hasSpells = true;
                             }
-                            if (item.data.damage && item.data.damage.parts.length > 0) {
+                            if (item.data.damage && item.data.damage.parts && item.data.damage.parts.length > 0) {
                                 for (let part of item.data.damage.parts) {
                                     let type = part[1];
                                     if (npc.damageDealt.indexOf(type) === -1) {
@@ -215,18 +212,9 @@ class SpellBrowser extends Application {
     }
     
     activateListeners(html) {
+        super.activateListeners(html);
         // localizing title
         $(html).parents('.app').find('.window-title')[0].innerText = game.i18n.localize("CMPBrowser.compendiumBrowser");
-
-
-        // activating tabs/*
-        let nav = $('.tabs[data-group="toplvl"]');
-        new Tabs(nav, {
-            initial: this["activeTab"] || 'tab1',
-            callback: clicked => {
-                this["activeTab"] = clicked.data("tab");
-            }
-        });
 
         // show entity sheet
         html.find('.item-edit').click(ev => {
@@ -288,6 +276,17 @@ class SpellBrowser extends Application {
             }
         });
         html.find('.npc-browser select[name=sortorder]').trigger('change')
+
+        // reset filters
+        html.find('#reset-spell-filter').click(ev => {
+            this.spellFilters.activeFilters = {};
+            this.render();
+        });
+
+        html.find('#reset-npc-filter').click(ev => {
+            this.npcFilters.activeFilters = {};
+            this.render();
+        });
 
         // settings
         html.find('.settings input').on('change', ev => {
@@ -738,13 +737,14 @@ class SpellBrowser extends Application {
     }
 }
 
-Hooks.on('init', () => {
+Hooks.on('ready', async function() {
+
     if (game.compendiumBrowser === undefined) {
         game.compendiumBrowser = new SpellBrowser();
+        await game.compendiumBrowser.initializeContent();
     }
-});
 
-Hooks.on('ready', () => {
+    game.compendiumBrowser.addSpellFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("DND5E.Source"), 'data.source', 'text');
     game.compendiumBrowser.addSpellFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.lvl"), 'data.level', 'multiSelect', [game.i18n.localize("CMPBrowser.cantip"), 1, 2, 3, 4, 5, 6, 7, 8, 9]);
     game.compendiumBrowser.addSpellFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.school"), 'data.school', 'select', CONFIG.DND5E.spellSchools);
     game.compendiumBrowser.addSpellFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.castingTime"), 'data.activation.type', 'select',
@@ -760,6 +760,7 @@ Hooks.on('ready', () => {
     game.compendiumBrowser.addSpellFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.damageType"), 'damageTypes', 'select', CONFIG.DND5E.damageTypes);
     game.compendiumBrowser.addSpellFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.class"), 'data.classes', 'select',
         {
+            artificer: game.i18n.localize("CMPBrowser.artificer"),
             bard: game.i18n.localize("CMPBrowser.bard"),
             cleric: game.i18n.localize("CMPBrowser.cleric"),
             druid: game.i18n.localize("CMPBrowser.druid"),
@@ -776,6 +777,7 @@ Hooks.on('ready', () => {
     game.compendiumBrowser.addSpellFilter(game.i18n.localize("CMPBrowser.components"), game.i18n.localize("CMPBrowser.somatic"), 'data.components.somatic', 'bool');
     game.compendiumBrowser.addSpellFilter(game.i18n.localize("CMPBrowser.components"), game.i18n.localize("CMPBrowser.material"), 'data.components.material', 'bool');
 
+    game.compendiumBrowser.addNpcFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("DND5E.Source"), 'data.details.source', 'text');
     game.compendiumBrowser.addNpcFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.size"), 'data.traits.size', 'select', CONFIG.DND5E.actorSizes);
     game.compendiumBrowser.addNpcFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.hasSpells"), 'hasSpells', 'bool');
     game.compendiumBrowser.addNpcFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.hasLegAct"), 'data.resources.legact.max', 'bool');
