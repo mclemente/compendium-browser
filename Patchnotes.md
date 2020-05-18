@@ -4,3 +4,6 @@ v0.2
   - migrated to the new TabsV2
   - added a Reset Filters button
   - Added the Artificer class, thanks to Tielc#7191 for that
+
+v0.2.1
+ - fixed an issue that prevented the rendering of the Button to open the browser
