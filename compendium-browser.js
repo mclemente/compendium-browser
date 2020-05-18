@@ -52,23 +52,26 @@ class SpellBrowser extends Application {
 
     hookCompendiumList() {
         Hooks.on('renderCompendiumDirectory', (app, html, data) => {
-            if (this.settings === undefined) {
-                this.initSettings();
-            }
-            if (game.user.isGM || this.settings.allowSpellBrowser || this.settings.allowNpcBrowser) {
-                const importButton = $(`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize("CMPBrowser.compendiumBrowser")}</button>`);
-                html.find('.compendium-browser-btn').remove();
-
-                // adding to directory-list since the footer doesn't exist if the user is not gm
-                html.find('.directory-footer').append(importButton);
-
-                // Handle button clicks
-                importButton.click(ev => {
-                    ev.preventDefault();
-                    this.render(true);
-                });
-            }
+            this.hookCompendiumList();
         });
+
+        let html = $('#compendium');
+        if (this.settings === undefined) {
+            this.initSettings();
+        }
+        if (game.user.isGM || this.settings.allowSpellBrowser || this.settings.allowNpcBrowser) {
+            const importButton = $(`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize("CMPBrowser.compendiumBrowser")}</button>`);
+            html.find('.compendium-browser-btn').remove();
+
+            // adding to directory-list since the footer doesn't exist if the user is not gm
+            html.find('.directory-footer').append(importButton);
+
+            // Handle button clicks
+            importButton.click(ev => {
+                ev.preventDefault();
+                this.render(true);
+            });
+        }
     }
 
     async getData() {
