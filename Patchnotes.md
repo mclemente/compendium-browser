@@ -7,3 +7,18 @@ v0.2
 
 v0.2.1
  - fixed an issue that prevented the rendering of the Button to open the browser
+
+v0.3.0
+ - improved load times by lazyloading images
+ - fixed some css problems
+ - new Feature: Feat Browser
+    - Compendium Browser now has a new section for Feats
+    - lets you filter by source, class (as set in the requirements field), activation cost, damage type and if it uses ressources
+ - new Feature: Item Browser
+    - Compendium Browser now has a new section for all inventory Items
+    - All item Packs (such as Explorer's Pack) are configured and you can browse a List of all Items contained in a pack!
+      - this list can be modified by editing the "item-packs.json" file to customize your packs
+    - many further filters available!
+
+Todo:
+ - clean up Translation strings. Most of the new features can't be translated yet.
