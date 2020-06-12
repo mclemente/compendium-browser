@@ -20,5 +20,9 @@ v0.3.0
       - this list can be modified by editing the "item-packs.json" file to customize your packs
     - many further filters available!
 
+v0.3.1
+  - fixed a bug that prevented loading when Class type items were loaded.
+  - fixed a bug that prevented disabled the scrollbar in the settings tab.
+
 Todo:
  - clean up Translation strings. Most of the new features can't be translated yet.
