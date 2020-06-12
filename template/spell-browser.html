@@ -18,10 +18,10 @@
     <ul>
         {{#each spells as |spell id|}}
         <li class="spell flexrow draggable" data-entry-compendium="{{spell.compendium}}" data-entry-id="{{spell._id}}">
-            <div class="spell-image">
-                <img class="" src="{{spell.img}}" title="{{spell.name}}" width="32" height="32"/>
+            <div class="item-image">
+                <img class="" data-src="{{spell.img}}" title="{{spell.name}}" width="32" height="32"/>
             </div>  
-            <div class="spell-name">
+            <div class="item-name">
                 <span class="item-edit" ><a>{{spell.name}}</a></span>
             </div>
             <div class="spell-tags">

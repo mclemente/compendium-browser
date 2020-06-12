@@ -6,6 +6,14 @@
             <h4>{{localize "CMPBrowser.allowSpellAcc"}}</h4>
         </label>
         <label>
+            <input data-setting="allow-feat-browser" type="checkbox" {{#if settings.allowFeatBrowser}}checked{{/if}}>
+            <h4>Allow Players Access to the feat browser</h4> 
+        </label>
+        <label>
+            <input data-setting="allow-item-browser" type="checkbox" {{#if settings.allowItemBrowser}}checked{{/if}}>
+            <h4>Allow Players Access to the item browser</h4> 
+        </label>
+        <label>
             <input data-setting="allow-npc-browser" type="checkbox" {{#if settings.allowNpcBrowser}}checked{{/if}}>
             <h4>{{localize "CMPBrowser.allowNpcAcc"}}</h4> 
         </label>

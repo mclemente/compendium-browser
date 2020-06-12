@@ -1,0 +1,38 @@
+<div class="feat-browser browser flexrow">
+    <div class="control-area">
+        <div class="filtercontainer" id="tagfilter">            
+            <div class="filter"  data-type="text" data-path="name">
+                <input class="" name="textFilter" type="text" value="" data-dtype="String" placeholder="{{localize "Name"}}"/>
+            </div>
+            <dl id="sorter">
+                <dt>{{localize "CMPBrowser.sortBy"}}:</dt>
+                <dd><select class="null" name="sortorder">
+                    <option value="true" selected>{{localize "Name"}}</option>
+                    <option value="false">Class</option>
+                </select></dd>
+            </dl> 
+            <button id="reset-feat-filter">Reset Filters</button>
+        </div>
+        {{> "modules/compendium-browser/template/filter-container.html" filters=featFilters}}
+    </div>
+    <ul>
+        {{#each feats as |feat id|}}
+        <li class="feat flexrow draggable" data-entry-compendium="{{feat.compendium}}" data-entry-id="{{feat._id}}">
+            <div class="item-image">
+                <img class="" data-src="{{feat.img}}" title="{{feat.name}}" width="32" height="32"/>
+            </div>  
+            <div class="item-name">
+                <span class="item-edit" ><a>{{feat.name}}</a></span>
+            </div>
+            <div class="feat-tags">
+                <span title="Class Requirement">{{feat.classRequirementString}}</span>
+            
+            </div>
+            <div class="filter-tags">
+                <input type="hidden" name="class" value="{{feat.classRequirementString}}">
+            </div>
+        </li>
+        {{/each}}
+    </ul>
+
+</div>

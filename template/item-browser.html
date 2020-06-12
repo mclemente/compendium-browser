@@ -1,0 +1,37 @@
+<div class="item-browser browser flexrow">
+    <div class="control-area">
+        <div class="filtercontainer" id="tagfilter">            
+            <div class="filter"  data-type="text" data-path="name">
+                <input class="" name="textFilter" type="text" value="" data-dtype="String" placeholder="{{localize "Name"}}"/>
+            </div>
+            <dl id="sorter">
+                <dt>{{localize "CMPBrowser.sortBy"}}:</dt>
+                <dd><select class="null" name="sortorder">
+                    <option value="true" selected>{{localize "Name"}}</option>
+                    <option value="false">Item Type</option>
+                </select></dd>
+            </dl> 
+            <button id="reset-item-filter">Reset Filters</button>
+        </div>
+        {{> "modules/compendium-browser/template/filter-container.html" filters=itemFilters}}
+    </div>
+    <ul>
+        {{#each items as |item id|}}
+        <li class="item flexrow draggable" data-entry-compendium="{{item.compendium}}" data-entry-id="{{item._id}}">
+            <div class="item-image">
+                <img class="" data-src="{{item.img}}" title="{{item.name}}" width="32" height="32"/>
+            </div>  
+            <div class="item-name">
+                <span class="item-edit" ><a>{{item.name}}</a></span>
+            </div>
+            <div class="item-tags">
+                <span title="Item Type">{{item.type}}</span>
+            </div>
+            <div class="filter-tags">
+                <input type="hidden" name="type" value="{{item.type}}">
+            </div>
+        </li>
+        {{/each}}
+    </ul>
+
+</div>

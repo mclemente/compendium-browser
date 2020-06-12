@@ -1,32 +1,37 @@
-/*  core foundry changes  
-#compendium.flexcolumn.active {
-    display: flex;
-    flex-direction: column;
-}
-#compendium.flexcolumn > .directory-list {
-    width: 100%;
-    height: auto;
-    flex-basis: 0;
-    flex-grow: 1;
-}
-#compendium.flexcolumn > .directory-footer {
-    height: auto;
-}
-#compendium.flexcolumn > .directory-footer > * {
-    margin-top: 5px;
-}
-*/
 #compendium .directory-footer .compendium-browser-btn {
   margin-top: 5px;
 }
 #compendium .directory-footer {
   display: block;
 }
-/*  spellbrowser  */
-/*  resizing  */
 .compendium-browser {
+  overflow-y: hidden!important;
   max-width: 1100px;
   max-height: 90vh;
+}
+.compendium-browser .window-content {
+  overflow-y: hidden!important;
+  height: 100%;
+}
+.compendium-browser .window-content .parent {
+  overflow-y: hidden!important;
+  height: 100%;
+}
+.compendium-browser .window-content .parent .content {
+  overflow-y: hidden!important;
+  height: calc(100% - 2em);
+}
+.compendium-browser .window-content .parent .content .tab {
+  overflow-y: hidden!important;
+  height: 100%;
+}
+.compendium-browser .window-content .parent .content .tab .browser {
+  overflow-y: hidden!important;
+  height: 100%;
+}
+.compendium-browser .window-content .parent .content .tab .browser ul {
+  overflow-y: auto;
+  height: 100%;
 }
 .compendium-browser .tabs {
   max-height: 2em;
@@ -109,6 +114,10 @@
 .compendium-browser .control-area .filtercontainer .small-select {
   width: 40px;
 }
+.compendium-browser .browser {
+  height: 100%;
+  overflow-y: hidden!important;
+}
 .compendium-browser .browser .window-content {
   overflow-y: hidden!important;
 }
@@ -137,19 +146,37 @@
   display: inline-block;
   min-width: 15px;
 }
-.compendium-browser .spell-browser .spell {
+.compendium-browser .item-browser li,
+.compendium-browser .feat-browser li,
+.compendium-browser .spell-browser li {
   cursor: default;
   vertical-align: middle;
   line-height: 32px;
   margin: 2px 0;
 }
-.compendium-browser .spell-browser .spell .spell-image {
+.compendium-browser .item-browser li .item-image,
+.compendium-browser .feat-browser li .item-image,
+.compendium-browser .spell-browser li .item-image {
   max-width: 32px;
   height: 32px;
 }
-.compendium-browser .spell-browser .spell .spell-name {
+.compendium-browser .item-browser li .item-name,
+.compendium-browser .feat-browser li .item-name,
+.compendium-browser .spell-browser li .item-name {
   height: 32px;
   padding-left: 5px;
+}
+.compendium-browser .item-browser li .feat-tags,
+.compendium-browser .feat-browser li .feat-tags,
+.compendium-browser .spell-browser li .feat-tags,
+.compendium-browser .item-browser li .item-tags,
+.compendium-browser .feat-browser li .item-tags,
+.compendium-browser .spell-browser li .item-tags {
+  text-align: right;
+  margin-right: 3px;
+  margin-left: 3px;
+  text-transform: capitalize;
+  height: 32px;
 }
 .compendium-browser .spell-browser .spell .spell-level {
   text-align: center;

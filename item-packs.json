@@ -1,0 +1,10 @@
+{
+    "burglar": ["Burglar's Pack", "Backpack","Ball Bearings", "String", "Bell", "Candle", "Crowbar", "Hammer", "Piton", "Hooded Lantern", "Oil Flask", "Rations", "Tinderbox","Waterskin","Hempen Rope (50 ft.)"],
+    "diplomat": ["Diplomat's Pack", "Chest", "Map or Scroll Case", "Fine Clothes", "Ink Bottle", "Ink Pen", "Lamp", "Oil Flask", "Paper", "Perfume", "Sealing Wax", "Soap"],
+    "dungeoneer": ["Dungeoneer's Pack", "Backpack", "Crowbar", "Hammer", "Piton", "Torch", "Tinderbox", "Rations", "Waterskin", "Hempen Rope (50 ft.)"],
+    "entertainer": ["Entertainer's Pack", "Backpack", "Bedroll", "Costume Clothes", "Candle", "Rations", "Waterskin", "Disguise Kit"],
+    "explorer": ["Explorer's Pack", "Backpack", "Bedroll", "Mess Kit", "Tinderbox", "Torch", "Rations", "Waterskin", "Hempen Rope (50 ft.)"],
+    "monsterhunter": ["Monster Hunter's Pack", "Chest", "Crowbar", "Hammer", "Wooden Stake", "Holy Symbol", "Flask of Holy Water", "Manacles", "Steel Mirror", "Oil Flask", "Tinderbox", "Torch"],
+    "priest": ["Priest's Pack", "Backpack", "Blanket", "Candle", "Tinderbox", "Alms Box", "Block of Incense", "Censor", "Vestments", "Rations", "Waterskin"],
+    "scholar": ["Scholar's Pack", "Backpack", "Book of Lore", "Ink Bottle", "Ink Pen", "Parchment", "Bag of Sand", "Small Knife"]
+}
