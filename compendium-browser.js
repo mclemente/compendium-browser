@@ -194,14 +194,14 @@ class SpellBrowser extends Application {
                             }
 
                             // getting class
-                            let reqString = item.data.requirements.replace(/[0-9]/g, '').trim();
+                            let reqString = item.data.requirements?.replace(/[0-9]/g, '').trim();
                             let matchedClass = [];
                             for (let c in this.subClasses) {
-                                if (reqString.toLowerCase().indexOf(c) !== -1) {
+                                if (reqString && reqString.toLowerCase().indexOf(c) !== -1) {
                                     matchedClass.push(c);
                                 } else {
                                     for (let subClass of this.subClasses[c]) {
-                                        if (reqString.indexOf(subClass) !== -1) {
+                                        if (reqString && reqString.indexOf(subClass) !== -1) {
                                             matchedClass.push(c);
                                             break;
                                         }
