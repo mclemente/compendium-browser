@@ -1,9 +1,18 @@
 {
     "name": "compendium-browser",
     "title": "Compendium Browser",
-    "description": "A module to easily browse and filter spells as well as npcs loaded from compendie.",
-    "version": "0.3.1",
+    "description": "A module to easily browse and filter spells as well as npcs loaded from compendia.",
+    "version": "0.4.0-spetzel2020",
     "author": "Felix#6196",
+      "authors": [
+        {
+          "name": "Spetzel#0103",
+          "url": "https://github.com/spetzel2020"
+        },
+        {
+          "name": "Felix#6196"
+        }
+      ],
     "systems": ["dnd5e"],
     "scripts": ["./compendium-browser.js"],
     "styles": ["./compendium-browser.css"],
@@ -30,9 +39,9 @@
 			"path": "lang/pt-BR.json"
 		}
     ],
-    "url": "https://github.com/syl3r86/compendium-browser",
-    "manifest": "https://raw.githubusercontent.com/syl3r86/compendium-browser/master/module.json",
-    "download": "https://github.com/syl3r86/compendium-browser/archive/master.zip",
+    "url": "https://github.com/League-of-Foundry-Developers/compendium-browser",
+    "manifest": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.4.0-s/module.json",
+    "download": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.4.0-s/compendium-browser.zip",
     "minimumCoreVersion": "0.6.2",
-    "compatibleCoreVersion": "0.6.2"
+    "compatibleCoreVersion": "0.7.9"
 }
