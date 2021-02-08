@@ -57,6 +57,8 @@
     "CMPBrowser.size": "Size",
     "CMPBrowser.spellBrowser":"Spell Browser",
     "CMPBrowser.npcBrowser":"NPC Browser",
-    "CMPBrowser.settings":"Settings"
+    "CMPBrowser.settings":"Settings",
+    "CMPBrowser.SETTING.Preload.NAME" : "Number to preload",
+    "CMPBrowser.SETTING.Preload.HINT" : "How many spells, feats, items, and NPCs to preload to keep memory manageable. "
     
 }

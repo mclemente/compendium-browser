@@ -2,7 +2,7 @@
     "name": "compendium-browser",
     "title": "Compendium Browser",
     "description": "A module to easily browse and filter spells as well as npcs loaded from compendia.",
-    "version": "0.4.0-spetzel2020",
+    "version": "0.4.1-spetzel2020",
     "author": "Felix#6196",
       "authors": [
         {
@@ -40,8 +40,8 @@
 		}
     ],
     "url": "https://github.com/League-of-Foundry-Developers/compendium-browser",
-    "manifest": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.4.0-s/module.json",
-    "download": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.4.0-s/compendium-browser.zip",
+    "manifest": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.4.1-s/module.json",
+    "download": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.4.1-s/compendium-browser.zip",
     "minimumCoreVersion": "0.6.2",
     "compatibleCoreVersion": "0.7.9"
 }
