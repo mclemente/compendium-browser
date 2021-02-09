@@ -15,15 +15,18 @@
 7-Feb-2021  0.4.1   Move load back to "ready" hook, but limit number loaded
 8-Feb-2021  0.4.1   Bug fix: initialize() was setting this.spells, not this.items so CB was using twice the memory (once loaded incorrectly into this.spells
                     and once loaded on first getData() into this.items)
+            0.4.1b  SpellBrowser -> CompendiumBrowser    
+9-Feb-2021  0.4.1b  Call loadAndFilterItems instead of loadItems; filter as we go, limited by numToPreload                  
 */
 
 const CMPBrowser = {
     MODULE_NAME : "compendium-browser",
     MODULE_VERSION : "0.4.1",
-    PRELOAD : 100       //How many items, spells, or NPCs you load at once (to minimize memory usage)
+    PRELOAD : 100,       //How many items, spells, or NPCs you load at once (to minimize memory usage)
+    VISIBLE_ROWS : 50   //Plug for maximum rows visible in window - fetch more when actual < this
 }
 
-class SpellBrowser extends Application {
+class CompendiumBrowser extends Application {
     
     async initialize() {
         // load settings
@@ -36,7 +39,7 @@ class SpellBrowser extends Application {
         });
         this.loadNpcs(numToPreload).then(obj => {
             this.npcs = obj;
-        }); 
+        });  //Plug 
         await loadTemplates([
             "modules/compendium-browser/template/spell-browser.html",
             "modules/compendium-browser/template/npc-browser.html",
@@ -67,79 +70,10 @@ class SpellBrowser extends Application {
         };
     }
 
-    static get defaultOptions() {
-        const options = super.defaultOptions;
-        mergeObject(options, {
-            tabs: [{navSelector: ".tabs", contentSelector: ".content", initial: "spell"}],
-            classes: options.classes.concat('compendium-browser'),
-            template: "modules/compendium-browser/template/template.html",
-            width: 800,
-            height: 700,
-            resizable: true,
-            minimizable: true,
-            title: "Compendium Browser"
-        });
-        return options;
-    }
 
-    hookCompendiumList() {
-        Hooks.on('renderCompendiumDirectory', (app, html, data) => {
-            this.hookCompendiumList();
-        });
-
-        let html = $('#compendium');
-        if (this.settings === undefined) {
-            this.initSettings();
-        }
-        if (game.user.isGM || this.settings.allowSpellBrowser || this.settings.allowNpcBrowser) {
-            const importButton = $(`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize("CMPBrowser.compendiumBrowser")}</button>`);
-            html.find('.compendium-browser-btn').remove();
-
-            // adding to directory-list since the footer doesn't exist if the user is not gm
-            html.find('.directory-footer').append(importButton);
-
-            // Handle button clicks
-            importButton.click(ev => {
-                ev.preventDefault();
-                this.render(true);
-            });
-        }
-    }
-
-    async getData() {     
-        //0.4.0 TEMPORARY - On demand load spells and NPCs, to see what performance impact is
-        if (!this.spellsLoaded) {
-            // spells will be stored locally to not require full loading each time the browser is opened
-            this.items = await this.loadItems();     //also sets this.spellsLoaded
-        }
-        if (!this.npcsLoaded) {
-            this.npcs = await this.loadNpcs();  //also sets this.npcsLoaded
-        }
-
-        let data = {
-            spells : this.items?.spells,
-            spellFilters : this.spellFilters,
-            showSpellBrowser : (game.user.isGM || this.settings.allowSpellBrowser),
-            feats : this.items?.feats,
-            featFilters : this.featFilters,
-            showFeatBrowser : (game.user.isGM || this.settings.allowFeatBrowser),
-            items : this.items?.items,
-            itemFilters : this.itemFilters,
-            showItemBrowser : (game.user.isGM || this.settings.allowItemBrowser),
-            npcs : this.npcs,
-            npcFilters : this.npcFilters,
-            showNpcBrowser : (game.user.isGM || this.settings.allowNpcBrowser),
-            settings : this.settings,
-            isGM : game.user.isGM
-        };
-
-        return data;
-    }
-
-    async loadItems(numToPreload=CMPBrowser.PRELOAD) {
-        console.log('Item Browser | Started loading items');
-        console.time("loadItems");
-        if (this.classList === undefined) {
+    async checkListsLoaded() {
+        //Provides extra info not in the standard SRD, like which classes can learn a spell
+        if (!this.classList) {
             this.classList = await fetch('modules/compendium-browser/spell-classes.json').then(result => {
                 return result.json();
             }).then(obj => {
@@ -147,7 +81,7 @@ class SpellBrowser extends Application {
             });
         }
 
-        if (this.packList === undefined) {
+        if (!this.packList) {
             this.packList = await fetch('modules/compendium-browser/item-packs.json').then(result => {
                 return result.json();
             }).then(obj => {
@@ -155,18 +89,74 @@ class SpellBrowser extends Application {
             });
         }
 
-        if (this.subClasses === undefined) {
+        if (!this.subClasses) {
             this.subClasses = await fetch('modules/compendium-browser/sub-classes.json').then(result => {
                 return result.json();
             }).then(obj => {
                 return this.subClasses = obj;
             });
         }
+    }
 
-        this.spellsLoaded = false;
-/*0.4.0: DEPRECATED (was never used)        
-        this.spellsLoading = true;
-*/        
+    async loadAndFilterItems(numToPreload=CMPBrowser.PRELOAD) {
+        console.log('Load and Filter Items | Started loading items');
+        console.time("loadAndFilterItems");
+        this.checkListsLoaded();
+
+        let unfoundSpells = '';
+        let numSpellsLoaded = 0;
+        let numFeatsLoaded = 0;
+        let numItemsLoaded = 0;
+        let items = {
+            spells: {},
+            feats: {},
+            items: {}
+        };
+
+        for (let pack of game.packs) {
+            if (pack['metadata']['entity'] === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
+//FIXME: How much could we do with the loaded index rather than all content?                
+                await pack.getContent().then(content => {
+                    for (let item5e of content) {
+                        const decoratedItem = this.decorateCompendiumEntry(item5e);
+                        if (decoratedItem) {
+                            decoratedItem.compendium = pack.collection;
+                            if ((decoratedItem.type === "spell") && this.getFilterResult(decoratedItem, this.spellFilters) && (numSpellsLoaded < numToPreload)) {
+                                numSpellsLoaded++;
+                                items.spells[decoratedItem._id] = decoratedItem;
+                            } else if ((decoratedItem.type === "feat") && this.getFilterResult(decoratedItem, this.featFilters) && (numFeatsLoaded < numToPreload)) {
+                                numFeatsLoaded++;
+                                items.feats[decoratedItem._id] = decoratedItem;
+                            } else if (this.getFilterResult(decoratedItem, this.itemFilters) && (numItemsLoaded < numToPreload)) {
+                                numItemsLoaded++;
+                                items.items[decoratedItem._id] = decoratedItem;
+                            }
+                        }
+                    }//for item5e of content
+                });
+            }
+            if ((numSpellsLoaded >= numToPreload) && (numFeatsLoaded >= numToPreload) && (numItemsLoaded >= numToPreload)) break;
+        }//for packs
+
+/*
+        if (unfoundSpells !== '') {
+            console.log(`Load and Fliter Items | List of Spells that don't have a class associated to them:`);
+            console.log(unfoundSpells);
+        }      
+*/
+        this.itemsLoaded = true;  
+        console.timeEnd("loadItems");
+        console.log(`Load and Filter Items | Finished loading items: ${Object.keys(items.spells).length} spells, ${Object.keys(items.feats).length} features, ${Object.keys(items.items).length} items `);
+        return items;
+    }
+
+    async loadItems(numToPreload=CMPBrowser.PRELOAD) {
+        console.log('Item Browser | Started loading items');
+        console.time("loadItems");
+        this.checkListsLoaded();
+
+        this.itemsLoaded = false;
+       
         
         let unfoundSpells = '';
         let numSpellsLoaded = 0;
@@ -180,7 +170,7 @@ class SpellBrowser extends Application {
 
 
         for (let pack of game.packs) {
-            if (pack['metadata']['entity'] == "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
+            if (pack['metadata']['entity'] === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
                 await pack.getContent().then(content => {
                     for (let item5e of content) {
                         let item = item5e.data;
@@ -296,7 +286,7 @@ class SpellBrowser extends Application {
             console.log(`Item Browser | List of Spells that don't have a class associated to them:`);
             console.log(unfoundSpells);
         }      
-        this.spellsLoaded = true;  
+        this.itemsLoaded = true;  
         console.timeEnd("loadItems");
         console.log(`Item Browser | Finished loading items: ${Object.keys(items.spells).length} spells, ${Object.keys(items.feats).length} features, ${Object.keys(items.items).length} items `);
         return items;
@@ -373,6 +363,92 @@ class SpellBrowser extends Application {
         return npcs;
     }
     
+
+    static get defaultOptions() {
+        const options = super.defaultOptions;
+        mergeObject(options, {
+            tabs: [{navSelector: ".tabs", contentSelector: ".content", initial: "spell"}],
+            classes: options.classes.concat('compendium-browser'),
+            template: "modules/compendium-browser/template/template.html",
+            width: 800,
+            height: 700,
+            resizable: true,
+            minimizable: true,
+            title: "Compendium Browser"
+        });
+        return options;
+    }
+
+    hookCompendiumList() {
+        Hooks.on('renderCompendiumDirectory', (app, html, data) => {
+            this.hookCompendiumList();
+        });
+
+        let html = $('#compendium');
+        if (this.settings === undefined) {
+            this.initSettings();
+        }
+        if (game.user.isGM || this.settings.allowSpellBrowser || this.settings.allowNpcBrowser) {
+            const importButton = $(`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize("CMPBrowser.compendiumBrowser")}</button>`);
+            html.find('.compendium-browser-btn').remove();
+
+            // adding to directory-list since the footer doesn't exist if the user is not gm
+            html.find('.directory-footer').append(importButton);
+
+            // Handle button clicks
+            importButton.click(ev => {
+                ev.preventDefault();
+                //0.4.1: Reset filters when you first click button
+                this.resetFilters();
+                this.render(true);
+            });
+        }
+    }
+
+    resetFilters() {
+        this.spellFilters.activeFilters = {};
+        this.featFilters.activeFilters = {};
+        this.itemFilters.activeFilters = {};
+        this.npcFilters.activeFilters = {};
+    }
+
+    async getData() {     
+        const numToPreload = game.settings.get(CMPBrowser.MODULE_NAME, "preload") ?? CMPBrowser.PRELOAD;
+/*
+        if (!this.spellsLoaded) {
+            // spells will be stored locally to not require full loading each time the browser is opened
+            this.items = await this.loadItems(numToPreload);     //also sets this.spellsLoaded
+        }
+
+*/        
+        //0.4.1 Filter as we load to support new way of filtering
+        //Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
+        //First time (when you press Compendium Browser button) is called with filters unset
+        this.items = await this.loadAndFilterItems(numToPreload);
+        if (!this.npcsLoaded) {
+            this.npcs = await this.loadNpcs(numToPreload);  //also sets this.npcsLoaded
+        }
+
+        let data = {
+            spells : this.items?.spells,
+            spellFilters : this.spellFilters,
+            showSpellBrowser : (game.user.isGM || this.settings.allowSpellBrowser),
+            feats : this.items?.feats,
+            featFilters : this.featFilters,
+            showFeatBrowser : (game.user.isGM || this.settings.allowFeatBrowser),
+            items : this.items?.items,
+            itemFilters : this.itemFilters,
+            showItemBrowser : (game.user.isGM || this.settings.allowItemBrowser),
+            npcs : this.npcs,
+            npcFilters : this.npcFilters,
+            showNpcBrowser : (game.user.isGM || this.settings.allowNpcBrowser),
+            settings : this.settings,
+            isGM : game.user.isGM
+        };
+
+        return data;
+    }
+
     activateListeners(html) {
         super.activateListeners(html);
         // localizing title
@@ -426,7 +502,7 @@ class SpellBrowser extends Application {
         });
         html.find('.spell-browser select[name=sortorder]').trigger('change');
 
-        // sort feat list
+        // sort feat list in place
         html.find('.feat-browser select[name=sortorder]').on('change', ev => {
             let featList = html.find('.feat-browser li');
             let byName = (ev.target.value == 'true');
@@ -439,7 +515,7 @@ class SpellBrowser extends Application {
         });
         html.find('.feat-browser select[name=sortorder]').trigger('change');
 
-        // sort item list
+        // sort item list in place
         html.find('.item-browser select[name=sortorder]').on('change', ev => {
             let itemList = html.find('.item-browser li');
             let byName = (ev.target.value == 'true');
@@ -452,7 +528,7 @@ class SpellBrowser extends Application {
         });
         html.find('.item-browser select[name=sortorder]').trigger('change');
 
-        // sort npc list
+        // sort npc list in place
         html.find('.npc-browser select[name=sortorder]').on('change', ev => {
             let npcList = html.find('.npc-browser li');
             let orderBy = ev.target.value;
@@ -465,7 +541,7 @@ class SpellBrowser extends Application {
         });
         html.find('.npc-browser select[name=sortorder]').trigger('change')
 
-        // reset filters
+        // reset filters and re-render
         html.find('#reset-spell-filter').click(ev => {
             this.spellFilters.activeFilters = {};
             this.render();
@@ -493,15 +569,15 @@ class SpellBrowser extends Application {
             if (setting === 'spell-compendium-setting') {
                 let key = ev.target.dataset.key;
                 this.settings.loadedSpellCompendium[key].load = value;
-                this.loadItems().then((spells) => {
-                    this.spells = spells;
+                this.loadItems().then(items => {
+                    this.items = items;
                     this.render();
                 });
                 ui.notifications.info("Settings Saved. Spell Compendiums are being reloaded.");
             } else if (setting === 'npc-compendium-setting') {
                 let key = ev.target.dataset.key;
                 this.settings.loadedNpcCompendium[key].load = value;
-                this.loadNpcs().then((npcs) => {
+                this.loadNpcs().then(npcs => {
                     this.npcs = npcs;
                     this.render();
                 });
@@ -523,7 +599,7 @@ class SpellBrowser extends Application {
         });
 
 
-        // activating or deactivating filters
+        // activating or deactivating filters - in place
 
         // text filters
 
@@ -721,7 +797,7 @@ class SpellBrowser extends Application {
 
     //SORTING
     sortSpells(list, byName) {
-        if(byName) {
+        if (byName) {
             list.sort((a, b) => {
                 let aName = $(a).find('.item-name a')[0].innerHTML;
                 let bName = $(b).find('.item-name a')[0].innerHTML;
@@ -843,6 +919,75 @@ class SpellBrowser extends Application {
         return list;
     }
 
+    decorateCompendiumEntry(item5e) {
+        if (!item5e) return null;
+        //Decorate and then filter a compendium entry - returns null or the item
+        let item = item5e.data;
+
+        // getting damage types (common to all Items, although some won't have any)
+        item.damageTypes = [];
+        if (item.data.damage && item.data.damage.parts.length > 0) {
+            for (let part of item.data.damage.parts) {
+                let type = part[1];
+                if (item.damageTypes.indexOf(type) === -1) {
+                    item.damageTypes.push(type);
+                }
+            }
+        }
+
+        if (item.type === 'spell') {
+            // determining classes that can use the spell
+            let cleanSpellName = item.name.toLowerCase().replace(/[^一-龠ぁ-ゔァ-ヴーa-zA-Z0-9ａ-ｚＡ-Ｚ０-９々〆〤]/g, '').replace("'", '').replace(/ /g, '');
+            //let cleanSpellName = spell.name.toLowerCase().replace(/[^a-zA-Z0-9\s:]/g, '').replace("'", '').replace(/ /g, '');
+            if (this.classList[cleanSpellName]) {
+                let classes = this.classList[cleanSpellName];
+                item.data.classes = classes.split(',');
+            } else {
+//FIXME: unfoundSpells += cleanSpellName + ',';
+            }
+        } else  if (item.type === 'feat' || item.type === 'class') {
+            // getting class
+            let reqString = item.data.requirements?.replace(/[0-9]/g, '').trim();
+            let matchedClass = [];
+            for (let c in this.subClasses) {
+                if (reqString && reqString.toLowerCase().indexOf(c) !== -1) {
+                    matchedClass.push(c);
+                } else {
+                    for (let subClass of this.subClasses[c]) {
+                        if (reqString && reqString.indexOf(subClass) !== -1) {
+                            matchedClass.push(c);
+                            break;
+                        }
+                    }
+                }
+            }
+            item.classRequirement = matchedClass;
+            item.classRequirementString = matchedClass.join(', ');
+
+            // getting uses/ressources status
+            item.usesRessources = item5e.hasLimitedUses;
+            item.hasSave = item5e.hasSave;
+
+        } else {
+            // getting pack
+            let matchedPacks = [];
+            for (let pack of Object.keys(this.packList)) {
+                for (let packItem of this.packList[pack]) {
+                    if (item.name.toLowerCase() === packItem.toLowerCase()) {
+                        matchedPacks.push(pack);
+                        break;
+                    }
+                }
+            }
+            item.matchedPacks = matchedPacks;
+            item.matchedPacksString = matchedPacks.join(', ');
+
+            // getting uses/ressources status
+            item.usesRessources = item5e.hasLimitedUses
+        } 
+        return item;
+    }
+
     filterElements(list, subjects, filters) {
         for (let element of list) {
             let subject = subjects[element.dataset.entryId];
@@ -855,8 +1000,7 @@ class SpellBrowser extends Application {
     }
 
     getFilterResult(subject, filters) {
-        for (let filterKey in filters) {
-            let filter = filters[filterKey];
+        for (let filter of Object.values(filters)) {
             let prop = getProperty(subject, filter.path);
             if (filter.type === 'numberCompare') {
 
@@ -941,7 +1085,7 @@ class SpellBrowser extends Application {
             }
         }
         // creating game setting container
-        game.settings.register("compendiumBrowser", "settings", {
+        game.settings.register(CMPBrowser.MODULE_NAME, "settings", {
             name: "Compendium Browser Settings",
             hint: "Settings to exclude packs from loading and visibility of the browser",
             default: defaultSettings,
@@ -966,7 +1110,7 @@ class SpellBrowser extends Application {
         });
         
         // load settings from container and apply to default settings (available compendie might have changed)
-        let settings = game.settings.get('compendiumBrowser', 'settings');
+        let settings = game.settings.get(CMPBrowser.MODULE_NAME, 'settings');
         for (let compKey in defaultSettings.loadedSpellCompendium) {
             if (settings.loadedSpellCompendium[compKey] !== undefined) {
                 defaultSettings.loadedSpellCompendium[compKey].load = settings.loadedSpellCompendium[compKey].load;
@@ -983,7 +1127,7 @@ class SpellBrowser extends Application {
         defaultSettings.allowNpcBrowser = settings.allowNpcBrowser ? true : false;
         
         if (game.user.isGM) {
-            game.settings.set('compendiumBrowser', 'settings', defaultSettings);
+            game.settings.set(CMPBrowser.MODULE_NAME, 'settings', defaultSettings);
             console.log("New default settings set");
             console.log(defaultSettings);
         }   
@@ -991,7 +1135,7 @@ class SpellBrowser extends Application {
     }
 
     saveSettings() {
-        game.settings.set('compendiumBrowser', 'settings', this.settings);
+        game.settings.set(CMPBrowser.MODULE_NAME, 'settings', this.settings);
     }
 
 
@@ -1222,7 +1366,7 @@ class SpellBrowser extends Application {
 Hooks.on('ready', async () => {
 
     if (game.compendiumBrowser === undefined) {
-        game.compendiumBrowser = new SpellBrowser();
+        game.compendiumBrowser = new CompendiumBrowser();
 //0.4.0 Defer loading content until we actually use the Compendium Browser
         //A compromise approach would be better (periodic loading) except would still create the memory use problem
         await game.compendiumBrowser.initialize();
