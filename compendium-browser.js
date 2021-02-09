@@ -16,7 +16,8 @@
 8-Feb-2021  0.4.1   Bug fix: initialize() was setting this.spells, not this.items so CB was using twice the memory (once loaded incorrectly into this.spells
                     and once loaded on first getData() into this.items)
             0.4.1b  SpellBrowser -> CompendiumBrowser    
-9-Feb-2021  0.4.1b  Call loadAndFilterItems instead of loadItems; filter as we go, limited by numToPreload                  
+9-Feb-2021  0.4.1b  Call loadAndFilterItems instead of loadItems; filter as we go, limited by numToPreload   
+            0.4.1c  Needed to pass specific spellFilters, itemFilters etc.              
 */
 
 const CMPBrowser = {
@@ -121,13 +122,13 @@ class CompendiumBrowser extends Application {
                         const decoratedItem = this.decorateCompendiumEntry(item5e);
                         if (decoratedItem) {
                             decoratedItem.compendium = pack.collection;
-                            if ((decoratedItem.type === "spell") && this.getFilterResult(decoratedItem, this.spellFilters) && (numSpellsLoaded < numToPreload)) {
+                            if ((decoratedItem.type === "spell") && this.getFilterResult(decoratedItem, this.spellFilters.activeFilters) && (numSpellsLoaded < numToPreload)) {
                                 numSpellsLoaded++;
                                 items.spells[decoratedItem._id] = decoratedItem;
-                            } else if ((decoratedItem.type === "feat") && this.getFilterResult(decoratedItem, this.featFilters) && (numFeatsLoaded < numToPreload)) {
+                            } else if ((decoratedItem.type === "feat") && this.getFilterResult(decoratedItem, this.featFilters.activeFilters) && (numFeatsLoaded < numToPreload)) {
                                 numFeatsLoaded++;
                                 items.feats[decoratedItem._id] = decoratedItem;
-                            } else if (this.getFilterResult(decoratedItem, this.itemFilters) && (numItemsLoaded < numToPreload)) {
+                            } else if (this.getFilterResult(decoratedItem, this.itemFilters.activeFilters) && (numItemsLoaded < numToPreload)) {
                                 numItemsLoaded++;
                                 items.items[decoratedItem._id] = decoratedItem;
                             }
