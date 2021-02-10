@@ -43,6 +43,7 @@ class CompendiumBrowser extends Application {
         });  //Plug 
         await loadTemplates([
             "modules/compendium-browser/template/spell-browser.html",
+            "modules/compendium-browser/template/spell-browser-list.html",
             "modules/compendium-browser/template/npc-browser.html",
             "modules/compendium-browser/template/feat-browser.html",
             "modules/compendium-browser/template/item-browser.html",
@@ -102,7 +103,7 @@ class CompendiumBrowser extends Application {
     async loadAndFilterItems(numToPreload=CMPBrowser.PRELOAD) {
         console.log('Load and Filter Items | Started loading items');
         console.time("loadAndFilterItems");
-        this.checkListsLoaded();
+        await this.checkListsLoaded();
 
         let unfoundSpells = '';
         let numSpellsLoaded = 0;
@@ -154,7 +155,7 @@ class CompendiumBrowser extends Application {
     async loadItems(numToPreload=CMPBrowser.PRELOAD) {
         console.log('Item Browser | Started loading items');
         console.time("loadItems");
-        this.checkListsLoaded();
+        await this.checkListsLoaded();
 
         this.itemsLoaded = false;
        
@@ -455,6 +456,23 @@ class CompendiumBrowser extends Application {
         // localizing title
         $(html).parents('.app').find('.window-title')[0].innerText = game.i18n.localize("CMPBrowser.compendiumBrowser");
 
+        const observer = new IntersectionObserver((entries, observer) => {
+            for (let e of entries) {
+                if (!e.isIntersecting) continue;
+                const img = e.target;
+                // Avatar image
+                //const img = li.querySelector("img");
+                if (img && img.dataset.src) {
+                    img.src = img.dataset.src;
+                    delete img.dataset.src;
+                }
+
+                // No longer observe the target
+                observer.unobserve(e.target);
+            }
+        });
+
+
         // show entity sheet
         html.find('.item-edit').click(ev => {
             let itemId = $(ev.currentTarget).parents("li").attr("data-entry-id");
@@ -628,6 +646,7 @@ class CompendiumBrowser extends Application {
             if (itemType === 'spell') {
                 list = html.find('.spell-browser li');
                 subjects = this.items.spells;
+                this.replaceSpells(html, observer);
             } else if (itemType === 'npc') {
                 list = html.find('.npc-browser li');
                 subjects = this.npcs;
@@ -638,7 +657,7 @@ class CompendiumBrowser extends Application {
                 list = html.find('.item-browser li');
                 subjects = this.items.items;
             }
-            this.filterElements(list, subjects, this[filterTarget].activeFilters);
+            //this.filterElements(list, subjects, this[filterTarget].activeFilters);
         });
 
         // select filters
@@ -668,9 +687,11 @@ class CompendiumBrowser extends Application {
 
             let list = null;
             let subjects = null;
+            let items = null;
             if (itemType === 'spell') {
                 list = html.find('.spell-browser li');
                 subjects = this.items.spells;
+                this.replaceSpells(html, observer);                
             } else if (itemType === 'npc') {
                 list = html.find('.npc-browser li');
                 subjects = this.npcs;
@@ -681,7 +702,8 @@ class CompendiumBrowser extends Application {
                 list = html.find('.item-browser li');
                 subjects = this.items.items;
             }
-            this.filterElements(list, subjects, this[filterTarget].activeFilters);
+            //this.render();
+            //this.filterElements(list, subjects, this[filterTarget].activeFilters);
         });
 
         // multiselect filters
@@ -720,6 +742,7 @@ class CompendiumBrowser extends Application {
             if (itemType === 'spell') {
                 list = html.find('.spell-browser li');
                 subjects = this.items.spells;
+                this.replaceSpells(html, observer);
             } else if (itemType === 'npc') {
                 list = html.find('.npc-browser li');
                 subjects = this.npcs;
@@ -730,7 +753,8 @@ class CompendiumBrowser extends Application {
                 list = html.find('.item-browser li');
                 subjects = this.items.items;
             }
-            this.filterElements(list, subjects, this[filterTarget].activeFilters);
+            //this.render();
+            //this.filterElements(list, subjects, this[filterTarget].activeFilters);
         });
 
 
@@ -773,27 +797,34 @@ class CompendiumBrowser extends Application {
                 list = html.find('.item-browser li');
                 subjects = this.items.items;
             }
-            this.filterElements(list, subjects, this[filterTarget].activeFilters);
+            this.render();
+            //this.filterElements(list, subjects, this[filterTarget].activeFilters);
         });
 
 
         // lazy load images
-        const observer = new IntersectionObserver((entries, observer) => {
-            for (let e of entries) {
-                if (!e.isIntersecting) continue;
-                const img = e.target;
-                // Avatar image
-                //const img = li.querySelector("img");
-                if (img && img.dataset.src) {
-                    img.src = img.dataset.src;
-                    delete img.dataset.src;
-                }
-
-                // No longer observe the target
-                observer.unobserve(e.target);
-            }
-        });
         html.find("img").each((i, img) => observer.observe(img));
+    }
+
+    replaceSpells(html, observer) {
+        const items = html.find("ul#CBSpells");
+        if (items.length) {
+            this.renderSpellData().then(newSpellsHTML => {
+                const replacement = document.createElement("ul");
+                replacement.setAttribute("id","CBSpells");
+                replacement.innerHTML = newSpellsHTML;
+                items[0].parentNode.replaceChild(replacement, items[0]);
+                //Lazy load images
+                $(newSpellsHTML).find("img").each((i, img) => observer.observe(img));
+            });
+        }
+    }
+
+    async renderSpellData() {
+        const items = await this.loadAndFilterItems();
+        const spellData = items?.spells;
+        const html = await renderTemplate("modules/compendium-browser/template/spell-browser-list.html", {spells : spellData});
+        return html;
     }
 
     //SORTING

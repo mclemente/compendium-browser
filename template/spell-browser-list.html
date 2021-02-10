@@ -1,0 +1,24 @@
+
+{{#each spells as |spell id|}}
+<li class="spell flexrow draggable" data-entry-compendium="{{spell.compendium}}" data-entry-id="{{spell._id}}">
+    <div class="item-image">
+        <img class="" data-src="{{spell.img}}" title="{{spell.name}}" width="32" height="32"/>
+    </div>  
+    <div class="item-name">
+        <span class="item-edit" ><a>{{spell.name}}</a></span>
+    </div>
+    <div class="spell-tags">
+        <span title="Spell level">{{#if spell.data.level}}{{spell.data.level}}{{else}}C{{/if}}</span>
+        <div class="spacer-large"></div>
+        <span {{#unless spell.data.components.ritual}}style="color:#bbb;" title="{{localize "No"}} {{localize "CMPBrowser.ritual"}}"{{else}} title="{{localize "CMPBrowser.ritual"}}"{{/unless}}>R</span>
+        <span {{#unless spell.data.components.concentration}}style="color:#bbb;" title="{{localize "No"}} {{localize "CMPBrowser.concentration"}}"{{else}} title="{{localize "CMPBrowser.concentration"}}"{{/unless}}>C</span>
+        <div class="spacer"></div>
+        <span {{#unless spell.data.components.vocal}}style="color:#bbb;" title="{{localize "No"}} {{localize "CMPBrowser.verbal"}}"{{else}} title="{{localize "CMPBrowser.verbal"}}"{{/unless}}>V</span>
+        <span {{#unless spell.data.components.somatic}}style="color:#bbb;" title="{{localize "No"}} {{localize "CMPBrowser.somatic"}}"{{else}} title="{{localize "CMPBrowser.somatic"}}"{{/unless}}>S</span>
+        <span {{#unless spell.data.components.material}}style="color:#bbb;" title="no{{localize "No"}} {{localize "CMPBrowser.material"}}"{{else}} title="{{localize "CMPBrowser.material"}}"{{/unless}}>M</span>
+    </div>
+    <div class="filter-tags">                
+        <input type="hidden" name="level" value="{{spell.data.level}}">
+    </div>
+</li>
+{{/each}}
