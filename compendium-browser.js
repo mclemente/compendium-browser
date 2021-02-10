@@ -17,7 +17,8 @@
                     and once loaded on first getData() into this.items)
             0.4.1b  SpellBrowser -> CompendiumBrowser    
 9-Feb-2021  0.4.1b  Call loadAndFilterItems instead of loadItems; filter as we go, limited by numToPreload   
-            0.4.1c  Needed to pass specific spellFilters, itemFilters etc.              
+            0.4.1c  Needed to pass specific spellFilters, itemFilters etc.    
+            0.4.1d: Fixed img observer on replaced spellData          
 */
 
 const CMPBrowser = {
@@ -815,7 +816,7 @@ class CompendiumBrowser extends Application {
                 replacement.innerHTML = newSpellsHTML;
                 items[0].parentNode.replaceChild(replacement, items[0]);
                 //Lazy load images
-                $(newSpellsHTML).find("img").each((i, img) => observer.observe(img));
+                $(replacement).find("img").each((i, img) => observer.observe(img));
             });
         }
     }
