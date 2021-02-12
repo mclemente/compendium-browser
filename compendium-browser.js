@@ -25,7 +25,7 @@
 const CMPBrowser = {
     MODULE_NAME : "compendium-browser",
     MODULE_VERSION : "0.4.1",
-    PRELOAD : 100,       //How many items, spells, or NPCs you load at once (to minimize memory usage)
+    PRELOAD : 9999,       //How many items, spells, or NPCs you load at once (to minimize memory usage) - ignored for now
     VISIBLE_ROWS : 50   //Plug for maximum rows visible in window - fetch more when actual < this
 }
 
@@ -455,7 +455,7 @@ class CompendiumBrowser extends Application {
         }
 
         let data = {
-            spells : this.items?.spells,
+            spells : this.items,
             spellFilters : this.spellFilters,
             showSpellBrowser : (game.user.isGM || this.settings.allowSpellBrowser),
             feats : this.items?.feats,
@@ -547,7 +547,7 @@ class CompendiumBrowser extends Application {
                 ol[0].append(element);
             }
         });
-        html.find('.spell-browser select[name=sortorder]').trigger('change');
+        this.triggerSortSpells(html);
 
         // sort feat list in place
         html.find('.feat-browser select[name=sortorder]').on('change', ev => {
@@ -837,16 +837,14 @@ class CompendiumBrowser extends Application {
         const items = html.find("ul#CBSpells");
         if (items.length) {
             this.renderSpellData().then(newSpellsHTML => {
-                const replacement = document.createElement("ul");
-                replacement.setAttribute("id","CBSpells");
-                replacement.innerHTML = newSpellsHTML;
-                items[0].parentNode.replaceChild(replacement, items[0]);
-
+                items[0].innerHTML = newSpellsHTML;
+                //Re-sort before setting up lazy loading
+                this.triggerSortSpells(html);
                 //Lazy load images
-                $(replacement).find("img").each((i, img) => observer.observe(img));
+                $(items).find("img").each((i,img) => observer.observe(img));
 
                 //Reactivate listeners for clicking and dragging
-                this.activateItemListListeners($(replacement));
+                this.activateItemListListeners($(items));
             });
         }
     }
@@ -859,6 +857,12 @@ class CompendiumBrowser extends Application {
     }
 
     //SORTING
+    triggerSortSpells(html) {
+        html.find('.spell-browser select[name=sortorder]').trigger('change');
+    }
+
+
+
     sortSpells(list, byName) {
         if (byName) {
             list.sort((a, b) => {
@@ -1167,8 +1171,8 @@ class CompendiumBrowser extends Application {
             type: Number,
             range: {             // If range is specified, the resulting setting will be a range slider
                 min: 20,
-                max: 500,
-                step: 10
+                max: 9999,
+                step: 100
             }
         });
         
