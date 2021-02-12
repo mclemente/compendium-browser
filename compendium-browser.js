@@ -25,7 +25,9 @@
 12-Feb-2021 0.4.1j: Correct compactItem for feats and items required display items   
                     Rename itemType -> browserTab to differentiate candidate item's type from the tab it appears on (spell, feat/class, item, NPC)  
                     Fixed: Was calling the wrong sort for feat and NPC    
-            0.4.1k: Don't call loadItems() during initalize; getData() just displays static elements                          
+            0.4.1k: Don't call loadItems() during initalize; getData() just displays static elements    
+            0.4.1l: Display progress indicator for loading - for now just a static one    
+            0.4.1m; PLANNED: Want loading message with dynamic results and to not replace existing data; need to localize as well
 */
 
 const CMPBrowser = {
@@ -136,9 +138,13 @@ class CompendiumBrowser extends Application {
         //0.4.1 Filter as we load to support new way of filtering
         //Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
         //First time (when you press Compendium Browser button) is called with filters unset
-
+        const loadingItem = {
+            name: "Loading...",
+            img: "icons/sundries/books/book-open-turquoise.webp"
+        }
         //0.4.1k: Don't do any item/npc loading until tab is visible
         let data = {
+            items : {"Loading" : loadingItem},
             spellFilters : this.spellFilters,
             showSpellBrowser : (game.user.isGM || this.settings.allowSpellBrowser),
             featFilters : this.featFilters,
@@ -440,6 +446,11 @@ class CompendiumBrowser extends Application {
 
             this.replaceList(html, browserTab);
         });
+
+        //Just for the loading image
+        if (this.observer) { 
+            html.find("img").each((i,img) => this.observer.observe(img));
+        }
     }
 
     async checkListsLoaded() {
