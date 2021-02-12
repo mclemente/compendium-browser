@@ -128,7 +128,7 @@ class CompendiumBrowser extends Application {
 //FIXME: How much could we do with the loaded index rather than all content?                
                 await pack.getContent().then(content => {
                     for (let item5e of content) {
-                        if (item5e.type === itemType) {
+                        if ((item5e.type === itemType) || ((itemType === "item") && !["spell","feat"].includes(item5e.type))) {
                             const decoratedItem = this.decorateCompendiumEntry(item5e);
                             if (decoratedItem) {
                                 let altItemSort = null;
@@ -798,15 +798,19 @@ class CompendiumBrowser extends Application {
     }
 
     async renderItemData(itemType) {
-        const items = await this.loadAndFilterItems(itemType);
+        let items;
         let html;
         if (itemType === "spell") {
+            items = await this.loadAndFilterItems(itemType);
             html = await renderTemplate("modules/compendium-browser/template/spell-browser-list.html", {spells : items});
         } else if (itemType === "feat") {
+            items = await this.loadAndFilterItems(itemType);
             html = await renderTemplate("modules/compendium-browser/template/feat-browser-list.html", {feats : items});
         } else if (itemType === "npc") {
-            html = await renderTemplate("modules/compendium-browser/template/npc-browser-list.html", {npcs : items});
+            const npcs = this.loadNpcs();
+            html = await renderTemplate("modules/compendium-browser/template/npc-browser-list.html", {npcs : npcs});
         } else {
+            items = await this.loadAndFilterItems(itemType);
             html = await renderTemplate("modules/compendium-browser/template/item-browser-list.html", {items : items});
         }
         return html;
