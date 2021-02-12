@@ -55,9 +55,11 @@
     "CMPBrowser.dmgInteraction": "Damage Interaction",
     "CMPBrowser.dmgDealt": "Damage Dealt",
     "CMPBrowser.size": "Size",
-    "CMPBrowser.spellBrowser":"Spell Browser",
-    "CMPBrowser.npcBrowser":"NPC Browser",
-    "CMPBrowser.settings":"Settings",
+    "CMPBrowser.Tab.SpellBrowser":"Spell Browser",
+    "CMPBrowser.Tab.FeatBrowser": "Feat Browser",
+    "CMPBrowser.Tab.ItemBrowser": "Item Browser",
+    "CMPBrowser.Tab.NPCBrowser":"NPC Browser",
+    "CMPBrowser.Tab.Settings":"Settings",
     "CMPBrowser.SETTING.Preload.NAME" : "Number to preload",
     "CMPBrowser.SETTING.Preload.HINT" : "How many spells, feats, items, and NPCs to preload to keep memory manageable. "
     

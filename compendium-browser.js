@@ -24,7 +24,8 @@
             0.4.1h: Add the partials for npc, feat, item and the backing code    
 12-Feb-2021 0.4.1j: Correct compactItem for feats and items required display items   
                     Rename itemType -> browserTab to differentiate candidate item's type from the tab it appears on (spell, feat/class, item, NPC)  
-                    Fixed: Was calling the wrong sort for feat and NPC         
+                    Fixed: Was calling the wrong sort for feat and NPC    
+            0.4.1k: Don't call loadItems() during initalize; getData() just displays static elements                          
 */
 
 const CMPBrowser = {
@@ -35,19 +36,36 @@ const CMPBrowser = {
 }
 
 class CompendiumBrowser extends Application {
-    
+
+    static get defaultOptions() {
+        const options = super.defaultOptions;
+        mergeObject(options, {
+            title: "CMPBrowser.compendiumBrowser",
+            tabs: [{navSelector: ".tabs", contentSelector: ".content", initial: "spell"}],
+            classes: options.classes.concat('compendium-browser'),
+            template: "modules/compendium-browser/template/template.html",
+            width: 800,
+            height: 700,
+            resizable: true,
+            minimizable: true
+        });
+        return options;
+    }
+
     async initialize() {
         // load settings
         if (this.settings === undefined) {
             this.initSettings();
         } 
         const numToPreload = game.settings.get(CMPBrowser.MODULE_NAME, "preload") ?? CMPBrowser.PRELOAD;
+/*        
         this.loadItems(numToPreload).then(obj => {
             this.items = obj;
         });
         this.loadNpcs(numToPreload).then(obj => {
             this.npcs = obj;
         });  //Plug 
+*/        
         await loadTemplates([
             "modules/compendium-browser/template/spell-browser.html",
             "modules/compendium-browser/template/spell-browser-list.html",       
@@ -82,6 +100,347 @@ class CompendiumBrowser extends Application {
         };
     }
 
+    /* Hook to load the first data */
+    static afterRender(cb, html, data) {
+        //After rendering the first time or re-rendering trigger the load/reload of visible data
+        if (game.user.isGM || this.settings.allowSpellBrowser) {
+            cb.replaceList(html, "spell");
+        } else if (this.settings.allowFeatBrowser) {
+            cb.replaceList(html, "feat");
+        } else if (this.settings.allowItemBrowser) {
+            cb.replaceList(html, "item");
+        } else if (this.settings.allowNPCBrowser) {
+            cb.replaceList(html, "npc");
+        }
+    }
+
+    /** override */
+    _onChangeTab(event, tabs, active) {
+        super._onChangeTab(event, tabs, active);
+        const html = this.element;
+        this.replaceList(html, active)
+    }
+
+
+    /** override */
+    async getData() {   
+        //Only called on initial display or refresh (including when settings are changed)
+        const numToPreload = game.settings.get(CMPBrowser.MODULE_NAME, "preload") ?? CMPBrowser.PRELOAD;
+/*
+        if (!this.spellsLoaded) {
+            // spells will be stored locally to not require full loading each time the browser is opened
+            this.items = await this.loadItems(numToPreload);     //also sets this.spellsLoaded
+        }
+
+*/        
+        //0.4.1 Filter as we load to support new way of filtering
+        //Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
+        //First time (when you press Compendium Browser button) is called with filters unset
+
+        //0.4.1k: Don't do any item/npc loading until tab is visible
+        let data = {
+            spellFilters : this.spellFilters,
+            showSpellBrowser : (game.user.isGM || this.settings.allowSpellBrowser),
+            featFilters : this.featFilters,
+            showFeatBrowser : (game.user.isGM || this.settings.allowFeatBrowser),
+            itemFilters : this.itemFilters,
+            showItemBrowser : (game.user.isGM || this.settings.allowItemBrowser),
+            npcFilters : this.npcFilters,
+            showNpcBrowser : (game.user.isGM || this.settings.allowNpcBrowser),
+            settings : this.settings,
+            isGM : game.user.isGM
+        };
+
+
+        return data;
+    }
+
+    activateItemListListeners(html) {
+        // show entity sheet
+        html.find('.item-edit').click(ev => {
+            let itemId = $(ev.currentTarget).parents("li").attr("data-entry-id");
+            let compendium = $(ev.currentTarget).parents("li").attr("data-entry-compendium");
+            let pack = game.packs.find(p => p.collection === compendium);
+            pack.getEntity(itemId).then(entity => {
+                entity.sheet.render(true);
+            });
+        });
+
+        // make draggable
+        //0.4.1: Avoid the game.packs lookup
+        html.find('.draggable').each((i, li) => {
+            li.setAttribute("draggable", true);
+            li.addEventListener('dragstart', event => {
+                let packName = li.getAttribute("data-entry-compendium");
+                let itemType = li.parents('.tab').data('tab');
+                let pack = game.packs.find(p => p.collection === packName);
+                if (!pack) {
+                    event.preventDefault();
+                    return false;
+                }
+                event.dataTransfer.setData("text/plain", JSON.stringify({
+                    type: pack.entity,
+                    pack: pack.collection,
+                    id: li.getAttribute("data-entry-id")
+                }));
+            }, false);
+        });
+    }
+
+    /** override */
+    activateListeners(html) {
+        super.activateListeners(html);
+
+        this.observer = new IntersectionObserver((entries, observer) => {
+            for (let e of entries) {
+                if (!e.isIntersecting) continue;
+                const img = e.target;
+                // Avatar image
+                //const img = li.querySelector("img");
+                if (img && img.dataset.src) {
+                    img.src = img.dataset.src;
+                    delete img.dataset.src;
+                }
+
+                // No longer observe the target
+                observer.unobserve(e.target);
+            }
+        });
+
+        this.activateItemListListeners(html);
+
+        // toggle visibility of filter containers
+        html.find('.filtercontainer h3, .multiselect label').click(async ev => {
+            await $(ev.target.nextElementSibling).toggle(100);
+
+        });
+        html.find('.multiselect label').trigger('click');
+
+        // sort spell list
+        html.find('.spell-browser select[name=sortorder]').on('change', ev => {
+            let spellList = html.find('.spell-browser li');
+            let byName = (ev.target.value == 'true');
+            let sortedList = this.sortSpells(spellList, byName);
+            let ol = $(html.find('.spell-browser ul'));
+            ol[0].innerHTML = [];
+            for (let element of sortedList) {
+                ol[0].append(element);
+            }
+        });
+        this.triggerSort(html, "spell");
+
+        // sort feat list in place
+        html.find('.feat-browser select[name=sortorder]').on('change', ev => {
+            let featList = html.find('.feat-browser li');
+            let byName = (ev.target.value == 'true');
+            let sortedList = this.sortFeats(featList, byName);
+            let ol = $(html.find('.feat-browser ul'));
+            ol[0].innerHTML = [];
+            for (let element of sortedList) {
+                ol[0].append(element);
+            }
+        });
+        this.triggerSort(html, "feat");
+
+        // sort item list in place
+        html.find('.item-browser select[name=sortorder]').on('change', ev => {
+            let itemList = html.find('.item-browser li');
+            let byName = (ev.target.value == 'true');
+            let sortedList = this.sortItems(itemList, byName);
+            let ol = $(html.find('.item-browser ul'));
+            ol[0].innerHTML = [];
+            for (let element of sortedList) {
+                ol[0].append(element);
+            }
+        });
+        this.triggerSort(html, "item");
+
+        // sort npc list in place
+        html.find('.npc-browser select[name=sortorder]').on('change', ev => {
+            let npcList = html.find('.npc-browser li');
+            let orderBy = ev.target.value;
+            let sortedList = this.sortNpcs(npcList, orderBy);
+            let ol = $(html.find('.npc-browser ul'));
+            ol[0].innerHTML = [];
+            for (let element of sortedList) {
+                ol[0].append(element);
+            }
+        });
+        this.triggerSort(html, "npc");
+
+        // reset filters and re-render
+        html.find('#reset-spell-filter').click(ev => {
+            this.spellFilters.activeFilters = {};
+            this.replaceList(html, "spell");
+        });
+
+        html.find('#reset-feat-filter').click(ev => {
+            this.featFilters.activeFilters = {};
+            this.replaceList(html, "feat");
+        });
+
+        html.find('#reset-item-filter').click(ev => {
+            this.itemFilters.activeFilters = {};
+            this.replaceList(html, "item");
+        });
+
+        html.find('#reset-npc-filter').click(ev => {
+            this.npcFilters.activeFilters = {};
+            this.replaceList(html, "npc");
+        });
+
+        // settings
+        html.find('.settings input').on('change', ev => {
+            let setting = ev.target.dataset.setting;
+            let value = ev.target.checked;
+            if (setting === 'spell-compendium-setting') {
+                let key = ev.target.dataset.key;
+                this.settings.loadedSpellCompendium[key].load = value;
+//FIXME                
+                this.loadItems().then(items => {
+                    this.items = items;
+                    this.render();
+                });
+                ui.notifications.info("Settings Saved. Item Compendiums are being reloaded.");
+            } else if (setting === 'npc-compendium-setting') {
+                let key = ev.target.dataset.key;
+                this.settings.loadedNpcCompendium[key].load = value;
+                this.loadNpcs().then(npcs => {
+                    this.npcs = npcs;
+                    this.render();
+                });
+                ui.notifications.info("Settings Saved. NPC Compendiums are being reloaded.");
+            }
+            if (setting === 'allow-spell-browser') {
+                this.settings.allowSpellBrowser = value;
+            }
+            if (setting === 'allow-feat-browser') {
+                this.settings.allowFeatBrowser = value;
+            }
+            if (setting === 'allow-item-browser') {
+                this.settings.allowItemBrowser = value;
+            }
+            if (setting === 'allow-npc-browser') {
+                this.settings.allowNpcBrowser = value;
+            }
+            this.saveSettings();
+        });
+
+
+        // activating or deactivating filters
+        //0.4.1: Now does a re-load and updates just the data side
+        // text filters
+        html.find('.filter[data-type=text] input, .filter[data-type=text] select').on('keyup change paste', ev => {
+            const path = $(ev.target).parents('.filter').data('path');
+            const key = path.replace(/\./g, '');
+            const value = ev.target.value;
+            const browserTab = $(ev.target).parents('.tab').data('tab');
+
+            const filterTarget = `${browserTab}Filters`;
+
+            if (value === '' || value === undefined) {
+                delete this[filterTarget].activeFilters[key];
+            } else {
+                this[filterTarget].activeFilters[key] = {
+                    path: path,
+                    type: 'text',
+                    valIsArray: false,
+                    value: ev.target.value
+                }
+            }
+
+            this.replaceList(html, browserTab);   
+        });
+
+        // select filters
+        html.find('.filter[data-type=select] select, .filter[data-type=bool] select').on('change', ev => {
+            const path = $(ev.target).parents('.filter').data('path');
+            const key = path.replace(/\./g, '');
+            const filterType = $(ev.target).parents('.filter').data('type');
+            const browserTab = $(ev.target).parents('.tab').data('tab');
+            let valIsArray = $(ev.target).parents('.filter').data('valisarray');
+            if (valIsArray === 'true') valIsArray = true;
+            let value = ev.target.value;
+            if (value === 'false') value = false;
+            if (value === 'true') value = true;
+
+            const filterTarget = `${browserTab}Filters`;
+
+            if (value === "null") {
+                delete this[filterTarget].activeFilters[key]
+            } else {
+                this[filterTarget].activeFilters[key] = {
+                    path: path,
+                    type: filterType,
+                    valIsArray: valIsArray,
+                    value:value
+                }
+            }
+            this.replaceList(html, browserTab);      
+        });
+
+        // multiselect filters
+        html.find('.filter[data-type=multiSelect] input').on('change', ev => {
+            const path = $(ev.target).parents('.filter').data('path');
+            const key = path.replace(/\./g, '');
+            const filterType = 'multiSelect';
+            const browserTab = $(ev.target).parents('.tab').data('tab');
+            let valIsArray = $(ev.target).parents('.filter').data('valisarray');
+            if (valIsArray === 'true') valIsArray = true;
+            let value = $(ev.target).data('value');
+
+            const filterTarget = `${browserTab}Filters`;
+            const filter = this[filterTarget].activeFilters[key];
+
+            if (ev.target.checked === true) {
+                if (filter === undefined) {
+                    this[filterTarget].activeFilters[key] = {
+                        path: path,
+                        type: filterType,
+                        valIsArray: valIsArray,
+                        values: [value]
+                    }
+                } else {
+                    this[filterTarget].activeFilters[key].values.push(value);
+                }
+            } else {
+                delete this[filterTarget].activeFilters[key].values.splice(this[filterTarget].activeFilters[key].values.indexOf(value),1);
+                if (this[filterTarget].activeFilters[key].values.length === 0) {
+                    delete this[filterTarget].activeFilters[key];
+                }
+            }
+
+            this.replaceList(html, browserTab, observer);   
+        });
+
+
+        html.find('.filter[data-type=numberCompare] select, .filter[data-type=numberCompare] input').on('change keyup paste', ev => {
+            const path = $(ev.target).parents('.filter').data('path');
+            const key = path.replace(/\./g, '');
+            const filterType = 'numberCompare';
+            const browserTab = $(ev.target).parents('.tab').data('tab');
+            let valIsArray = false;
+
+            const operator = $(ev.target).parents('.filter').find('select').val();
+            const value = $(ev.target).parents('.filter').find('input').val();
+
+            const filterTarget = `${browserTab}Filters`;
+
+            if (value === '' || operator === 'null') {
+                delete this[filterTarget].activeFilters[key]
+            } else {
+                this[filterTarget].activeFilters[key] = {
+                    path: path,
+                    type: filterType,
+                    valIsArray: valIsArray,
+                    operator: operator,
+                    value: value
+                }
+            }
+
+            this.replaceList(html, browserTab);
+        });
+    }
 
     async checkListsLoaded() {
         //Provides extra info not in the standard SRD, like which classes can learn a spell
@@ -395,20 +754,6 @@ class CompendiumBrowser extends Application {
     }
     
 
-    static get defaultOptions() {
-        const options = super.defaultOptions;
-        mergeObject(options, {
-            tabs: [{navSelector: ".tabs", contentSelector: ".content", initial: "spell"}],
-            classes: options.classes.concat('compendium-browser'),
-            template: "modules/compendium-browser/template/template.html",
-            width: 800,
-            height: 700,
-            resizable: true,
-            minimizable: true,
-            title: "Compendium Browser"
-        });
-        return options;
-    }
 
     hookCompendiumList() {
         Hooks.on('renderCompendiumDirectory', (app, html, data) => {
@@ -443,336 +788,9 @@ class CompendiumBrowser extends Application {
         this.npcFilters.activeFilters = {};
     }
 
-    async getData() {     
-        const numToPreload = game.settings.get(CMPBrowser.MODULE_NAME, "preload") ?? CMPBrowser.PRELOAD;
-/*
-        if (!this.spellsLoaded) {
-            // spells will be stored locally to not require full loading each time the browser is opened
-            this.items = await this.loadItems(numToPreload);     //also sets this.spellsLoaded
-        }
-
-*/        
-        //0.4.1 Filter as we load to support new way of filtering
-        //Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
-        //First time (when you press Compendium Browser button) is called with filters unset
-        this.items = await this.loadAndFilterItems("spell",numToPreload);
-        if (!this.npcsLoaded) {
-            this.npcs = await this.loadNpcs(numToPreload);  //also sets this.npcsLoaded
-        }
-
-        let data = {
-            spells : this.items,
-            spellFilters : this.spellFilters,
-            showSpellBrowser : (game.user.isGM || this.settings.allowSpellBrowser),
-            feats : this.items?.feats,
-            featFilters : this.featFilters,
-            showFeatBrowser : (game.user.isGM || this.settings.allowFeatBrowser),
-            items : this.items?.items,
-            itemFilters : this.itemFilters,
-            showItemBrowser : (game.user.isGM || this.settings.allowItemBrowser),
-            npcs : this.npcs,
-            npcFilters : this.npcFilters,
-            showNpcBrowser : (game.user.isGM || this.settings.allowNpcBrowser),
-            settings : this.settings,
-            isGM : game.user.isGM
-        };
-
-        return data;
-    }
-
-    activateItemListListeners(html) {
-        // show entity sheet
-        html.find('.item-edit').click(ev => {
-            let itemId = $(ev.currentTarget).parents("li").attr("data-entry-id");
-            let compendium = $(ev.currentTarget).parents("li").attr("data-entry-compendium");
-            let pack = game.packs.find(p => p.collection === compendium);
-            pack.getEntity(itemId).then(entity => {
-                entity.sheet.render(true);
-            });
-        });
-
-        // make draggable
-        //0.4.1: Avoid the game.packs lookup
-        html.find('.draggable').each((i, li) => {
-            li.setAttribute("draggable", true);
-            li.addEventListener('dragstart', event => {
-                let packName = li.getAttribute("data-entry-compendium");
-                let itemType = li.parents('.tab').data('tab');
-                let pack = game.packs.find(p => p.collection === packName);
-                if (!pack) {
-                    event.preventDefault();
-                    return false;
-                }
-                event.dataTransfer.setData("text/plain", JSON.stringify({
-                    type: pack.entity,
-                    pack: pack.collection,
-                    id: li.getAttribute("data-entry-id")
-                }));
-            }, false);
-        });
-    }
-
-    activateListeners(html) {
-        super.activateListeners(html);
-        // localizing title
-        $(html).parents('.app').find('.window-title')[0].innerText = game.i18n.localize("CMPBrowser.compendiumBrowser");
-
-        const observer = new IntersectionObserver((entries, observer) => {
-            for (let e of entries) {
-                if (!e.isIntersecting) continue;
-                const img = e.target;
-                // Avatar image
-                //const img = li.querySelector("img");
-                if (img && img.dataset.src) {
-                    img.src = img.dataset.src;
-                    delete img.dataset.src;
-                }
-
-                // No longer observe the target
-                observer.unobserve(e.target);
-            }
-        });
-
-        this.activateItemListListeners(html);
-
-        // toggle visibility of filter containers
-        html.find('.filtercontainer h3, .multiselect label').click(async ev => {
-            await $(ev.target.nextElementSibling).toggle(100);
-
-        });
-        html.find('.multiselect label').trigger('click');
-
-        // sort spell list
-        html.find('.spell-browser select[name=sortorder]').on('change', ev => {
-            let spellList = html.find('.spell-browser li');
-            let byName = (ev.target.value == 'true');
-            let sortedList = this.sortSpells(spellList, byName);
-            let ol = $(html.find('.spell-browser ul'));
-            ol[0].innerHTML = [];
-            for (let element of sortedList) {
-                ol[0].append(element);
-            }
-        });
-        this.triggerSort(html, "spell");
-
-        // sort feat list in place
-        html.find('.feat-browser select[name=sortorder]').on('change', ev => {
-            let featList = html.find('.feat-browser li');
-            let byName = (ev.target.value == 'true');
-            let sortedList = this.sortFeats(featList, byName);
-            let ol = $(html.find('.feat-browser ul'));
-            ol[0].innerHTML = [];
-            for (let element of sortedList) {
-                ol[0].append(element);
-            }
-        });
-        this.triggerSort(html, "feat");
-
-        // sort item list in place
-        html.find('.item-browser select[name=sortorder]').on('change', ev => {
-            let itemList = html.find('.item-browser li');
-            let byName = (ev.target.value == 'true');
-            let sortedList = this.sortItems(itemList, byName);
-            let ol = $(html.find('.item-browser ul'));
-            ol[0].innerHTML = [];
-            for (let element of sortedList) {
-                ol[0].append(element);
-            }
-        });
-        this.triggerSort(html, "item");
-
-        // sort npc list in place
-        html.find('.npc-browser select[name=sortorder]').on('change', ev => {
-            let npcList = html.find('.npc-browser li');
-            let orderBy = ev.target.value;
-            let sortedList = this.sortNpcs(npcList, orderBy);
-            let ol = $(html.find('.npc-browser ul'));
-            ol[0].innerHTML = [];
-            for (let element of sortedList) {
-                ol[0].append(element);
-            }
-        });
-        this.triggerSort(html, "npc");
-
-        // reset filters and re-render
-        html.find('#reset-spell-filter').click(ev => {
-            this.spellFilters.activeFilters = {};
-            this.render();
-        });
-
-        html.find('#reset-feat-filter').click(ev => {
-            this.featFilters.activeFilters = {};
-            this.render();
-        });
-
-        html.find('#reset-item-filter').click(ev => {
-            this.itemFilters.activeFilters = {};
-            this.render();
-        });
-
-        html.find('#reset-npc-filter').click(ev => {
-            this.npcFilters.activeFilters = {};
-            this.render();
-        });
-
-        // settings
-        html.find('.settings input').on('change', ev => {
-            let setting = ev.target.dataset.setting;
-            let value = ev.target.checked;
-            if (setting === 'spell-compendium-setting') {
-                let key = ev.target.dataset.key;
-                this.settings.loadedSpellCompendium[key].load = value;
-//FIXME                
-                this.loadItems().then(items => {
-                    this.items = items;
-                    this.render();
-                });
-                ui.notifications.info("Settings Saved. Spell Compendiums are being reloaded.");
-            } else if (setting === 'npc-compendium-setting') {
-                let key = ev.target.dataset.key;
-                this.settings.loadedNpcCompendium[key].load = value;
-                this.loadNpcs().then(npcs => {
-                    this.npcs = npcs;
-                    this.render();
-                });
-                ui.notifications.info("Settings Saved. NPC Compendiums are being reloaded.");
-            }
-            if (setting === 'allow-spell-browser') {
-                this.settings.allowSpellBrowser = value;
-            }
-            if (setting === 'allow-feat-browser') {
-                this.settings.allowFeatBrowser = value;
-            }
-            if (setting === 'allow-item-browser') {
-                this.settings.allowItemBrowser = value;
-            }
-            if (setting === 'allow-npc-browser') {
-                this.settings.allowNpcBrowser = value;
-            }
-            this.saveSettings();
-        });
 
 
-        // activating or deactivating filters
-        //0.4.1: Now does a re-load and updates just the data side
-        // text filters
-        html.find('.filter[data-type=text] input, .filter[data-type=text] select').on('keyup change paste', ev => {
-            const path = $(ev.target).parents('.filter').data('path');
-            const key = path.replace(/\./g, '');
-            const value = ev.target.value;
-            const browserTab = $(ev.target).parents('.tab').data('tab');
-
-            const filterTarget = `${browserTab}Filters`;
-
-            if (value === '' || value === undefined) {
-                delete this[filterTarget].activeFilters[key];
-            } else {
-                this[filterTarget].activeFilters[key] = {
-                    path: path,
-                    type: 'text',
-                    valIsArray: false,
-                    value: ev.target.value
-                }
-            }
-
-            this.replaceList(html, browserTab, observer);   
-        });
-
-        // select filters
-        html.find('.filter[data-type=select] select, .filter[data-type=bool] select').on('change', ev => {
-            const path = $(ev.target).parents('.filter').data('path');
-            const key = path.replace(/\./g, '');
-            const filterType = $(ev.target).parents('.filter').data('type');
-            const browserTab = $(ev.target).parents('.tab').data('tab');
-            let valIsArray = $(ev.target).parents('.filter').data('valisarray');
-            if (valIsArray === 'true') valIsArray = true;
-            let value = ev.target.value;
-            if (value === 'false') value = false;
-            if (value === 'true') value = true;
-
-            const filterTarget = `${browserTab}Filters`;
-
-            if (value === "null") {
-                delete this[filterTarget].activeFilters[key]
-            } else {
-                this[filterTarget].activeFilters[key] = {
-                    path: path,
-                    type: filterType,
-                    valIsArray: valIsArray,
-                    value:value
-                }
-            }
-            this.replaceList(html, browserTab, observer);      
-        });
-
-        // multiselect filters
-        html.find('.filter[data-type=multiSelect] input').on('change', ev => {
-            const path = $(ev.target).parents('.filter').data('path');
-            const key = path.replace(/\./g, '');
-            const filterType = 'multiSelect';
-            const browserTab = $(ev.target).parents('.tab').data('tab');
-            let valIsArray = $(ev.target).parents('.filter').data('valisarray');
-            if (valIsArray === 'true') valIsArray = true;
-            let value = $(ev.target).data('value');
-
-            const filterTarget = `${browserTab}Filters`;
-            const filter = this[filterTarget].activeFilters[key];
-
-            if (ev.target.checked === true) {
-                if (filter === undefined) {
-                    this[filterTarget].activeFilters[key] = {
-                        path: path,
-                        type: filterType,
-                        valIsArray: valIsArray,
-                        values: [value]
-                    }
-                } else {
-                    this[filterTarget].activeFilters[key].values.push(value);
-                }
-            } else {
-                delete this[filterTarget].activeFilters[key].values.splice(this[filterTarget].activeFilters[key].values.indexOf(value),1);
-                if (this[filterTarget].activeFilters[key].values.length === 0) {
-                    delete this[filterTarget].activeFilters[key];
-                }
-            }
-
-            this.replaceList(html, browserTab, observer);   
-        });
-
-
-        html.find('.filter[data-type=numberCompare] select, .filter[data-type=numberCompare] input').on('change keyup paste', ev => {
-            const path = $(ev.target).parents('.filter').data('path');
-            const key = path.replace(/\./g, '');
-            const filterType = 'numberCompare';
-            const browserTab = $(ev.target).parents('.tab').data('tab');
-            let valIsArray = false;
-
-            const operator = $(ev.target).parents('.filter').find('select').val();
-            const value = $(ev.target).parents('.filter').find('input').val();
-
-            const filterTarget = `${browserTab}Filters`;
-
-            if (value === '' || operator === 'null') {
-                delete this[filterTarget].activeFilters[key]
-            } else {
-                this[filterTarget].activeFilters[key] = {
-                    path: path,
-                    type: filterType,
-                    valIsArray: valIsArray,
-                    operator: operator,
-                    value: value
-                }
-            }
-
-            this.replaceList(html, browserTab, observer);
-        });
-
-
-        // lazy load images
-        html.find("img").each((i, img) => observer.observe(img));
-    }
-
-    async replaceList(html, browserTab, observer) {
+    async replaceList(html, browserTab) {
         let items = null;
         if (browserTab === 'spell') {
             items = html.find("ul#CBSpells");
@@ -784,13 +802,16 @@ class CompendiumBrowser extends Application {
             items = html.find("ul#CBItems");
         }
         if (items?.length) {
+            //Uses loadAndFilterItems to read compendia for items which pass the current filters and render on this tab
             const newItemsHTML = await this.renderItemData(browserTab); 
             items[0].innerHTML = newItemsHTML;
             //Re-sort before setting up lazy loading
             this.triggerSort(html, browserTab);
 
             //Lazy load images
-            $(items).find("img").each((i,img) => observer.observe(img));
+            if (this.observer) { 
+                $(items).find("img").each((i,img) => this.observer.observe(img));
+            }
 
             //Reactivate listeners for clicking and dragging
             this.activateItemListListeners($(items));
@@ -1410,3 +1431,5 @@ Hooks.on('ready', async () => {
     game.compendiumBrowser.addNpcFilters();
 
 });
+
+Hooks.on("renderCompendiumBrowser", CompendiumBrowser.afterRender);
