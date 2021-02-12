@@ -19,7 +19,8 @@
 9-Feb-2021  0.4.1b  Call loadAndFilterItems instead of loadItems; filter as we go, limited by numToPreload   
             0.4.1c  Needed to pass specific spellFilters, itemFilters etc.    
             0.4.1d: Fixed img observer on replaced spellData        
-11-Feb-2021 0.4.1e: Don't save the filter data (which is most of the memory) and remove the preload limit; instead just save the minimal amount of data              
+11-Feb-2021 0.4.1e: Don't save the filter data (which is most of the memory) and remove the preload limit; instead just save the minimal amount of data     
+            0.4.1g: Generalize the spell list reload and confirm spells still working         
 */
 
 const CMPBrowser = {
@@ -46,6 +47,7 @@ class CompendiumBrowser extends Application {
         await loadTemplates([
             "modules/compendium-browser/template/spell-browser.html",
             "modules/compendium-browser/template/spell-browser-list.html",
+//FIXME: Add -list partials for rendering the data separately            
             "modules/compendium-browser/template/npc-browser.html",
             "modules/compendium-browser/template/feat-browser.html",
             "modules/compendium-browser/template/item-browser.html",
@@ -547,7 +549,7 @@ class CompendiumBrowser extends Application {
                 ol[0].append(element);
             }
         });
-        this.triggerSortSpells(html);
+        this.triggerSort(html, "spell");
 
         // sort feat list in place
         html.find('.feat-browser select[name=sortorder]').on('change', ev => {
@@ -560,7 +562,7 @@ class CompendiumBrowser extends Application {
                 ol[0].append(element);
             }
         });
-        html.find('.feat-browser select[name=sortorder]').trigger('change');
+        this.triggerSort(html, "feat");
 
         // sort item list in place
         html.find('.item-browser select[name=sortorder]').on('change', ev => {
@@ -573,7 +575,7 @@ class CompendiumBrowser extends Application {
                 ol[0].append(element);
             }
         });
-        html.find('.item-browser select[name=sortorder]').trigger('change');
+        this.triggerSort(html, "item");
 
         // sort npc list in place
         html.find('.npc-browser select[name=sortorder]').on('change', ev => {
@@ -586,7 +588,7 @@ class CompendiumBrowser extends Application {
                 ol[0].append(element);
             }
         });
-        html.find('.npc-browser select[name=sortorder]').trigger('change')
+        this.triggerSort(html, "npc");
 
         // reset filters and re-render
         html.find('#reset-spell-filter').click(ev => {
@@ -616,6 +618,7 @@ class CompendiumBrowser extends Application {
             if (setting === 'spell-compendium-setting') {
                 let key = ev.target.dataset.key;
                 this.settings.loadedSpellCompendium[key].load = value;
+//FIXME                
                 this.loadItems().then(items => {
                     this.items = items;
                     this.render();
@@ -668,23 +671,7 @@ class CompendiumBrowser extends Application {
                 }
             }
 
-            let list = null;
-            let subjects = null;
-            if (itemType === 'spell') {
-                list = html.find('.spell-browser li');
-                subjects = this.items.spells;
-                this.replaceSpells(html, observer);
-            } else if (itemType === 'npc') {
-                list = html.find('.npc-browser li');
-                subjects = this.npcs;
-            } else if (itemType === 'feat') {
-                list = html.find('.feat-browser li');
-                subjects = this.items.feats;
-            } else if (itemType === 'item') {
-                list = html.find('.item-browser li');
-                subjects = this.items.items;
-            }
-            //this.filterElements(list, subjects, this[filterTarget].activeFilters);
+            this.replaceList(html, itemType, observer);   
         });
 
         // select filters
@@ -711,25 +698,7 @@ class CompendiumBrowser extends Application {
                     value:value
                 }
             }
-
-            let list = null;
-            let subjects = null;
-            if (itemType === 'spell') {
-                list = html.find('.spell-browser li');
-                subjects = this.items.spells;
-                this.replaceSpells(html, observer);                
-            } else if (itemType === 'npc') {
-                list = html.find('.npc-browser li');
-                subjects = this.npcs;
-            } else if (itemType === 'feat') {
-                list = html.find('.feat-browser li');
-                subjects = this.items.feats;
-            } else if (itemType === 'item') {
-                list = html.find('.item-browser li');
-                subjects = this.items.items;
-            }
-            //this.render();
-            //this.filterElements(list, subjects, this[filterTarget].activeFilters);
+            this.replaceList(html, itemType, observer);      
         });
 
         // multiselect filters
@@ -763,24 +732,7 @@ class CompendiumBrowser extends Application {
                 }
             }
 
-            let list = null;
-            let subjects = null;
-            if (itemType === 'spell') {
-                list = html.find('.spell-browser li');
-                subjects = this.items.spells;
-                this.replaceSpells(html, observer);
-            } else if (itemType === 'npc') {
-                list = html.find('.npc-browser li');
-                subjects = this.npcs;
-            } else if (itemType === 'feat') {
-                list = html.find('.feat-browser li');
-                subjects = this.items.feats;
-            } else if (itemType === 'item') {
-                list = html.find('.item-browser li');
-                subjects = this.items.items;
-            }
-            //this.render();
-            //this.filterElements(list, subjects, this[filterTarget].activeFilters);
+            this.replaceList(html, itemType, observer);   
         });
 
 
@@ -808,24 +760,7 @@ class CompendiumBrowser extends Application {
                 }
             }
 
-            let list = null;
-            let subjects = null;
-            if (itemType === 'spell') {
-                list = html.find('.spell-browser li');
-                subjects = this.items.spells;
-                this.replaceSpells(html, observer);
-            } else if (itemType === 'npc') {
-                list = html.find('.npc-browser li');
-                subjects = this.npcs;
-            } else if (itemType === 'feat') {
-                list = html.find('.feat-browser li');
-                subjects = this.items.feats;
-            } else if (itemType === 'item') {
-                list = html.find('.item-browser li');
-                subjects = this.items.items;
-            }
-            this.render();
-            //this.filterElements(list, subjects, this[filterTarget].activeFilters);
+            this.replaceList(html, itemType, observer);
         });
 
 
@@ -833,32 +768,58 @@ class CompendiumBrowser extends Application {
         html.find("img").each((i, img) => observer.observe(img));
     }
 
-    replaceSpells(html, observer) {
-        const items = html.find("ul#CBSpells");
-        if (items.length) {
-            this.renderSpellData().then(newSpellsHTML => {
-                items[0].innerHTML = newSpellsHTML;
-                //Re-sort before setting up lazy loading
-                this.triggerSortSpells(html);
-                //Lazy load images
-                $(items).find("img").each((i,img) => observer.observe(img));
-
-                //Reactivate listeners for clicking and dragging
-                this.activateItemListListeners($(items));
-            });
+    async replaceList(html, itemType, observer) {
+        let items = null;
+        if (itemType === 'spell') {
+            items = html.find("ul#CBSpells");
+        } else if (itemType === 'npc') {
+            items = html.find("ul#CBNPCs");
+        } else if (itemType === 'feat') {
+            items = html.find("ul#CBSpells");
+        } else if (itemType === 'item') {
+            items = html.find("ul#CBItems");
         }
+        if (items?.length) {
+            const newItemsHTML = await this.renderItemData(itemType); 
+            items[0].innerHTML = newItemsHTML;
+            //Re-sort before setting up lazy loading
+            this.triggerSort(html, itemType);
+
+            //Lazy load images
+            $(items).find("img").each((i,img) => observer.observe(img));
+
+            //Reactivate listeners for clicking and dragging
+            this.activateItemListListeners($(items));
+        }
+
     }
 
-    async renderSpellData() {
-        const items = await this.loadAndFilterItems("spell");
-        const spellData = items;
-        const html = await renderTemplate("modules/compendium-browser/template/spell-browser-list.html", {spells : spellData});
+    async renderItemData(itemType) {
+        const items = await this.loadAndFilterItems(itemType);
+        let html;
+        if (itemType === "spell") {
+            html = await renderTemplate("modules/compendium-browser/template/spell-browser-list.html", {spells : items});
+        } else if (itemType === "feat") {
+            html = await renderTemplate("modules/compendium-browser/template/feat-browser-list.html", {feats : items});
+        } else if (itemType === "npc") {
+            html = await renderTemplate("modules/compendium-browser/template/npc-browser-list.html", {npcs : items});
+        } else {
+            html = await renderTemplate("modules/compendium-browser/template/item-browser-list.html", {items : items});
+        }
         return html;
     }
 
     //SORTING
-    triggerSortSpells(html) {
-        html.find('.spell-browser select[name=sortorder]').trigger('change');
+    triggerSort(html, itemType) {
+        if (itemType === 'spell') {
+            html.find('.spell-browser select[name=sortorder]').trigger('change');
+        } else if (itemType === 'npc') {
+            html.find('.feat-browser select[name=sortorder]').trigger('change');
+        } else if (itemType === 'feat') {
+            html.find('.npc-browser select[name=sortorder]').trigger('change')
+        } else if (itemType === 'item') {
+            html.find('.item-browser select[name=sortorder]').trigger('change');
+        }
     }
 
 
