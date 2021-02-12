@@ -20,7 +20,8 @@
             0.4.1c  Needed to pass specific spellFilters, itemFilters etc.    
             0.4.1d: Fixed img observer on replaced spellData        
 11-Feb-2021 0.4.1e: Don't save the filter data (which is most of the memory) and remove the preload limit; instead just save the minimal amount of data     
-            0.4.1g: Generalize the spell list reload and confirm spells still working         
+            0.4.1g: Generalize the spell list reload and confirm spells still working   
+            0.4.1h: Add the partials for npc, feat, item and the backing code      
 */
 
 const CMPBrowser = {
@@ -46,11 +47,13 @@ class CompendiumBrowser extends Application {
         });  //Plug 
         await loadTemplates([
             "modules/compendium-browser/template/spell-browser.html",
-            "modules/compendium-browser/template/spell-browser-list.html",
-//FIXME: Add -list partials for rendering the data separately            
+            "modules/compendium-browser/template/spell-browser-list.html",       
             "modules/compendium-browser/template/npc-browser.html",
+            "modules/compendium-browser/template/npc-browser-list.html",
             "modules/compendium-browser/template/feat-browser.html",
+            "modules/compendium-browser/template/feat-browser-list.html",
             "modules/compendium-browser/template/item-browser.html",
+            "modules/compendium-browser/template/item-browser-list.html",
             "modules/compendium-browser/template/filter-container.html",
             "modules/compendium-browser/template/settings.html"
         ]);
@@ -775,7 +778,7 @@ class CompendiumBrowser extends Application {
         } else if (itemType === 'npc') {
             items = html.find("ul#CBNPCs");
         } else if (itemType === 'feat') {
-            items = html.find("ul#CBSpells");
+            items = html.find("ul#CBFeats");
         } else if (itemType === 'item') {
             items = html.find("ul#CBItems");
         }

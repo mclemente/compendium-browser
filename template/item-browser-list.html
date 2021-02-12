@@ -1,0 +1,16 @@
+{{#each items as |item id|}}
+<li class="item flexrow draggable" data-entry-compendium="{{item.compendium}}" data-entry-id="{{id}}">
+    <div class="item-image">
+        <img class="" data-src="{{item.img}}" title="{{item.name}}" width="32" height="32" />
+    </div>
+    <div class="item-name">
+        <span class="item-edit"><a>{{item.name}}</a></span>
+    </div>
+    <div class="item-tags">
+        <span title="Item Type">{{item.type}}</span>
+    </div>
+    <div class="filter-tags">
+        <input type="hidden" name="type" value="{{item.type}}">
+    </div>
+</li>
+{{/each}}

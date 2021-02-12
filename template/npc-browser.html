@@ -16,28 +16,8 @@
         </div>                
         {{> "modules/compendium-browser/template/filter-container.html" filters=npcFilters}}
     </div>
-    <ul>
-        {{#each npcs as |npc id|}}
-        <li class="npc flexrow draggable" data-entry-compendium="{{npc.compendium}}" data-entry-id="{{npc._id}}">
-            <div class="npc-image">
-                <img class="" data-src="{{npc.img}}" title="{{npc.name}}" width="32" height="32" />
-            </div>
-            <div class="npc-line">
-                <div class="npc-name">
-                    <span class="item-edit"><a>{{npc.name}}</a></span>
-                </div>
-                <div class="npc-tags">
-                    <span class="cr-display" title="Challange Rating">CR {{npc.displayCR}}</span>
-                    <span class="size-display">{{npc.displaySize}}</span>
-                    <span class="type">{{npc.data.details.type.value}}</span>
-                </div>
-                <div class="filter-tags">
-                    <input type="hidden" name="order.cr" value="{{npc.data.details.cr}}">
-                    <input type="hidden" name="order.size" value="{{npc.filterSize}}">
-                </div>
-            </div>
-        </li>
-        {{/each}}
+    <ul id="CBNPCs">
+        {{> "modules/compendium-browser/template/npc-browser-list.html" npcs=npcs}}
     </ul>
 
 </div>

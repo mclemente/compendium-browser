@@ -15,24 +15,8 @@
         </div>
         {{> "modules/compendium-browser/template/filter-container.html" filters=featFilters}}
     </div>
-    <ul>
-        {{#each feats as |feat id|}}
-        <li class="feat flexrow draggable" data-entry-compendium="{{feat.compendium}}" data-entry-id="{{feat._id}}">
-            <div class="item-image">
-                <img class="" data-src="{{feat.img}}" title="{{feat.name}}" width="32" height="32"/>
-            </div>  
-            <div class="item-name">
-                <span class="item-edit" ><a>{{feat.name}}</a></span>
-            </div>
-            <div class="feat-tags">
-                <span title="Class Requirement">{{feat.classRequirementString}}</span>
-            
-            </div>
-            <div class="filter-tags">
-                <input type="hidden" name="class" value="{{feat.classRequirementString}}">
-            </div>
-        </li>
-        {{/each}}
+    <ul id="CBFeats">
+        {{> "modules/compendium-browser/template/feat-browser-list.html" feats=feats}}
     </ul>
 
 </div>
