@@ -21,7 +21,10 @@
             0.4.1d: Fixed img observer on replaced spellData        
 11-Feb-2021 0.4.1e: Don't save the filter data (which is most of the memory) and remove the preload limit; instead just save the minimal amount of data     
             0.4.1g: Generalize the spell list reload and confirm spells still working   
-            0.4.1h: Add the partials for npc, feat, item and the backing code      
+            0.4.1h: Add the partials for npc, feat, item and the backing code    
+12-Feb-2021 0.4.1j: Correct compactItem for feats and items required display items   
+                    Rename itemType -> browserTab to differentiate candidate item's type from the tab it appears on (spell, feat/class, item, NPC)  
+                    Fixed: Was calling the wrong sort for feat and NPC         
 */
 
 const CMPBrowser = {
@@ -107,20 +110,15 @@ class CompendiumBrowser extends Application {
         }
     }
 
-    async loadAndFilterItems(itemType="spell",numToPreload=CMPBrowser.PRELOAD) {
-        console.log(`Load and Filter Items | Started loading ${itemType}s`);
+    async loadAndFilterItems(browserTab="spell",numToPreload=CMPBrowser.PRELOAD) {
+        console.log(`Load and Filter Items | Started loading ${browserTab}s`);
         console.time("loadAndFilterItems");
         await this.checkListsLoaded();
 
-        //0.4.1: Load and filter just one of spells, feats, and items (specified by itemType)
+        //0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
         let unfoundSpells = '';
         let numItemsLoaded = 0;
         let compactItems = {};
-        let items = {
-            spells: {},
-            feats: {},
-            items: {}
-        };
 
         //Filter the full list, but only save the core compendium information + level
         for (let pack of game.packs) {
@@ -128,43 +126,46 @@ class CompendiumBrowser extends Application {
 //FIXME: How much could we do with the loaded index rather than all content?                
                 await pack.getContent().then(content => {
                     for (let item5e of content) {
-                        if ((item5e.type === itemType) || ((itemType === "item") && !["spell","feat"].includes(item5e.type))) {
-                            const decoratedItem = this.decorateCompendiumEntry(item5e);
-                            if (decoratedItem) {
-                                let altItemSort = null;
-                                decoratedItem.compendium = pack.collection;
-                                if (decoratedItem.type === "spell") {
-                                    if (this.getFilterResult(decoratedItem, this.spellFilters.activeFilters)) {
-                                        altItemSort = decoratedItem.data?.level;
-                                    }
-                                } else if (decoratedItem.type === "feat") {
-                                    if (this.getFilterResult(decoratedItem, this.featFilters.activeFilters)) {
-                                        altItemSort = item5e.name;  //FIXME
-                                    }
-                                } else {
-                                    if (this.getFilterResult(decoratedItem, this.itemFilters.activeFilters)) {
-                                        altItemSort = item5e.name; //FIXME
-                                    }
-                                }
-                                if (altItemSort) {  //Indicates it passed the filters
-                                    compactItems[decoratedItem._id] = {
+                        let compactItem = null;
+                        const decoratedItem = this.decorateCompendiumEntry(item5e);
+                        if (decoratedItem) {
+                            if ((browserTab === "spell") && (decoratedItem.type === "spell")) {
+                                if (this.getFilterResult(decoratedItem, this.spellFilters.activeFilters)) {
+                                    compactItem = {
                                         compendium : pack.collection,
                                         name : decoratedItem.name,
                                         img: decoratedItem.img,
                                         data : {
                                             level : decoratedItem.data?.level,
                                             components : decoratedItem.data?.components
-                                        },
-                                        altItemSort : altItemSort
+                                        }
                                     }
-                                    if (numItemsLoaded++ >= numToPreload) break;
                                 }
-
+                            } else if ((browserTab === "feat") && ((decoratedItem.type === "feat") || (decoratedItem.type === "class"))) {
+                                if (this.getFilterResult(decoratedItem, this.featFilters.activeFilters)) {
+                                    compactItem = {
+                                        compendium : pack.collection,
+                                        name : decoratedItem.name,
+                                        img: decoratedItem.img,
+                                        classRequirementString : decoratedItem.classRequirementString
+                                    }
+                                }
+                            } else if ((browserTab === "item") && this.getFilterResult(decoratedItem, this.itemFilters.activeFilters)) {
+                                compactItem = {
+                                    compendium : pack.collection,
+                                    name : decoratedItem.name,
+                                    img: decoratedItem.img,
+                                    type : decoratedItem.type
+                                }
+                            }
+                            if (compactItem) {  //Indicates it passed the filters
+                                compactItems[decoratedItem._id] = compactItem; 
+                                if (numItemsLoaded++ >= numToPreload) break;
                             }
                         }
                     }//for item5e of content
                 });
-            }
+            }//end if pack entity === Item
             if (numItemsLoaded >= numToPreload) break;
         }//for packs
 
@@ -176,7 +177,7 @@ class CompendiumBrowser extends Application {
 */
         this.itemsLoaded = true;  
         console.timeEnd("loadAndFilterItems");
-        console.log(`Load and Filter Items | Finished loading ${Object.keys(compactItems).length} ${itemType}s`);
+        console.log(`Load and Filter Items | Finished loading ${Object.keys(compactItems).length} ${browserTab}s`);
         return compactItems;
     }
 
@@ -656,12 +657,12 @@ class CompendiumBrowser extends Application {
         //0.4.1: Now does a re-load and updates just the data side
         // text filters
         html.find('.filter[data-type=text] input, .filter[data-type=text] select').on('keyup change paste', ev => {
-            let path = $(ev.target).parents('.filter').data('path');
-            let key = path.replace(/\./g, '');
-            let value = ev.target.value;
-            let itemType = $(ev.target).parents('.tab').data('tab');
+            const path = $(ev.target).parents('.filter').data('path');
+            const key = path.replace(/\./g, '');
+            const value = ev.target.value;
+            const browserTab = $(ev.target).parents('.tab').data('tab');
 
-            let filterTarget = `${itemType}Filters`;
+            const filterTarget = `${browserTab}Filters`;
 
             if (value === '' || value === undefined) {
                 delete this[filterTarget].activeFilters[key];
@@ -674,22 +675,22 @@ class CompendiumBrowser extends Application {
                 }
             }
 
-            this.replaceList(html, itemType, observer);   
+            this.replaceList(html, browserTab, observer);   
         });
 
         // select filters
         html.find('.filter[data-type=select] select, .filter[data-type=bool] select').on('change', ev => {
-            let path = $(ev.target).parents('.filter').data('path');
-            let key = path.replace(/\./g, '');
-            let filterType = $(ev.target).parents('.filter').data('type');
-            let itemType = $(ev.target).parents('.tab').data('tab');
+            const path = $(ev.target).parents('.filter').data('path');
+            const key = path.replace(/\./g, '');
+            const filterType = $(ev.target).parents('.filter').data('type');
+            const browserTab = $(ev.target).parents('.tab').data('tab');
             let valIsArray = $(ev.target).parents('.filter').data('valisarray');
             if (valIsArray === 'true') valIsArray = true;
             let value = ev.target.value;
             if (value === 'false') value = false;
             if (value === 'true') value = true;
 
-            let filterTarget = `${itemType}Filters`;
+            const filterTarget = `${browserTab}Filters`;
 
             if (value === "null") {
                 delete this[filterTarget].activeFilters[key]
@@ -701,21 +702,21 @@ class CompendiumBrowser extends Application {
                     value:value
                 }
             }
-            this.replaceList(html, itemType, observer);      
+            this.replaceList(html, browserTab, observer);      
         });
 
         // multiselect filters
         html.find('.filter[data-type=multiSelect] input').on('change', ev => {
-            let path = $(ev.target).parents('.filter').data('path');
-            let key = path.replace(/\./g, '');
-            let filterType = 'multiSelect';
-            let itemType = $(ev.target).parents('.tab').data('tab');
+            const path = $(ev.target).parents('.filter').data('path');
+            const key = path.replace(/\./g, '');
+            const filterType = 'multiSelect';
+            const browserTab = $(ev.target).parents('.tab').data('tab');
             let valIsArray = $(ev.target).parents('.filter').data('valisarray');
             if (valIsArray === 'true') valIsArray = true;
             let value = $(ev.target).data('value');
 
-            let filterTarget = `${itemType}Filters`;
-            let filter = this[filterTarget].activeFilters[key];
+            const filterTarget = `${browserTab}Filters`;
+            const filter = this[filterTarget].activeFilters[key];
 
             if (ev.target.checked === true) {
                 if (filter === undefined) {
@@ -735,21 +736,21 @@ class CompendiumBrowser extends Application {
                 }
             }
 
-            this.replaceList(html, itemType, observer);   
+            this.replaceList(html, browserTab, observer);   
         });
 
 
         html.find('.filter[data-type=numberCompare] select, .filter[data-type=numberCompare] input').on('change keyup paste', ev => {
-            let path = $(ev.target).parents('.filter').data('path');
-            let key = path.replace(/\./g, '');
-            let filterType = 'numberCompare';
-            let itemType = $(ev.target).parents('.tab').data('tab');
+            const path = $(ev.target).parents('.filter').data('path');
+            const key = path.replace(/\./g, '');
+            const filterType = 'numberCompare';
+            const browserTab = $(ev.target).parents('.tab').data('tab');
             let valIsArray = false;
 
-            let operator = $(ev.target).parents('.filter').find('select').val();
-            let value = $(ev.target).parents('.filter').find('input').val();
+            const operator = $(ev.target).parents('.filter').find('select').val();
+            const value = $(ev.target).parents('.filter').find('input').val();
 
-            let filterTarget = `${itemType}Filters`;
+            const filterTarget = `${browserTab}Filters`;
 
             if (value === '' || operator === 'null') {
                 delete this[filterTarget].activeFilters[key]
@@ -763,7 +764,7 @@ class CompendiumBrowser extends Application {
                 }
             }
 
-            this.replaceList(html, itemType, observer);
+            this.replaceList(html, browserTab, observer);
         });
 
 
@@ -771,22 +772,22 @@ class CompendiumBrowser extends Application {
         html.find("img").each((i, img) => observer.observe(img));
     }
 
-    async replaceList(html, itemType, observer) {
+    async replaceList(html, browserTab, observer) {
         let items = null;
-        if (itemType === 'spell') {
+        if (browserTab === 'spell') {
             items = html.find("ul#CBSpells");
-        } else if (itemType === 'npc') {
+        } else if (browserTab === 'npc') {
             items = html.find("ul#CBNPCs");
-        } else if (itemType === 'feat') {
+        } else if (browserTab === 'feat') {
             items = html.find("ul#CBFeats");
-        } else if (itemType === 'item') {
+        } else if (browserTab === 'item') {
             items = html.find("ul#CBItems");
         }
         if (items?.length) {
-            const newItemsHTML = await this.renderItemData(itemType); 
+            const newItemsHTML = await this.renderItemData(browserTab); 
             items[0].innerHTML = newItemsHTML;
             //Re-sort before setting up lazy loading
-            this.triggerSort(html, itemType);
+            this.triggerSort(html, browserTab);
 
             //Lazy load images
             $(items).find("img").each((i,img) => observer.observe(img));
@@ -797,34 +798,34 @@ class CompendiumBrowser extends Application {
 
     }
 
-    async renderItemData(itemType) {
+    async renderItemData(browserTab) {
         let items;
         let html;
-        if (itemType === "spell") {
-            items = await this.loadAndFilterItems(itemType);
+        if (browserTab === "spell") {
+            items = await this.loadAndFilterItems(browserTab);
             html = await renderTemplate("modules/compendium-browser/template/spell-browser-list.html", {spells : items});
-        } else if (itemType === "feat") {
-            items = await this.loadAndFilterItems(itemType);
+        } else if (browserTab === "feat") {
+            items = await this.loadAndFilterItems(browserTab);
             html = await renderTemplate("modules/compendium-browser/template/feat-browser-list.html", {feats : items});
-        } else if (itemType === "npc") {
+        } else if (browserTab === "npc") {
             const npcs = this.loadNpcs();
             html = await renderTemplate("modules/compendium-browser/template/npc-browser-list.html", {npcs : npcs});
         } else {
-            items = await this.loadAndFilterItems(itemType);
+            items = await this.loadAndFilterItems(browserTab);
             html = await renderTemplate("modules/compendium-browser/template/item-browser-list.html", {items : items});
         }
         return html;
     }
 
     //SORTING
-    triggerSort(html, itemType) {
-        if (itemType === 'spell') {
+    triggerSort(html, browserTab) {
+        if (browserTab === 'spell') {
             html.find('.spell-browser select[name=sortorder]').trigger('change');
-        } else if (itemType === 'npc') {
+        } else if (browserTab === 'feat') {
             html.find('.feat-browser select[name=sortorder]').trigger('change');
-        } else if (itemType === 'feat') {
+        } else if (browserTab === 'npc') {
             html.find('.npc-browser select[name=sortorder]').trigger('change')
-        } else if (itemType === 'item') {
+        } else if (browserTab === 'item') {
             html.find('.item-browser select[name=sortorder]').trigger('change');
         }
     }
@@ -957,7 +958,7 @@ class CompendiumBrowser extends Application {
     decorateCompendiumEntry(item5e) {
         if (!item5e) return null;
         //Decorate and then filter a compendium entry - returns null or the item
-        let item = item5e.data;
+        const item = item5e.data;
 
         // getting damage types (common to all Items, although some won't have any)
         item.damageTypes = [];
@@ -1171,10 +1172,6 @@ class CompendiumBrowser extends Application {
 
     saveSettings() {
         game.settings.set(CMPBrowser.MODULE_NAME, 'settings', this.settings);
-    }
-
-
-    _lazyLoadImg(entries, observer) {
     }
 
     //FILTERS - Added on the Ready hook
