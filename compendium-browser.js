@@ -18,7 +18,8 @@
             0.4.1b  SpellBrowser -> CompendiumBrowser    
 9-Feb-2021  0.4.1b  Call loadAndFilterItems instead of loadItems; filter as we go, limited by numToPreload   
             0.4.1c  Needed to pass specific spellFilters, itemFilters etc.    
-            0.4.1d: Fixed img observer on replaced spellData          
+            0.4.1d: Fixed img observer on replaced spellData        
+11-Feb-2021 0.4.1e: Don't save the filter data (which is most of the memory) and remove the preload limit; instead just save the minimal amount of data              
 */
 
 const CMPBrowser = {
@@ -101,44 +102,65 @@ class CompendiumBrowser extends Application {
         }
     }
 
-    async loadAndFilterItems(numToPreload=CMPBrowser.PRELOAD) {
-        console.log('Load and Filter Items | Started loading items');
+    async loadAndFilterItems(itemType="spell",numToPreload=CMPBrowser.PRELOAD) {
+        console.log(`Load and Filter Items | Started loading ${itemType}s`);
         console.time("loadAndFilterItems");
         await this.checkListsLoaded();
 
+        //0.4.1: Load and filter just one of spells, feats, and items (specified by itemType)
         let unfoundSpells = '';
-        let numSpellsLoaded = 0;
-        let numFeatsLoaded = 0;
         let numItemsLoaded = 0;
+        let compactItems = {};
         let items = {
             spells: {},
             feats: {},
             items: {}
         };
 
+        //Filter the full list, but only save the core compendium information + level
         for (let pack of game.packs) {
             if (pack['metadata']['entity'] === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
 //FIXME: How much could we do with the loaded index rather than all content?                
                 await pack.getContent().then(content => {
                     for (let item5e of content) {
-                        const decoratedItem = this.decorateCompendiumEntry(item5e);
-                        if (decoratedItem) {
-                            decoratedItem.compendium = pack.collection;
-                            if ((decoratedItem.type === "spell") && this.getFilterResult(decoratedItem, this.spellFilters.activeFilters) && (numSpellsLoaded < numToPreload)) {
-                                numSpellsLoaded++;
-                                items.spells[decoratedItem._id] = decoratedItem;
-                            } else if ((decoratedItem.type === "feat") && this.getFilterResult(decoratedItem, this.featFilters.activeFilters) && (numFeatsLoaded < numToPreload)) {
-                                numFeatsLoaded++;
-                                items.feats[decoratedItem._id] = decoratedItem;
-                            } else if (this.getFilterResult(decoratedItem, this.itemFilters.activeFilters) && (numItemsLoaded < numToPreload)) {
-                                numItemsLoaded++;
-                                items.items[decoratedItem._id] = decoratedItem;
+                        if (item5e.type === itemType) {
+                            const decoratedItem = this.decorateCompendiumEntry(item5e);
+                            if (decoratedItem) {
+                                let altItemSort = null;
+                                decoratedItem.compendium = pack.collection;
+                                if (decoratedItem.type === "spell") {
+                                    if (this.getFilterResult(decoratedItem, this.spellFilters.activeFilters)) {
+                                        altItemSort = decoratedItem.data?.level;
+                                    }
+                                } else if (decoratedItem.type === "feat") {
+                                    if (this.getFilterResult(decoratedItem, this.featFilters.activeFilters)) {
+                                        altItemSort = item5e.name;  //FIXME
+                                    }
+                                } else {
+                                    if (this.getFilterResult(decoratedItem, this.itemFilters.activeFilters)) {
+                                        altItemSort = item5e.name; //FIXME
+                                    }
+                                }
+                                if (altItemSort) {  //Indicates it passed the filters
+                                    compactItems[decoratedItem._id] = {
+                                        compendium : pack.collection,
+                                        name : decoratedItem.name,
+                                        img: decoratedItem.img,
+                                        data : {
+                                            level : decoratedItem.data?.level,
+                                            components : decoratedItem.data?.components
+                                        },
+                                        altItemSort : altItemSort
+                                    }
+                                    if (numItemsLoaded++ >= numToPreload) break;
+                                }
+
                             }
                         }
                     }//for item5e of content
                 });
             }
-            if ((numSpellsLoaded >= numToPreload) && (numFeatsLoaded >= numToPreload) && (numItemsLoaded >= numToPreload)) break;
+            if (numItemsLoaded >= numToPreload) break;
         }//for packs
 
 /*
@@ -148,9 +170,9 @@ class CompendiumBrowser extends Application {
         }      
 */
         this.itemsLoaded = true;  
-        console.timeEnd("loadItems");
-        console.log(`Load and Filter Items | Finished loading items: ${Object.keys(items.spells).length} spells, ${Object.keys(items.feats).length} features, ${Object.keys(items.items).length} items `);
-        return items;
+        console.timeEnd("loadAndFilterItems");
+        console.log(`Load and Filter Items | Finished loading ${Object.keys(compactItems).length} ${itemType}s`);
+        return compactItems;
     }
 
     async loadItems(numToPreload=CMPBrowser.PRELOAD) {
@@ -427,7 +449,7 @@ class CompendiumBrowser extends Application {
         //0.4.1 Filter as we load to support new way of filtering
         //Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
         //First time (when you press Compendium Browser button) is called with filters unset
-        this.items = await this.loadAndFilterItems(numToPreload);
+        this.items = await this.loadAndFilterItems("spell",numToPreload);
         if (!this.npcsLoaded) {
             this.npcs = await this.loadNpcs(numToPreload);  //also sets this.npcsLoaded
         }
@@ -452,6 +474,38 @@ class CompendiumBrowser extends Application {
         return data;
     }
 
+    activateItemListListeners(html) {
+        // show entity sheet
+        html.find('.item-edit').click(ev => {
+            let itemId = $(ev.currentTarget).parents("li").attr("data-entry-id");
+            let compendium = $(ev.currentTarget).parents("li").attr("data-entry-compendium");
+            let pack = game.packs.find(p => p.collection === compendium);
+            pack.getEntity(itemId).then(entity => {
+                entity.sheet.render(true);
+            });
+        });
+
+        // make draggable
+        //0.4.1: Avoid the game.packs lookup
+        html.find('.draggable').each((i, li) => {
+            li.setAttribute("draggable", true);
+            li.addEventListener('dragstart', event => {
+                let packName = li.getAttribute("data-entry-compendium");
+                let itemType = li.parents('.tab').data('tab');
+                let pack = game.packs.find(p => p.collection === packName);
+                if (!pack) {
+                    event.preventDefault();
+                    return false;
+                }
+                event.dataTransfer.setData("text/plain", JSON.stringify({
+                    type: pack.entity,
+                    pack: pack.collection,
+                    id: li.getAttribute("data-entry-id")
+                }));
+            }, false);
+        });
+    }
+
     activateListeners(html) {
         super.activateListeners(html);
         // localizing title
@@ -473,34 +527,7 @@ class CompendiumBrowser extends Application {
             }
         });
 
-
-        // show entity sheet
-        html.find('.item-edit').click(ev => {
-            let itemId = $(ev.currentTarget).parents("li").attr("data-entry-id");
-            let compendium = $(ev.currentTarget).parents("li").attr("data-entry-compendium");
-            let pack = game.packs.find(p => p.collection === compendium);
-            pack.getEntity(itemId).then(entity => {
-                entity.sheet.render(true);
-            });
-        });
-
-        // make draggable
-        html.find('.draggable').each((i, li) => {
-            li.setAttribute("draggable", true);
-            li.addEventListener('dragstart', event => {
-                let packName = li.getAttribute("data-entry-compendium");
-                let pack = game.packs.find(p => p.collection === packName);
-                if (!pack) {
-                    event.preventDefault();
-                    return false;
-                }
-                event.dataTransfer.setData("text/plain", JSON.stringify({
-                    type: pack.entity,
-                    pack: pack.collection,
-                    id: li.getAttribute("data-entry-id")
-                }));
-            }, false);
-        });
+        this.activateItemListListeners(html);
 
         // toggle visibility of filter containers
         html.find('.filtercontainer h3, .multiselect label').click(async ev => {
@@ -619,10 +646,9 @@ class CompendiumBrowser extends Application {
         });
 
 
-        // activating or deactivating filters - in place
-
+        // activating or deactivating filters
+        //0.4.1: Now does a re-load and updates just the data side
         // text filters
-
         html.find('.filter[data-type=text] input, .filter[data-type=text] select').on('keyup change paste', ev => {
             let path = $(ev.target).parents('.filter').data('path');
             let key = path.replace(/\./g, '');
@@ -688,7 +714,6 @@ class CompendiumBrowser extends Application {
 
             let list = null;
             let subjects = null;
-            let items = null;
             if (itemType === 'spell') {
                 list = html.find('.spell-browser li');
                 subjects = this.items.spells;
@@ -726,7 +751,7 @@ class CompendiumBrowser extends Application {
                         path: path,
                         type: filterType,
                         valIsArray: valIsArray,
-                        values: [ value ]
+                        values: [value]
                     }
                 } else {
                     this[filterTarget].activeFilters[key].values.push(value);
@@ -788,6 +813,7 @@ class CompendiumBrowser extends Application {
             if (itemType === 'spell') {
                 list = html.find('.spell-browser li');
                 subjects = this.items.spells;
+                this.replaceSpells(html, observer);
             } else if (itemType === 'npc') {
                 list = html.find('.npc-browser li');
                 subjects = this.npcs;
@@ -815,15 +841,19 @@ class CompendiumBrowser extends Application {
                 replacement.setAttribute("id","CBSpells");
                 replacement.innerHTML = newSpellsHTML;
                 items[0].parentNode.replaceChild(replacement, items[0]);
+
                 //Lazy load images
                 $(replacement).find("img").each((i, img) => observer.observe(img));
+
+                //Reactivate listeners for clicking and dragging
+                this.activateItemListListeners($(replacement));
             });
         }
     }
 
     async renderSpellData() {
-        const items = await this.loadAndFilterItems();
-        const spellData = items?.spells;
+        const items = await this.loadAndFilterItems("spell");
+        const spellData = items;
         const html = await renderTemplate("modules/compendium-browser/template/spell-browser-list.html", {spells : spellData});
         return html;
     }
