@@ -28,6 +28,7 @@
             0.4.1k: Don't call loadItems() during initalize; getData() just displays static elements    
             0.4.1l: Display progress indicator for loading - for now just a static one    
 15-Feb-2021 0.4.2:  Fix NPCs to use loadAndFilterNpcs
+            0.4.2b: Add Loading... message for NPCs
                     Want loading message with dynamic results and to not replace existing data; need to localize as well
 */
 
@@ -146,6 +147,7 @@ class CompendiumBrowser extends Application {
         //0.4.1k: Don't do any item/npc loading until tab is visible
         let data = {
             items : {"Loading" : loadingItem},
+            npcs: {"Loading" : loadingItem},
             spellFilters : this.spellFilters,
             showSpellBrowser : (game.user.isGM || this.settings.allowSpellBrowser),
             featFilters : this.featFilters,
@@ -278,22 +280,22 @@ class CompendiumBrowser extends Application {
         // reset filters and re-render
         html.find('#reset-spell-filter').click(ev => {
             this.spellFilters.activeFilters = {};
-            this.replaceList(html, "spell");
+            this.replaceList(html, "spell", {force : true});
         });
 
         html.find('#reset-feat-filter').click(ev => {
             this.featFilters.activeFilters = {};
-            this.replaceList(html, "feat");
+            this.replaceList(html, "feat", {force : true});
         });
 
         html.find('#reset-item-filter').click(ev => {
             this.itemFilters.activeFilters = {};
-            this.replaceList(html, "item");
+            this.replaceList(html, "item", {force : true});
         });
 
         html.find('#reset-npc-filter').click(ev => {
             this.npcFilters.activeFilters = {};
-            this.replaceList(html, "npc");
+            this.replaceList(html, "npc", {force : true});
         });
 
         // settings
@@ -744,14 +746,14 @@ class CompendiumBrowser extends Application {
             this.initSettings();
         }
         if (game.user.isGM || this.settings.allowSpellBrowser || this.settings.allowNpcBrowser) {
-            const importButton = $(`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize("CMPBrowser.compendiumBrowser")}</button>`);
+            const cbButton = $(`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize("CMPBrowser.compendiumBrowser")}</button>`);
             html.find('.compendium-browser-btn').remove();
 
             // adding to directory-list since the footer doesn't exist if the user is not gm
-            html.find('.directory-footer').append(importButton);
+            html.find('.directory-footer').append(cbButton);
 
             // Handle button clicks
-            importButton.click(ev => {
+            cbButton.click(ev => {
                 ev.preventDefault();
                 //0.4.1: Reset filters when you first click button
                 this.resetFilters();
@@ -769,31 +771,34 @@ class CompendiumBrowser extends Application {
 
 
 
-    async replaceList(html, browserTab) {
-        let items = null;
+    async replaceList(html, browserTab, options = {force : false}) {
+        let elements = null;
         if (browserTab === 'spell') {
-            items = html.find("ul#CBSpells");
+            elements = html.find("ul#CBSpells");
         } else if (browserTab === 'npc') {
-            items = html.find("ul#CBNPCs");
+            elements = html.find("ul#CBNPCs");
         } else if (browserTab === 'feat') {
-            items = html.find("ul#CBFeats");
+            elements = html.find("ul#CBFeats");
         } else if (browserTab === 'item') {
-            items = html.find("ul#CBItems");
+            elements = html.find("ul#CBItems");
         }
-        if (items?.length) {
-            //Uses loadAndFilterItems to read compendia for items which pass the current filters and render on this tab
-            const newItemsHTML = await this.renderItemData(browserTab); 
-            items[0].innerHTML = newItemsHTML;
-            //Re-sort before setting up lazy loading
-            this.triggerSort(html, browserTab);
+        if (elements?.length) {
+            //0.4.2b: Only reload if you don't already have data here (we ignore the Loading... message)
+            if ((elements[0].children.length <= 1) || options?.force) {
+                //Uses loadAndFilterItems to read compendia for items which pass the current filters and render on this tab
+                const newItemsHTML = await this.renderItemData(browserTab); 
+                elements[0].innerHTML = newItemsHTML;
+                //Re-sort before setting up lazy loading
+                this.triggerSort(html, browserTab);
 
-            //Lazy load images
-            if (this.observer) { 
-                $(items).find("img").each((i,img) => this.observer.observe(img));
+                //Lazy load images
+                if (this.observer) { 
+                    $(elements).find("img").each((i,img) => this.observer.observe(img));
+                }
+
+                //Reactivate listeners for clicking and dragging
+                this.activateItemListListeners($(elements));
             }
-
-            //Reactivate listeners for clicking and dragging
-            this.activateItemListListeners($(items));
         }
 
     }
