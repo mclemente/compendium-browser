@@ -122,7 +122,7 @@ class CompendiumBrowser extends Application {
     _onChangeTab(event, tabs, active) {
         super._onChangeTab(event, tabs, active);
         const html = this.element;
-        this.replaceList(html, active)
+        this.replaceList(html, active, {reload : false})
     }
 
 
@@ -280,22 +280,22 @@ class CompendiumBrowser extends Application {
         // reset filters and re-render
         html.find('#reset-spell-filter').click(ev => {
             this.spellFilters.activeFilters = {};
-            this.replaceList(html, "spell", {force : true});
+            this.replaceList(html, "spell", {reload : true});
         });
 
         html.find('#reset-feat-filter').click(ev => {
             this.featFilters.activeFilters = {};
-            this.replaceList(html, "feat", {force : true});
+            this.replaceList(html, "feat", {reload : true});
         });
 
         html.find('#reset-item-filter').click(ev => {
             this.itemFilters.activeFilters = {};
-            this.replaceList(html, "item", {force : true});
+            this.replaceList(html, "item", {reload : true});
         });
 
         html.find('#reset-npc-filter').click(ev => {
             this.npcFilters.activeFilters = {};
-            this.replaceList(html, "npc", {force : true});
+            this.replaceList(html, "npc", {reload : true});
         });
 
         // settings
@@ -771,7 +771,7 @@ class CompendiumBrowser extends Application {
 
 
 
-    async replaceList(html, browserTab, options = {force : false}) {
+    async replaceList(html, browserTab, options = {reload : true}) {
         let elements = null;
         if (browserTab === 'spell') {
             elements = html.find("ul#CBSpells");
@@ -783,8 +783,8 @@ class CompendiumBrowser extends Application {
             elements = html.find("ul#CBItems");
         }
         if (elements?.length) {
-            //0.4.2b: Only reload if you don't already have data here (we ignore the Loading... message)
-            if ((elements[0].children.length <= 1) || options?.force) {
+            //0.4.2b: Don't reload on a tab-switch
+            if ((elements[0].children.length <= 1) && options?.reload) {
                 //Uses loadAndFilterItems to read compendia for items which pass the current filters and render on this tab
                 const newItemsHTML = await this.renderItemData(browserTab); 
                 elements[0].innerHTML = newItemsHTML;
