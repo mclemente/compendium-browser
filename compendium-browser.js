@@ -27,7 +27,8 @@
                     Fixed: Was calling the wrong sort for feat and NPC    
             0.4.1k: Don't call loadItems() during initalize; getData() just displays static elements    
             0.4.1l: Display progress indicator for loading - for now just a static one    
-            0.4.1m; PLANNED: Want loading message with dynamic results and to not replace existing data; need to localize as well
+15-Feb-2021 0.4.2:  Fix NPCs to use loadAndFilterNpcs
+                    Want loading message with dynamic results and to not replace existing data; need to localize as well
 */
 
 const CMPBrowser = {
@@ -302,19 +303,12 @@ class CompendiumBrowser extends Application {
             if (setting === 'spell-compendium-setting') {
                 let key = ev.target.dataset.key;
                 this.settings.loadedSpellCompendium[key].load = value;
-//FIXME                
-                this.loadItems().then(items => {
-                    this.items = items;
-                    this.render();
-                });
+                this.render();
                 ui.notifications.info("Settings Saved. Item Compendiums are being reloaded.");
             } else if (setting === 'npc-compendium-setting') {
                 let key = ev.target.dataset.key;
                 this.settings.loadedNpcCompendium[key].load = value;
-                this.loadNpcs().then(npcs => {
-                    this.npcs = npcs;
-                    this.render();
-                });
+                this.render();
                 ui.notifications.info("Settings Saved. NPC Compendiums are being reloaded.");
             }
             if (setting === 'allow-spell-browser') {
@@ -497,7 +491,7 @@ class CompendiumBrowser extends Application {
                 await pack.getContent().then(content => {
                     for (let item5e of content) {
                         let compactItem = null;
-                        const decoratedItem = this.decorateCompendiumEntry(item5e);
+                        const decoratedItem = this.decorateItem(item5e);
                         if (decoratedItem) {
                             if ((browserTab === "spell") && (decoratedItem.type === "spell")) {
                                 if (this.getFilterResult(decoratedItem, this.spellFilters.activeFilters)) {
@@ -693,9 +687,9 @@ class CompendiumBrowser extends Application {
         return items;
     }
     
-    async loadNpcs(numToPreload=CMPBrowser.PRELOAD) {
+    async loadAndFilterNpcs(numToPreload=CMPBrowser.PRELOAD) {
         console.log('NPC Browser | Started loading NPCs');
-        console.time("loadNpcs");
+        console.time("loadAndFilterNpcs");
         let npcs = {};
 
         let numberLoaded = 0;
@@ -705,52 +699,26 @@ class CompendiumBrowser extends Application {
                 await pack.getContent().then(async content => {
                     
                     for (let npc of content) {
-                        //console.log('%c '+npc.name, 'background: white; color: red')
-                        npc = npc.data;
-                        // add needed data
-                        npc.compendium = pack.collection;
-                        // cr display
-                        let cr = npc.data.details.cr;
-                        if (cr == undefined || cr == '') cr = 0;
-                        else cr = Number(cr);
-                        if (cr > 0 && cr < 1) cr = "1/" + (1 / cr);
-                        npc.displayCR = cr;
-                        npc.displaySize = 'unset';
-                        npc.filterSize = 2;
-                        if (CONFIG.DND5E.actorSizes[npc.data.traits.size] !== undefined) {
-                            npc.displaySize = CONFIG.DND5E.actorSizes[npc.data.traits.size];
-                        }
-                        switch (npc.data.traits.size) {
-                            case 'grg': npc.filterSize = 5; break;
-                            case 'huge': npc.filterSize = 4; break;
-                            case 'lg': npc.filterSize = 3; break;
-                            case 'sm': npc.filterSize = 1; break;
-                            case 'tiny': npc.filterSize = 0; break;
-                            case 'med':
-                            default: npc.filterSize = 2; break;
-                        }
-
-                        // getting value for HasSpells and damage types
-                        npc.hasSpells = false;
-                        npc.damageDealt = [];
-                        for (let item of npc.items) {
-                            if (item.type == 'spell') {
-                                npc.hasSpells = true;
+                        let compactNpc = null;
+                        const decoratedNpc = this.decorateNpc(npc);
+                        if (decoratedNpc && this.getFilterResult(decoratedNpc, this.npcFilters.activeFilters)) {
+                            //0.4.2: Don't store all the details - just the display elements
+                            compactNpc = {
+                                compendium : pack.collection,
+                                name : decoratedNpc.name,
+                                img: decoratedNpc.img,
+                                displayCR : decoratedNpc.displayCR,
+                                displaySize : decoratedNpc.displaySize,
+                                displayType: decoratedNpc.data?.details?.type,
+                                orderCR : decoratedNpc.data.details.cr,
+                                orderSize : decoratedNpc.filterSize
                             }
-                            if (item.data.damage && item.data.damage.parts && item.data.damage.parts.length > 0) {
-                                for (let part of item.data.damage.parts) {
-                                    let type = part[1];
-                                    if (npc.damageDealt.indexOf(type) === -1) {
-                                        npc.damageDealt.push(type);
-                                    }
-                                }
+                            if (compactNpc) {
+                                npcs[decoratedNpc._id] = compactNpc;
                             }
+                            //0.4.1 Only preload a limited number and fill more in as needed
+                            if (numberLoaded++ > numToPreload) break;
                         }
-
-                        npcs[npc._id] = npc;
-                        //0.4.1 Only preload a limited number and fill more in as needed
-                        if (numberLoaded++ > numToPreload) break;
-
                     }
                 });
             }
@@ -759,7 +727,7 @@ class CompendiumBrowser extends Application {
         }
 
         this.npcsLoaded = true;
-        console.timeEnd("loadNpcs");
+        console.timeEnd("loadAndFilterNpcs");
         console.log(`NPC Browser | Finished loading NPCs: ${Object.keys(npcs).length} NPCs`);
         return npcs;
     }
@@ -840,7 +808,7 @@ class CompendiumBrowser extends Application {
             items = await this.loadAndFilterItems(browserTab);
             html = await renderTemplate("modules/compendium-browser/template/feat-browser-list.html", {feats : items});
         } else if (browserTab === "npc") {
-            const npcs = this.loadNpcs();
+            const npcs = await this.loadAndFilterNpcs();
             html = await renderTemplate("modules/compendium-browser/template/npc-browser-list.html", {npcs : npcs});
         } else {
             items = await this.loadAndFilterItems(browserTab);
@@ -987,7 +955,7 @@ class CompendiumBrowser extends Application {
         return list;
     }
 
-    decorateCompendiumEntry(item5e) {
+    decorateItem(item5e) {
         if (!item5e) return null;
         //Decorate and then filter a compendium entry - returns null or the item
         const item = item5e.data;
@@ -1054,6 +1022,51 @@ class CompendiumBrowser extends Application {
             item.usesRessources = item5e.hasLimitedUses
         } 
         return item;
+    }
+
+    decorateNpc(npc) {
+        //console.log('%c '+npc.name, 'background: white; color: red')
+        const decoratedNpc = npc.data;
+
+        // cr display
+        let cr = decoratedNpc.data.details.cr;
+        if (cr == undefined || cr == '') cr = 0;
+        else cr = Number(cr);
+        if (cr > 0 && cr < 1) cr = "1/" + (1 / cr);
+        decoratedNpc.displayCR = cr;
+        decoratedNpc.displaySize = 'unset';
+        decoratedNpc.filterSize = 2;
+        if (CONFIG.DND5E.actorSizes[decoratedNpc.data.traits.size] !== undefined) {
+            decoratedNpc.displaySize = CONFIG.DND5E.actorSizes[decoratedNpc.data.traits.size];
+        }
+        switch (decoratedNpc.data.traits.size) {
+            case 'grg': decoratedNpc.filterSize = 5; break;
+            case 'huge': decoratedNpc.filterSize = 4; break;
+            case 'lg': decoratedNpc.filterSize = 3; break;
+            case 'sm': decoratedNpc.filterSize = 1; break;
+            case 'tiny': decoratedNpc.filterSize = 0; break;
+            case 'med':
+            default: decoratedNpc.filterSize = 2; break;
+        }
+
+        // getting value for HasSpells and damage types
+        decoratedNpc.hasSpells = false;
+        decoratedNpc.damageDealt = [];
+        for (let item of decoratedNpc.items) {
+            if (item.type == 'spell') {
+                decoratedNpc.hasSpells = true;
+            }
+            if (item.data.damage && item.data.damage.parts && item.data.damage.parts.length > 0) {
+                for (let part of item.data.damage.parts) {
+                    let type = part[1];
+                    if (decoratedNpc.damageDealt.indexOf(type) === -1) {
+                        decoratedNpc.damageDealt.push(type);
+                    }
+                }
+            }
+        }
+
+        return decoratedNpc;
     }
 
     filterElements(list, subjects, filters) {

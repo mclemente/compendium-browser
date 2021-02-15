@@ -8,13 +8,13 @@
             <span class="item-edit"><a>{{npc.name}}</a></span>
         </div>
         <div class="npc-tags">
-            <span class="cr-display" title="Challange Rating">CR {{npc.displayCR}}</span>
-            <span class="size-display">{{npc.displaySize}}</span>
-            <span class="type">{{npc.data.details.type.value}}</span>
+            <span class="cr" title="Challange Rating">CR {{npc.displayCR}}</span>
+            <span class="size">{{npc.displaySize}}</span>
+            <span class="type">{{npc.displayType}}</span>
         </div>
         <div class="filter-tags">
-            <input type="hidden" name="order.cr" value="{{npc.data.details.cr}}">
-            <input type="hidden" name="order.size" value="{{npc.filterSize}}">
+            <input type="hidden" name="order.cr" value="{{npc.orderCR}}">
+            <input type="hidden" name="order.size" value="{{npc.orderSize}}">
         </div>
     </div>
 </li>
