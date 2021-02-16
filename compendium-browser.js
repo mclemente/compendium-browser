@@ -29,12 +29,12 @@
             0.4.1l: Display progress indicator for loading - for now just a static one    
 15-Feb-2021 0.4.2:  Fix NPCs to use loadAndFilterNpcs
             0.4.2b: Add Loading... message for NPCs
-                    Want loading message with dynamic results and to not replace existing data; need to localize as well
+            0.4.2c: Correct Loading... message on initial tab, but not on tab switch
 */
 
 const CMPBrowser = {
     MODULE_NAME : "compendium-browser",
-    MODULE_VERSION : "0.4.1",
+    MODULE_VERSION : "0.4.2",
     PRELOAD : 9999,       //How many items, spells, or NPCs you load at once (to minimize memory usage) - ignored for now
     VISIBLE_ROWS : 50   //Plug for maximum rows visible in window - fetch more when actual < this
 }
@@ -80,7 +80,8 @@ class CompendiumBrowser extends Application {
             "modules/compendium-browser/template/item-browser.html",
             "modules/compendium-browser/template/item-browser-list.html",
             "modules/compendium-browser/template/filter-container.html",
-            "modules/compendium-browser/template/settings.html"
+            "modules/compendium-browser/template/settings.html",
+            "modules/compendium-browser/template/loading.html"
         ]);
 
         this.hookCompendiumList();
@@ -106,7 +107,6 @@ class CompendiumBrowser extends Application {
 
     /* Hook to load the first data */
     static afterRender(cb, html, data) {
-        //After rendering the first time or re-rendering trigger the load/reload of visible data
         if (game.user.isGM || this.settings.allowSpellBrowser) {
             cb.replaceList(html, "spell");
         } else if (this.settings.allowFeatBrowser) {
@@ -140,14 +140,11 @@ class CompendiumBrowser extends Application {
         //0.4.1 Filter as we load to support new way of filtering
         //Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
         //First time (when you press Compendium Browser button) is called with filters unset
-        const loadingItem = {
-            name: "Loading...",
-            img: "icons/sundries/books/book-open-turquoise.webp"
-        }
+ 
         //0.4.1k: Don't do any item/npc loading until tab is visible
         let data = {
-            items : {"Loading" : loadingItem},
-            npcs: {"Loading" : loadingItem},
+            items : [],
+            npcs: [],
             spellFilters : this.spellFilters,
             showSpellBrowser : (game.user.isGM || this.settings.allowSpellBrowser),
             featFilters : this.featFilters,
@@ -412,7 +409,7 @@ class CompendiumBrowser extends Application {
                 }
             }
 
-            this.replaceList(html, browserTab, observer);   
+            this.replaceList(html, browserTab);   
         });
 
 
@@ -772,6 +769,14 @@ class CompendiumBrowser extends Application {
 
 
     async replaceList(html, browserTab, options = {reload : true}) {
+        //After rendering the first time or re-rendering trigger the load/reload of visible data
+        //0.4.2 Display a Loading... message while the data is being loaded and filtered
+        const loadingProgress = {
+            name: "Loading...",
+            img: "icons/sundries/books/book-open-turquoise.webp",
+            numLoaded: 0
+        }
+
         let elements = null;
         if (browserTab === 'spell') {
             elements = html.find("ul#CBSpells");
@@ -783,8 +788,11 @@ class CompendiumBrowser extends Application {
             elements = html.find("ul#CBItems");
         }
         if (elements?.length) {
-            //0.4.2b: Don't reload on a tab-switch
-            if ((elements[0].children.length <= 1) && options?.reload) {
+            //0.4.2b: On a tab-switch, only reload if there isn't any data already 
+            if (options?.reload || !elements[0].children.length) {
+                let loadingHTML = await renderTemplate("modules/compendium-browser/template/loading.html", {loadingProgress : loadingProgress});
+                elements[0].innerHTML = loadingHTML;
+
                 //Uses loadAndFilterItems to read compendia for items which pass the current filters and render on this tab
                 const newItemsHTML = await this.renderItemData(browserTab); 
                 elements[0].innerHTML = newItemsHTML;
