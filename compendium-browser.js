@@ -30,6 +30,7 @@
 15-Feb-2021 0.4.2:  Fix NPCs to use loadAndFilterNpcs
             0.4.2b: Add Loading... message for NPCs
             0.4.2c: Correct Loading... message on initial tab, but not on tab switch
+            0.4.2d: Display the type of item being loaded
 */
 
 const CMPBrowser = {
@@ -770,13 +771,7 @@ class CompendiumBrowser extends Application {
 
     async replaceList(html, browserTab, options = {reload : true}) {
         //After rendering the first time or re-rendering trigger the load/reload of visible data
-        //0.4.2 Display a Loading... message while the data is being loaded and filtered
-        const loadingProgress = {
-            name: "Loading...",
-            img: "icons/sundries/books/book-open-turquoise.webp",
-            numLoaded: 0
-        }
-
+ 
         let elements = null;
         if (browserTab === 'spell') {
             elements = html.find("ul#CBSpells");
@@ -790,8 +785,8 @@ class CompendiumBrowser extends Application {
         if (elements?.length) {
             //0.4.2b: On a tab-switch, only reload if there isn't any data already 
             if (options?.reload || !elements[0].children.length) {
-                let loadingHTML = await renderTemplate("modules/compendium-browser/template/loading.html", {loadingProgress : loadingProgress});
-                elements[0].innerHTML = loadingHTML;
+                //0.4.2 Display a Loading... message while the data is being loaded and filtered
+                await this.renderLoading(elements[0], browserTab, 0);
 
                 //Uses loadAndFilterItems to read compendia for items which pass the current filters and render on this tab
                 const newItemsHTML = await this.renderItemData(browserTab); 
@@ -809,6 +804,19 @@ class CompendiumBrowser extends Application {
             }
         }
 
+    }
+
+    async renderLoading(rootElement, itemType, numLoaded) {
+        if (!rootElement) return;
+        const loadingProgress = {
+            name: "Loading...",
+            img: "icons/sundries/books/book-open-turquoise.webp",
+            numLoaded: numLoaded,
+            itemType: itemType
+        }
+
+        let loadingHTML = await renderTemplate("modules/compendium-browser/template/loading.html", { loadingProgress: loadingProgress });
+        rootElement.innerHTML = loadingHTML;
     }
 
     async renderItemData(browserTab) {
