@@ -474,7 +474,7 @@ class CompendiumBrowser extends Application {
         }
     }
 
-    async loadAndFilterItems(browserTab="spell",numToPreload=CMPBrowser.PRELOAD) {
+    async loadAndFilterItems(browserTab="spell",updateLoading, numToPreload=CMPBrowser.PRELOAD) {
         console.log(`Load and Filter Items | Started loading ${browserTab}s`);
         console.time("loadAndFilterItems");
         await this.checkListsLoaded();
@@ -525,6 +525,8 @@ class CompendiumBrowser extends Application {
                             if (compactItem) {  //Indicates it passed the filters
                                 compactItems[decoratedItem._id] = compactItem; 
                                 if (numItemsLoaded++ >= numToPreload) break;
+                                //0.4.2e: Update the UI (e.g. "Loading 142 spells")
+                                if (updateLoading) {updateLoading(numItemsLoaded);}
                             }
                         }
                     }//for item5e of content
@@ -786,10 +788,13 @@ class CompendiumBrowser extends Application {
             //0.4.2b: On a tab-switch, only reload if there isn't any data already 
             if (options?.reload || !elements[0].children.length) {
                 //0.4.2 Display a Loading... message while the data is being loaded and filtered
-                await this.renderLoading(elements[0], browserTab, 0);
+                const updateLoading = async numLoaded => {
+                    this.renderLoading(elements[0], browserTab, numLoaded);
+                }
+                updateLoading(0);
 
                 //Uses loadAndFilterItems to read compendia for items which pass the current filters and render on this tab
-                const newItemsHTML = await this.renderItemData(browserTab); 
+                const newItemsHTML = await this.renderItemData(browserTab, updateLoading); 
                 elements[0].innerHTML = newItemsHTML;
                 //Re-sort before setting up lazy loading
                 this.triggerSort(html, browserTab);
@@ -819,20 +824,20 @@ class CompendiumBrowser extends Application {
         rootElement.innerHTML = loadingHTML;
     }
 
-    async renderItemData(browserTab) {
+    async renderItemData(browserTab, updateLoading=null) {
         let items;
         let html;
         if (browserTab === "spell") {
-            items = await this.loadAndFilterItems(browserTab);
+            items = await this.loadAndFilterItems(browserTab, updateLoading);
             html = await renderTemplate("modules/compendium-browser/template/spell-browser-list.html", {spells : items});
         } else if (browserTab === "feat") {
-            items = await this.loadAndFilterItems(browserTab);
+            items = await this.loadAndFilterItems(browserTab, updateLoading);
             html = await renderTemplate("modules/compendium-browser/template/feat-browser-list.html", {feats : items});
         } else if (browserTab === "npc") {
-            const npcs = await this.loadAndFilterNpcs();
+            const npcs = await this.loadAndFilterNpcs(updateLoading);
             html = await renderTemplate("modules/compendium-browser/template/npc-browser-list.html", {npcs : npcs});
         } else {
-            items = await this.loadAndFilterItems(browserTab);
+            items = await this.loadAndFilterItems(browserTab, updateLoading);
             html = await renderTemplate("modules/compendium-browser/template/item-browser-list.html", {items : items});
         }
         return html;
