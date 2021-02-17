@@ -1,14 +1,21 @@
 # Compendium Browser
 
 A module to easily browse and filter spells, feats, items, and npcs loaded from compendia.
+
 **NEW** Compendium Browser is faster and better-behaved; **it no longer loads all the compendia into memory on start-up** (which sometimes hung servers because of memory or CPU requirements). Instead, it filters and loads on-demand, as well as giving you a Module Setting to control how many rows are loaded at a time.
 
-## Installation
-1. Copy this link and use it in Foundrys Module Manager to install the Module
+## Summary
+* **Authors**: Discord: Spetzel#0103; Felix (felix.mueller.86@web.de)
+* **Version**: 0.4.2
+* **Foundry VTT Compatibility**: 0.7.2-0.7.9
+* **System Compatibility (If applicable)**: dnd5e
+* **Translation Support**: en
 
-    > https://raw.githubusercontent.com/syl3r86/compendium-browser/master/module.json
-    
-2. Enable the Module in your Worlds Module Settings
+## Installation
+1. Go to the Add-on Modules tab in Foundry Setup
+2. Click Install Module and search for **Compendium Browser** OR paste this link: `https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/latest/module.json`
+3. Open your world and go to Settings>Manage Modules and enable Compendium Browser
+
 
 ![example](preview.jpg)
 
