@@ -1,7 +1,7 @@
 {
     "name": "compendium-browser",
     "title": "Compendium Browser",
-    "description": "A module to easily browse and filter spells as well as npcs loaded from compendia.",
+    "description": "<p>Easily browse and filter spells, feats, items, and npcs loaded from compendia!</p><strong>NEW! Compendium Browser is faster and better-behaved;</strong> it no longer loads all the compendia into memory on start-up (which sometimes hung servers because of memory or CPU requirements). Instead, it filters and loads on-demand, as well as giving you a Module Setting to control how many rows are loaded at a time.",
     "version": "0.4.2-spetzel2020",
     "author": "Felix#6196",
       "authors": [
@@ -34,14 +34,18 @@
           "path": "lang/fr.json"
         },
         {
-			"lang": "pt-BR",
-			"name": "Português (Brasil)",
-			"path": "lang/pt-BR.json"
-		}
+          "lang": "pt-BR",
+          "name": "Português (Brasil)",
+          "path": "lang/pt-BR.json"
+	    	}
     ],
     "url": "https://github.com/League-of-Foundry-Developers/compendium-browser",
-    "manifest": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.4.2-s/module.json",
-    "download": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.4.2-s/compendium-browser.zip",
+    "manifest": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/latest/module.json",
+    "download": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/latest/compendium-browser.zip",
     "minimumCoreVersion": "0.6.2",
-    "compatibleCoreVersion": "0.7.9"
+    "compatibleCoreVersion": "0.7.9",
+    "allowBugReporter": true,
+    "bugs": "https://github.com/League-of-Foundry-Developers/compendium-browser/issues",
+    "readme": "https://github.com/League-of-Foundry-Developers/compendium-browser/blob/master/README.md",
+    "changelog": "https://github.com/League-of-Foundry-Developers/compendium-browser/blob/master/CHANGELOG.md"
 }

@@ -53,7 +53,7 @@
   position: sticky;
   display: block;
   min-width: 250px;
-  max-width: 50%;
+  max-width: 45%;
   width: 350px;
   height: 100%;
   padding-right: 5px;
@@ -63,7 +63,7 @@
   position: sticky;
   display: flex;
   min-width: 250px;
-  max-width: 50%;
+  max-width: 55%;
   width: 400px;
   height: 100%;
   padding-right: 5px;
