@@ -15,8 +15,10 @@
         </div>
         {{> "modules/compendium-browser/template/filter-container.html" filters=itemFilters}}
     </div>
-    <ul id="CBItems">
-        {{> "modules/compendium-browser/template/item-browser-list.html" items=items}}
-    </ul>
-
+    <div class="list-area flexcol">
+        <span id="CBItemsMessage" style="flex:0"></span>
+        <ul id="CBItems">
+            {{> "modules/compendium-browser/template/item-browser-list.html" items=items}}
+        </ul>
+    </div>        
 </div>

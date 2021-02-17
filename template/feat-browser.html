@@ -15,8 +15,11 @@
         </div>
         {{> "modules/compendium-browser/template/filter-container.html" filters=featFilters}}
     </div>
-    <ul id="CBFeats">
-        {{> "modules/compendium-browser/template/feat-browser-list.html" feats=items}}
-    </ul>
+    <div class="list-area flexcol">
+        <span id="CBFeatsMessage" style="flex:0"></span>
+        <ul id="CBFeats">
+            {{> "modules/compendium-browser/template/feat-browser-list.html" feats=items}}
+        </ul>
+    </div>
 
 </div>

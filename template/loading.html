@@ -1,9 +1,6 @@
 
-<li class="spell flexrow loading">
-    <div class="item-image">
-        <img class="" src="{{loadingProgress.img}}" title="{{loadingProgress.name}}" width="32" height="32"/>
-    </div>  
-    <div class="item-name">
-        <span class="item-edit" >{{loadingProgress.name}} {{loadingProgress.numLoaded}} {{loadingProgress.itemType}}s</span>
-    </div>
-</li>
+<img class="" src="icons/sundries/books/book-open-turquoise.webp" title="Loading book" width="32" height="32"/>
+<span class="item-edit" >
+    {{localize "CMPBrowser.LOADING.Message" numLoaded=numLoaded itemType=itemType}}
+    {{#if maxLoaded}}{{localize "CMPBrowser.LOADING.MaxLoaded"}}{{/if}}
+</span>

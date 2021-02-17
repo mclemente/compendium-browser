@@ -15,7 +15,10 @@
         </div>
         {{> "modules/compendium-browser/template/filter-container.html" filters=spellFilters}}
     </div>
-    <ul id="CBSpells">
-        {{> "modules/compendium-browser/template/spell-browser-list.html" spells=items}}
-    </ul>
+    <div class="list-area flexcol">
+        <span id="CBSpellsMessage" style="flex:0"></span>
+        <ul id="CBSpells">
+            {{> "modules/compendium-browser/template/spell-browser-list.html" spells=items}}
+        </ul>
+    </div>
 </div>

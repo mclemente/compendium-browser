@@ -53,11 +53,21 @@
   position: sticky;
   display: block;
   min-width: 250px;
-  max-width: 400px;
-  width: 300px;
+  max-width: 50%;
+  width: 350px;
   height: 100%;
   padding-right: 5px;
   overflow: scroll;
+}
+.compendium-browser .list-area {
+  position: sticky;
+  display: flex;
+  min-width: 250px;
+  max-width: 50%;
+  width: 400px;
+  height: 100%;
+  padding-right: 5px;
+  overflow-y: scroll;
 }
 .compendium-browser .control-area button {
   background: rgba(0, 0, 0, 0.05);
@@ -129,7 +139,6 @@
   float: right;
   display: block;
   min-width: 335px;
-  width: 785px;
   margin: 0;
   height: 100%;
   overflow: auto;

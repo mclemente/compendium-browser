@@ -16,8 +16,10 @@
         </div>                
         {{> "modules/compendium-browser/template/filter-container.html" filters=npcFilters}}
     </div>
-    <ul id="CBNPCs">
-        {{> "modules/compendium-browser/template/npc-browser-list.html" npcs=npcs}}
-    </ul>
-
+    <div class="list-area flexcol">
+        <span id="CBNpcsMessage" style="flex:0"></span>
+        <ul id="CBNPCs">
+            {{> "modules/compendium-browser/template/npc-browser-list.html" npcs=npcs}}
+        </ul>
+    </div>
 </div>

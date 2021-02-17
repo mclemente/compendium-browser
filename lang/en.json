@@ -60,7 +60,9 @@
     "CMPBrowser.Tab.ItemBrowser": "Item Browser",
     "CMPBrowser.Tab.NPCBrowser":"NPC Browser",
     "CMPBrowser.Tab.Settings":"Settings",
-    "CMPBrowser.SETTING.Preload.NAME" : "Number to preload",
-    "CMPBrowser.SETTING.Preload.HINT" : "How many spells, feats, items, and NPCs to preload to keep memory manageable. "
+    "CMPBrowser.SETTING.Maxload.NAME" : "Maximum load",
+    "CMPBrowser.SETTING.Maxload.HINT" : "Maximum number of spells, feats, items, or NPCs to display; to see more use the filters. This setting is to allow manageing memory and server load.",
+    "CMPBrowser.LOADING.Message" : "Loaded...{numLoaded} {itemType}s",
+    "CMPBrowser.LOADING.MaxLoaded" : "(maximum displayed; to see more, use the filters)"
     
 }

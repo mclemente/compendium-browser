@@ -31,13 +31,13 @@
             0.4.2b: Add Loading... message for NPCs
             0.4.2c: Correct Loading... message on initial tab, but not on tab switch
             0.4.2d: Display the type of item being loaded
+16-Dec-2021 0.4.2f: Change preload to maxLoaded and display a message to filter if you want more            
 */
 
 const CMPBrowser = {
     MODULE_NAME : "compendium-browser",
     MODULE_VERSION : "0.4.2",
-    PRELOAD : 9999,       //How many items, spells, or NPCs you load at once (to minimize memory usage) - ignored for now
-    VISIBLE_ROWS : 50   //Plug for maximum rows visible in window - fetch more when actual < this
+    MAXLOAD : 500,      //Default for the maximum number to load before displaying a message that you need to filter to see more
 }
 
 class CompendiumBrowser extends Application {
@@ -62,15 +62,7 @@ class CompendiumBrowser extends Application {
         if (this.settings === undefined) {
             this.initSettings();
         } 
-        const numToPreload = game.settings.get(CMPBrowser.MODULE_NAME, "preload") ?? CMPBrowser.PRELOAD;
-/*        
-        this.loadItems(numToPreload).then(obj => {
-            this.items = obj;
-        });
-        this.loadNpcs(numToPreload).then(obj => {
-            this.npcs = obj;
-        });  //Plug 
-*/        
+
         await loadTemplates([
             "modules/compendium-browser/template/spell-browser.html",
             "modules/compendium-browser/template/spell-browser-list.html",       
@@ -129,15 +121,7 @@ class CompendiumBrowser extends Application {
 
     /** override */
     async getData() {   
-        //Only called on initial display or refresh (including when settings are changed)
-        const numToPreload = game.settings.get(CMPBrowser.MODULE_NAME, "preload") ?? CMPBrowser.PRELOAD;
-/*
-        if (!this.spellsLoaded) {
-            // spells will be stored locally to not require full loading each time the browser is opened
-            this.items = await this.loadItems(numToPreload);     //also sets this.spellsLoaded
-        }
 
-*/        
         //0.4.1 Filter as we load to support new way of filtering
         //Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
         //First time (when you press Compendium Browser button) is called with filters unset
@@ -474,11 +458,13 @@ class CompendiumBrowser extends Application {
         }
     }
 
-    async loadAndFilterItems(browserTab="spell",updateLoading, numToPreload=CMPBrowser.PRELOAD) {
+    async loadAndFilterItems(browserTab="spell",updateLoading=null) {
         console.log(`Load and Filter Items | Started loading ${browserTab}s`);
         console.time("loadAndFilterItems");
         await this.checkListsLoaded();
 
+        const maxLoad = game.settings.get(CMPBrowser.MODULE_NAME, "maxload") ?? CMPBrowser.MAXLOAD;
+       
         //0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
         let unfoundSpells = '';
         let numItemsLoaded = 0;
@@ -524,7 +510,7 @@ class CompendiumBrowser extends Application {
                             }
                             if (compactItem) {  //Indicates it passed the filters
                                 compactItems[decoratedItem._id] = compactItem; 
-                                if (numItemsLoaded++ >= numToPreload) break;
+                                if (numItemsLoaded++ >= maxLoad) break;
                                 //0.4.2e: Update the UI (e.g. "Loading 142 spells")
                                 if (updateLoading) {updateLoading(numItemsLoaded);}
                             }
@@ -532,7 +518,7 @@ class CompendiumBrowser extends Application {
                     }//for item5e of content
                 });
             }//end if pack entity === Item
-            if (numItemsLoaded >= numToPreload) break;
+            if (numItemsLoaded >= maxLoad) break;
         }//for packs
 
 /*
@@ -689,12 +675,14 @@ class CompendiumBrowser extends Application {
         return items;
     }
     
-    async loadAndFilterNpcs(numToPreload=CMPBrowser.PRELOAD) {
+    async loadAndFilterNpcs(updateLoading=null) {
         console.log('NPC Browser | Started loading NPCs');
         console.time("loadAndFilterNpcs");
         let npcs = {};
 
-        let numberLoaded = 0;
+        const maxLoad = game.settings.get(CMPBrowser.MODULE_NAME, "maxload") ?? CMPBrowser.MAXLOAD;
+       
+        let numNpcsLoaded = 0;
         this.npcsLoaded = false;
         for (let pack of game.packs) {
             if (pack['metadata']['entity'] == "Actor" && this.settings.loadedNpcCompendium[pack.collection].load) {
@@ -717,15 +705,17 @@ class CompendiumBrowser extends Application {
                             }
                             if (compactNpc) {
                                 npcs[decoratedNpc._id] = compactNpc;
+                                //0.4.2 Don't load more than maxLoad; display a message to filter
+                                if (numNpcsLoaded++ > maxLoad) break;
+                                //0.4.2e: Update the UI (e.g. "Loading 142 NPCs")
+                                if (updateLoading) {updateLoading(numNpcsLoaded);}
                             }
-                            //0.4.1 Only preload a limited number and fill more in as needed
-                            if (numberLoaded++ > numToPreload) break;
                         }
                     }
                 });
             }
            //0.4.1 Only preload a limited number and fill more in as needed
-            if (numberLoaded > numToPreload) break;
+            if (numNpcsLoaded >= maxLoad) break;
         }
 
         this.npcsLoaded = true;
@@ -775,21 +765,28 @@ class CompendiumBrowser extends Application {
         //After rendering the first time or re-rendering trigger the load/reload of visible data
  
         let elements = null;
+        //0.4.2 Display a Loading... message while the data is being loaded and filtered
+        let loadingMessage = null;
         if (browserTab === 'spell') {
             elements = html.find("ul#CBSpells");
+            loadingMessage = html.find("#CBSpellsMessage");
         } else if (browserTab === 'npc') {
             elements = html.find("ul#CBNPCs");
+            loadingMessage = html.find("#CBNpcsMessage");            
         } else if (browserTab === 'feat') {
             elements = html.find("ul#CBFeats");
+            loadingMessage = html.find("#CBFeatsMessage");            
         } else if (browserTab === 'item') {
             elements = html.find("ul#CBItems");
+            loadingMessage = html.find("#CBItemsMessage");            
         }
         if (elements?.length) {
             //0.4.2b: On a tab-switch, only reload if there isn't any data already 
             if (options?.reload || !elements[0].children.length) {
-                //0.4.2 Display a Loading... message while the data is being loaded and filtered
+
+                const maxLoad = game.settings.get(CMPBrowser.MODULE_NAME, "maxload") ?? CMPBrowser.MAXLOAD;
                 const updateLoading = async numLoaded => {
-                    this.renderLoading(elements[0], browserTab, numLoaded);
+                    if (loadingMessage.length) {this.renderLoading(loadingMessage[0], browserTab, numLoaded, numLoaded>=maxLoad);}
                 }
                 updateLoading(0);
 
@@ -811,35 +808,22 @@ class CompendiumBrowser extends Application {
 
     }
 
-    async renderLoading(rootElement, itemType, numLoaded) {
-        if (!rootElement) return;
-        const loadingProgress = {
-            name: "Loading...",
-            img: "icons/sundries/books/book-open-turquoise.webp",
-            numLoaded: numLoaded,
-            itemType: itemType
-        }
+    async renderLoading(messageElement, itemType, numLoaded, maxLoaded=false) {
+        if (!messageElement) return;
 
-        let loadingHTML = await renderTemplate("modules/compendium-browser/template/loading.html", { loadingProgress: loadingProgress });
-        rootElement.innerHTML = loadingHTML;
+        let loadingHTML = await renderTemplate("modules/compendium-browser/template/loading.html", {numLoaded: numLoaded, itemType: itemType, maxLoaded: maxLoaded});
+        messageElement.innerHTML = loadingHTML;
     }
 
     async renderItemData(browserTab, updateLoading=null) {
-        let items;
-        let html;
-        if (browserTab === "spell") {
-            items = await this.loadAndFilterItems(browserTab, updateLoading);
-            html = await renderTemplate("modules/compendium-browser/template/spell-browser-list.html", {spells : items});
-        } else if (browserTab === "feat") {
-            items = await this.loadAndFilterItems(browserTab, updateLoading);
-            html = await renderTemplate("modules/compendium-browser/template/feat-browser-list.html", {feats : items});
-        } else if (browserTab === "npc") {
-            const npcs = await this.loadAndFilterNpcs(updateLoading);
-            html = await renderTemplate("modules/compendium-browser/template/npc-browser-list.html", {npcs : npcs});
+        let listItems;
+        if (browserTab === "npc") {
+            listItems = await this.loadAndFilterNpcs(updateLoading);
         } else {
-            items = await this.loadAndFilterItems(browserTab, updateLoading);
-            html = await renderTemplate("modules/compendium-browser/template/item-browser-list.html", {items : items});
+            listItems = await this.loadAndFilterItems(browserTab, updateLoading);
         }
+        const html = await renderTemplate(`modules/compendium-browser/template/${browserTab}-browser-list.html`, {listItems : listItems})
+
         return html;
     }
 
@@ -1202,16 +1186,16 @@ class CompendiumBrowser extends Application {
                 this.settings = settings;
             }
         });
-        game.settings.register(CMPBrowser.MODULE_NAME, "preload", {
-            name: game.i18n.localize("CMPBrowser.SETTING.Preload.NAME"),
-            hint: game.i18n.localize("CMPBrowser.SETTING.Preload.HINT"),
+        game.settings.register(CMPBrowser.MODULE_NAME, "maxload", {
+            name: game.i18n.localize("CMPBrowser.SETTING.Maxload.NAME"),
+            hint: game.i18n.localize("CMPBrowser.SETTING.Maxload.HINT"),
             scope: "world",
             config: true,
-            default: CMPBrowser.PRELOAD,
+            default: CMPBrowser.MAXLOAD,
             type: Number,
             range: {             // If range is specified, the resulting setting will be a range slider
-                min: 20,
-                max: 9999,
+                min: 200,
+                max: 5000,
                 step: 100
             }
         });
