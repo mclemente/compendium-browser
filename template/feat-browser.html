@@ -8,31 +8,18 @@
                 <dt>{{localize "CMPBrowser.sortBy"}}:</dt>
                 <dd><select class="null" name="sortorder">
                     <option value="true" selected>{{localize "Name"}}</option>
-                    <option value="false">Class</option>
+                    <option value="false">{{localize "DND5E.ItemTypeClass"}}</option>
                 </select></dd>
             </dl> 
-            <button id="reset-feat-filter">Reset Filters</button>
+            <button id="reset-feat-filter">{{localize "CMPBrowser.Filters.ResetFilters"}}</button>
         </div>
         {{> "modules/compendium-browser/template/filter-container.html" filters=featFilters}}
     </div>
-    <ul>
-        {{#each feats as |feat id|}}
-        <li class="feat flexrow draggable" data-entry-compendium="{{feat.compendium}}" data-entry-id="{{feat._id}}">
-            <div class="item-image">
-                <img class="" data-src="{{feat.img}}" title="{{feat.name}}" width="32" height="32"/>
-            </div>  
-            <div class="item-name">
-                <span class="item-edit" ><a>{{feat.name}}</a></span>
-            </div>
-            <div class="feat-tags">
-                <span title="Class Requirement">{{feat.classRequirementString}}</span>
-            
-            </div>
-            <div class="filter-tags">
-                <input type="hidden" name="class" value="{{feat.classRequirementString}}">
-            </div>
-        </li>
-        {{/each}}
-    </ul>
+    <div class="list-area flexcol">
+        <span id="CBFeatsMessage" style="flex:0"></span>
+        <ul id="CBFeats">
+            {{> "modules/compendium-browser/template/feat-browser-list.html" feats=items}}
+        </ul>
+    </div>
 
 </div>

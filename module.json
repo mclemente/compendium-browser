@@ -1,9 +1,18 @@
 {
     "name": "compendium-browser",
     "title": "Compendium Browser",
-    "description": "A module to easily browse and filter spells as well as npcs loaded from compendie.",
-    "version": "0.3.1",
+    "description": "<p>Easily browse and filter spells, feats, items, and npcs loaded from compendia!</p><strong>NEW! Compendium Browser is faster and better-behaved;</strong> it no longer loads all the compendia into memory on start-up (which sometimes hung servers because of memory or CPU requirements). Instead, it filters and loads on-demand, as well as giving you a Module Setting to control how many rows are loaded at a time.<br>Changes in v0.4.3:<ul><li>Fixed: Error on dragging item from Compendium Browser (<a href='https://github.com/League-of-Foundry-Developers/compendium-browser/issues/9'>Issue #9</a>)</li><li>Fixed: Reset Filters doesn't clear the onscreen filters (<a href='https://github.com/League-of-Foundry-Developers/compendium-browser/issues/4'>Issue #4</a>)</li></ul>",
+    "version": "0.4.3",
     "author": "Felix#6196",
+      "authors": [
+        {
+          "name": "Spetzel#0103",
+          "url": "https://github.com/spetzel2020"
+        },
+        {
+          "name": "Felix#6196"
+        }
+      ],
     "systems": ["dnd5e"],
     "scripts": ["./compendium-browser.js"],
     "styles": ["./compendium-browser.css"],
@@ -25,14 +34,18 @@
           "path": "lang/fr.json"
         },
         {
-			"lang": "pt-BR",
-			"name": "Português (Brasil)",
-			"path": "lang/pt-BR.json"
-		}
+          "lang": "pt-BR",
+          "name": "Português (Brasil)",
+          "path": "lang/pt-BR.json"
+	    	}
     ],
-    "url": "https://github.com/syl3r86/compendium-browser",
-    "manifest": "https://raw.githubusercontent.com/syl3r86/compendium-browser/master/module.json",
-    "download": "https://github.com/syl3r86/compendium-browser/archive/master.zip",
+    "url": "https://github.com/League-of-Foundry-Developers/compendium-browser",
+    "manifest": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/latest/module.json",
+    "download": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/latest/compendium-browser.zip",
     "minimumCoreVersion": "0.6.2",
-    "compatibleCoreVersion": "0.6.2"
+    "compatibleCoreVersion": "0.7.9",
+    "allowBugReporter": true,
+    "bugs": "https://github.com/League-of-Foundry-Developers/compendium-browser/issues",
+    "readme": "https://github.com/League-of-Foundry-Developers/compendium-browser/blob/master/README.md",
+    "changelog": "https://github.com/League-of-Foundry-Developers/compendium-browser/blob/master/CHANGELOG.md"
 }

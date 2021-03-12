@@ -1,24 +1,30 @@
 # Compendium Browser
 
-> This version only works for Foundry v0.4.4 and up. To use the previous version please visit https://github.com/syl3r86/compendium-browser/tree/pre-0.4.4
+Tired of scrolling compendia? Easily brows and filter for spells, feats, items, and NPCs using Compendium Browser.
 
-A module to easily browse and filter spells as well as npcs loaded from compendie.
+**NEW** Compendium Browser is faster and better-behaved; **it no longer loads all the compendia into memory on start-up** (which sometimes hung servers because of memory or CPU requirements). Instead, it filters and loads on-demand, as well as giving you a Module Setting to control how many rows are loaded at a time.
+
+## Summary
+* **Authors**: Discord: Spetzel#0103; Felix (felix.mueller.86@web.de)
+* **Version**: 0.4.2
+* **Foundry VTT Compatibility**: 0.7.2-0.7.9
+* **System Compatibility (If applicable)**: dnd5e
+* **Translation Support**: en
 
 ## Installation
-1. Copy this link and use it in Foundrys Module Manager to install the Module
+1. Go to the Add-on Modules tab in Foundry Setup
+2. Click Install Module and search for **Compendium Browser** OR paste this link: `https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/latest/module.json`
+3. Open your world and go to Settings>Manage Modules and enable Compendium Browser
 
-    > https://raw.githubusercontent.com/syl3r86/compendium-browser/master/module.json
-    
-2. Enable the Module in your Worlds Module Settings
 
 ![example](preview.jpg)
 
 ## Details
-Only the Gamemaster has access to the Settings, where they can enable or disable player access to the spell or npc-browser. It is **highly** recommended to disable any compendie that do not contain spell or should not be used in the NPC Browser. This reduces the initial loading time, that happens after a client connects to foundry, immensly.
+Only the Gamemaster has access to the Settings, where they can enable or disable player access to the spell or npc-browser. It is **highly** recommended to disable any compendia that do not contain spell or should not be used in the NPC Browser. .
 
 This application enables anyone to add their own custom spell or npc filters via the api. After initialization the app can be found under game.compendiumBrowser where either addSpellFilter or addNpcFilter can be used to add a filter. This does support any data that the spell or npc has, including flags.
 
-All filters featured in the app are included in this manor and can be found in the compendium-browser.js at around line 726.
+All filters featured in the app are included in this manner and can be found in the compendium-browser.js at around line 726.
 
 ## Contribution
 If you feel like supporting my work, feel free to leave a tip at my paypal felix.mueller.86@web.de
