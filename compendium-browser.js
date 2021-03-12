@@ -31,12 +31,15 @@
             0.4.2b: Add Loading... message for NPCs
             0.4.2c: Correct Loading... message on initial tab, but not on tab switch
             0.4.2d: Display the type of item being loaded
-16-Dec-2021 0.4.2f: Change preload to maxLoaded and display a message to filter if you want more            
+16-Dec-2021 0.4.2f: Change preload to maxLoaded and display a message to filter if you want more      
+10-Mar-2021 0.4.3: activateItemListListeners(): Remove spurious li.parents (wasn't being used anyway)    
+11-Mar-2021 0.4.3  Fixed: Reset Filters doesn't clear the on-screen filter fields (because it is not completely re-rendering like it used to) Issue #4  
+                    Hack solution is to re-render whole dialog which unfortunately loses filter settings on other tabs as well
 */
 
 const CMPBrowser = {
     MODULE_NAME : "compendium-browser",
-    MODULE_VERSION : "0.4.2",
+    MODULE_VERSION : "0.4.3",
     MAXLOAD : 500,      //Default for the maximum number to load before displaying a message that you need to filter to see more
 }
 
@@ -98,18 +101,6 @@ class CompendiumBrowser extends Application {
         };
     }
 
-    /* Hook to load the first data */
-    static afterRender(cb, html, data) {
-        if (game.user.isGM || this.settings.allowSpellBrowser) {
-            cb.replaceList(html, "spell");
-        } else if (this.settings.allowFeatBrowser) {
-            cb.replaceList(html, "feat");
-        } else if (this.settings.allowItemBrowser) {
-            cb.replaceList(html, "item");
-        } else if (this.settings.allowNPCBrowser) {
-            cb.replaceList(html, "npc");
-        }
-    }
 
     /** override */
     _onChangeTab(event, tabs, active) {
@@ -163,7 +154,6 @@ class CompendiumBrowser extends Application {
             li.setAttribute("draggable", true);
             li.addEventListener('dragstart', event => {
                 let packName = li.getAttribute("data-entry-compendium");
-                let itemType = li.parents('.tab').data('tab');
                 let pack = game.packs.find(p => p.collection === packName);
                 if (!pack) {
                     event.preventDefault();
@@ -262,22 +252,31 @@ class CompendiumBrowser extends Application {
         // reset filters and re-render
         html.find('#reset-spell-filter').click(ev => {
             this.spellFilters.activeFilters = {};
-            this.replaceList(html, "spell", {reload : true});
+            //v0.4.3: Re-render so that we display the filters correctly
+            this.refreshList = "spell";
+            this.render();
         });
 
         html.find('#reset-feat-filter').click(ev => {
             this.featFilters.activeFilters = {};
-            this.replaceList(html, "feat", {reload : true});
+            //v0.4.3: Re-render so that we display the filters correctly
+            this.refreshList = "feat";
+            this.render();
         });
 
         html.find('#reset-item-filter').click(ev => {
             this.itemFilters.activeFilters = {};
-            this.replaceList(html, "item", {reload : true});
+            //v0.4.3: Re-render so that we display the filters correctly
+            this.refreshList = "item";
+            this.render();
+
         });
 
         html.find('#reset-npc-filter').click(ev => {
             this.npcFilters.activeFilters = {};
-            this.replaceList(html, "npc", {reload : true});
+            //v0.4.3: Re-render so that we display the filters correctly
+            this.refreshList = "npc";
+            this.render();
         });
 
         // settings
@@ -745,11 +744,33 @@ class CompendiumBrowser extends Application {
             // Handle button clicks
             cbButton.click(ev => {
                 ev.preventDefault();
-                //0.4.1: Reset filters when you first click button
+                //0.4.1: Reset filters when you click button
                 this.resetFilters();
+                //0.4.3: Reset everything (including data) when you press the button - calls afterRender() hook
+                 
+                if (game.user.isGM || this.settings.allowSpellBrowser) {
+                    this.refreshList = "spell";
+                } else if (this.settings.allowFeatBrowser) {
+                    this.refreshList = "feat";
+                } else if (this.settings.allowItemBrowser) {
+                    this.refreshList = "item";
+                } else if (this.settings.allowNPCBrowser) {
+                    this.refreshList = "npc";
+                }
                 this.render(true);
             });
         }
+    }
+
+    
+    /* Hook to load the first data */
+    static afterRender(cb, html) {
+        //0.4.3 afterRender is a render hook,but we call it just for the tab when we're just re-rendering for filters
+        if (!cb?.refreshList) {return;}
+
+        cb.replaceList(html, cb.refreshList);
+
+        cb.refreshList = null;
     }
 
     resetFilters() {
