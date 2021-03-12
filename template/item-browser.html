@@ -8,10 +8,10 @@
                 <dt>{{localize "CMPBrowser.sortBy"}}:</dt>
                 <dd><select class="null" name="sortorder">
                     <option value="true" selected>{{localize "Name"}}</option>
-                    <option value="false">Item Type</option>
+                    <option value="false">{{localize "DND5E.Type"}}</option>
                 </select></dd>
             </dl> 
-            <button id="reset-item-filter">Reset Filters</button>
+            <button id="reset-item-filter">{{localize "CMPBrowser.Filters.ResetFilters"}}</button>
         </div>
         {{> "modules/compendium-browser/template/filter-container.html" filters=itemFilters}}
     </div>

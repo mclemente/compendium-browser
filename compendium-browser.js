@@ -35,6 +35,7 @@
 10-Mar-2021 0.4.3: activateItemListListeners(): Remove spurious li.parents (wasn't being used anyway)    
 11-Mar-2021 0.4.3  Fixed: Reset Filters doesn't clear the on-screen filter fields (because it is not completely re-rendering like it used to) Issue #4  
                     Hack solution is to re-render whole dialog which unfortunately loses filter settings on other tabs as well
+            0.4.3b: Clear all filters to match displayed                
 */
 
 const CMPBrowser = {
@@ -250,22 +251,23 @@ class CompendiumBrowser extends Application {
         this.triggerSort(html, "npc");
 
         // reset filters and re-render
+        //0.4.3: Reset ALL filters because when we do a re-render it affects all tabs
         html.find('#reset-spell-filter').click(ev => {
-            this.spellFilters.activeFilters = {};
+            this.resetFilters();
             //v0.4.3: Re-render so that we display the filters correctly
             this.refreshList = "spell";
             this.render();
         });
 
         html.find('#reset-feat-filter').click(ev => {
-            this.featFilters.activeFilters = {};
+            this.resetFilters();
             //v0.4.3: Re-render so that we display the filters correctly
             this.refreshList = "feat";
             this.render();
         });
 
         html.find('#reset-item-filter').click(ev => {
-            this.itemFilters.activeFilters = {};
+            this.resetFilters();
             //v0.4.3: Re-render so that we display the filters correctly
             this.refreshList = "item";
             this.render();
@@ -273,7 +275,7 @@ class CompendiumBrowser extends Application {
         });
 
         html.find('#reset-npc-filter').click(ev => {
-            this.npcFilters.activeFilters = {};
+            this.resetFilters();
             //v0.4.3: Re-render so that we display the filters correctly
             this.refreshList = "npc";
             this.render();
@@ -765,7 +767,8 @@ class CompendiumBrowser extends Application {
     
     /* Hook to load the first data */
     static afterRender(cb, html) {
-        //0.4.3 afterRender is a render hook,but we call it just for the tab when we're just re-rendering for filters
+        //0.4.3: Because a render always resets ALL the displayed filters (on all tabs) to unselected , we have to blank all the lists as well
+        // (because the current HTML template doesn't set the selected filter values)
         if (!cb?.refreshList) {return;}
 
         cb.replaceList(html, cb.refreshList);
