@@ -1,7 +1,7 @@
 {
     "name": "compendium-browser",
     "title": "Compendium Browser",
-    "description": "<p>Easily browse and filter spells, feats, items, and npcs loaded from compendia!</p><strong>NEW! Compendium Browser is faster and better-behaved;</strong> it no longer loads all the compendia into memory on start-up (which sometimes hung servers because of memory or CPU requirements). Instead, it filters and loads on-demand, as well as giving you a Module Setting to control how many rows are loaded at a time.",
+    "description": "<p>Easily browse and filter spells, feats, items, and npcs loaded from compendia!</p><strong>NEW! Compendium Browser is faster and better-behaved;</strong> it no longer loads all the compendia into memory on start-up (which sometimes hung servers because of memory or CPU requirements). Instead, it filters and loads on-demand, as well as giving you a Module Setting to control how many rows are loaded at a time.<br>Changes in v0.4.3:<ul><li>Fixed: Error on dragging item from Compendium Browser (<a href='https://github.com/League-of-Foundry-Developers/compendium-browser/issues/9'>Issue #9</a>)</li><li>Fixed: Reset Filters doesn't clear the onscreen filters (<a href='https://github.com/League-of-Foundry-Developers/compendium-browser/issues/4'>Issue #4</a>)</li></ul>",
     "version": "0.4.3",
     "author": "Felix#6196",
       "authors": [
@@ -40,8 +40,8 @@
 	    	}
     ],
     "url": "https://github.com/League-of-Foundry-Developers/compendium-browser",
-    "manifest": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.4.3/module.json",
-    "download": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.4.3/compendium-browser.zip",
+    "manifest": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/latest/module.json",
+    "download": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/latest/compendium-browser.zip",
     "minimumCoreVersion": "0.6.2",
     "compatibleCoreVersion": "0.7.9",
     "allowBugReporter": true,
