@@ -37,7 +37,9 @@
                     Hack solution is to re-render whole dialog which unfortunately loses filter settings on other tabs as well
             0.4.3b: Clear all filters to match displayed   
 15-Mar-2021 0.4.5:  Fix: Spells from non-system compendium show up in items tab. Issue#10   
-                    loadAndFilterItems(): Changed tests to switch + more explicit tests                      
+                    loadAndFilterItems(): Changed tests to switch + more explicit tests   
+            0.4.5b  Show compendium source in results issue#11                                       
+                    Try showing compendium in the image mouseover
 */
 
 const CMPBrowser = {
@@ -473,7 +475,7 @@ class CompendiumBrowser extends Application {
         let numItemsLoaded = 0;
         let compactItems = {};
 
-        //Filter the full list, but only save the core compendium information + level
+        //Filter the full list, but only save the core compendium information + displayed info 
         for (let pack of game.packs) {
             if (pack['metadata']['entity'] === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
 //FIXME: How much could we do with the loaded index rather than all content? 
