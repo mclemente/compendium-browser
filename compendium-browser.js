@@ -5,7 +5,7 @@
  * @version 0.2.0
  */
 /** @author Jeffrey Pugh aka @spetzel2020
- * @version 0.4.0
+ * @version 0.4
  */
 /*
 4-Feb-2020  0.4.0   Switch to not pre-loading the indexes, and instead do that at browsing time, to reduce server load and memory usage
@@ -35,12 +35,14 @@
 10-Mar-2021 0.4.3: activateItemListListeners(): Remove spurious li.parents (wasn't being used anyway)    
 11-Mar-2021 0.4.3  Fixed: Reset Filters doesn't clear the on-screen filter fields (because it is not completely re-rendering like it used to) Issue #4  
                     Hack solution is to re-render whole dialog which unfortunately loses filter settings on other tabs as well
-            0.4.3b: Clear all filters to match displayed                
+            0.4.3b: Clear all filters to match displayed   
+15-Mar-2021 0.4.5:  Fix: Spells from non-system compendium show up in items tab. Issue#10   
+                    loadAndFilterItems(): Changed tests to switch + more explicit tests                      
 */
 
 const CMPBrowser = {
     MODULE_NAME : "compendium-browser",
-    MODULE_VERSION : "0.4.3",
+    MODULE_VERSION : "0.4.5",
     MAXLOAD : 500,      //Default for the maximum number to load before displaying a message that you need to filter to see more
 }
 
@@ -474,41 +476,55 @@ class CompendiumBrowser extends Application {
         //Filter the full list, but only save the core compendium information + level
         for (let pack of game.packs) {
             if (pack['metadata']['entity'] === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
-//FIXME: How much could we do with the loaded index rather than all content?                
+//FIXME: How much could we do with the loaded index rather than all content? 
+//OR filter the content up front for the decoratedItem.type??               
                 await pack.getContent().then(content => {
                     for (let item5e of content) {
                         let compactItem = null;
                         const decoratedItem = this.decorateItem(item5e);
                         if (decoratedItem) {
-                            if ((browserTab === "spell") && (decoratedItem.type === "spell")) {
-                                if (this.getFilterResult(decoratedItem, this.spellFilters.activeFilters)) {
-                                    compactItem = {
-                                        compendium : pack.collection,
-                                        name : decoratedItem.name,
-                                        img: decoratedItem.img,
-                                        data : {
-                                            level : decoratedItem.data?.level,
-                                            components : decoratedItem.data?.components
+                            switch (browserTab) {
+                                case "spell":
+                                    if ((decoratedItem.type === "spell") && this.passesFilter(decoratedItem, this.spellFilters.activeFilters)) {
+                                        compactItem = {
+                                            compendium : pack.collection,
+                                            name : decoratedItem.name,
+                                            img: decoratedItem.img,
+                                            data : {
+                                                level : decoratedItem.data?.level,
+                                                components : decoratedItem.data?.components
+                                            }
                                         }
                                     }
-                                }
-                            } else if ((browserTab === "feat") && ((decoratedItem.type === "feat") || (decoratedItem.type === "class"))) {
-                                if (this.getFilterResult(decoratedItem, this.featFilters.activeFilters)) {
-                                    compactItem = {
-                                        compendium : pack.collection,
-                                        name : decoratedItem.name,
-                                        img: decoratedItem.img,
-                                        classRequirementString : decoratedItem.classRequirementString
+                                    break;
+
+                                case "feat":
+                                    if (["feat","class"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.featFilters.activeFilters)) {
+                                        compactItem = {
+                                            compendium : pack.collection,
+                                            name : decoratedItem.name,
+                                            img: decoratedItem.img,
+                                            classRequirementString : decoratedItem.classRequirementString
+                                        }
+                                    }                                    
+                                    break;
+
+                                case "item":
+                                    //0.4.5: Itm type for true items could be many things (weapon, consumable, etc) so we just look for everything except spells, feats, classes
+                                    if (!["spell","feat","class"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.itemFilters.activeFilters)) {
+                                        compactItem = {
+                                            compendium : pack.collection,
+                                            name : decoratedItem.name,
+                                            img: decoratedItem.img,
+                                            type : decoratedItem.type
+                                        }
                                     }
-                                }
-                            } else if ((browserTab === "item") && this.getFilterResult(decoratedItem, this.itemFilters.activeFilters)) {
-                                compactItem = {
-                                    compendium : pack.collection,
-                                    name : decoratedItem.name,
-                                    img: decoratedItem.img,
-                                    type : decoratedItem.type
-                                }
+                                    break;
+
+                                default:
+                                    break;
                             }
+
                             if (compactItem) {  //Indicates it passed the filters
                                 compactItems[decoratedItem._id] = compactItem; 
                                 if (numItemsLoaded++ >= maxLoad) break;
@@ -692,7 +708,7 @@ class CompendiumBrowser extends Application {
                     for (let npc of content) {
                         let compactNpc = null;
                         const decoratedNpc = this.decorateNpc(npc);
-                        if (decoratedNpc && this.getFilterResult(decoratedNpc, this.npcFilters.activeFilters)) {
+                        if (decoratedNpc && this.passesFilter(decoratedNpc, this.npcFilters.activeFilters)) {
                             //0.4.2: Don't store all the details - just the display elements
                             compactNpc = {
                                 compendium : pack.collection,
@@ -1106,7 +1122,7 @@ class CompendiumBrowser extends Application {
     filterElements(list, subjects, filters) {
         for (let element of list) {
             let subject = subjects[element.dataset.entryId];
-            if (this.getFilterResult(subject, filters) == false) {
+            if (this.passesFilter(subject, filters) == false) {
                 $(element).hide();
             } else {
                 $(element).show();
@@ -1114,7 +1130,7 @@ class CompendiumBrowser extends Application {
         }
     }
 
-    getFilterResult(subject, filters) {
+    passesFilter(subject, filters) {
         for (let filter of Object.values(filters)) {
             let prop = getProperty(subject, filter.path);
             if (filter.type === 'numberCompare') {
