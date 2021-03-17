@@ -1,5 +1,8 @@
 #v0.4.5
-- Fixed: [Suggestion] Show compendium source in results; Issue #9
+- Fixed: [Suggestion] Show compendium source in results; Issue #11
+- Fixed: Spells from non-system compendium show up in items tab. Issue#10
+
+#v0.4.3
 
 #v0.3.1
   - fixed a bug that prevented loading when Class type items were loaded.
