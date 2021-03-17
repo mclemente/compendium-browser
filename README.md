@@ -6,7 +6,7 @@ Tired of scrolling compendia? Easily brows and filter for spells, feats, items, 
 
 ## Summary
 * **Authors**: Discord: Spetzel#0103; Felix (felix.mueller.86@web.de)
-* **Version**: 0.4.2
+* **Version**: 0.4.5
 * **Foundry VTT Compatibility**: 0.7.2-0.7.9
 * **System Compatibility (If applicable)**: dnd5e
 * **Translation Support**: en
