@@ -1,7 +1,7 @@
 {
     "name": "compendium-browser-t20",
     "title": "Compendium Browser T20",
-    "description": "Navegue e filtre magias, poderes, itens e Personagens de Mestre em compêndios.",
+    "description": "Navegue e filtre magias, poderes, itens e Personagens de Mestre em compÃªndios.",
     "version": "0.4.5",
     "author": "MClemente#5524, Spetzel#0103",
     "systems": ["tormenta20"],
