@@ -396,9 +396,6 @@ class CompendiumBrowser extends Application {
 	}
 
 	async loadAndFilterItems(browserTab="spell",updateLoading=null) {
-		console.log(`Load and Filter Items | Started loading ${browserTab}s`);
-		console.time("loadAndFilterItems");
-
 		const maxLoad = game.settings.get(CMPBrowser.MODULE_NAME, "maxload") ?? CMPBrowser.MAXLOAD;
 	   
 		//0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
@@ -469,16 +466,11 @@ class CompendiumBrowser extends Application {
 			}//end if pack entity === Item
 			if (numItemsLoaded >= maxLoad) break;
 		}//for packs
-		this.itemsLoaded = true;  
-		console.timeEnd("loadAndFilterItems");
-		console.log(`Load and Filter Items | Finished loading ${Object.keys(compactItems).length} ${browserTab}s`);
+		this.itemsLoaded = true;
 		return compactItems;
 	}
 
 	async loadItems(numToPreload=CMPBrowser.PRELOAD) {
-		console.log('Item Browser | Started loading items');
-		console.time("loadItems");
-
 		this.itemsLoaded = false;
 	  
 		let numSpellsLoaded = 0;
@@ -531,14 +523,10 @@ class CompendiumBrowser extends Application {
 			if ((numSpellsLoaded >= numToPreload) && (numFeatsLoaded >= numToPreload) && (numItemsLoaded >= numToPreload)) break;
 		}//for packs 
 		this.itemsLoaded = true;  
-		console.timeEnd("loadItems");
-		console.log(`Item Browser | Finished loading items: ${Object.keys(items.spells).length} spells, ${Object.keys(items.feats).length} features, ${Object.keys(items.items).length} items `);
 		return items;
 	}
 	
 	async loadAndFilterNpcs(updateLoading=null) {
-		console.log('NPC Browser | Started loading NPCs');
-		console.time("loadAndFilterNpcs");
 		let npcs = {};
 
 		const maxLoad = game.settings.get(CMPBrowser.MODULE_NAME, "maxload") ?? CMPBrowser.MAXLOAD;
@@ -580,8 +568,6 @@ class CompendiumBrowser extends Application {
 		}
 
 		this.npcsLoaded = true;
-		console.timeEnd("loadAndFilterNpcs");
-		console.log(`NPC Browser | Finished loading NPCs: ${Object.keys(npcs).length} NPCs`);
 		return npcs;
 	}
 	
@@ -867,7 +853,6 @@ class CompendiumBrowser extends Application {
 	}
 
 	decorateNpc(npc) {
-		//console.log('%c '+npc.name, 'background: white; color: red')
 		const decoratedNpc = npc.data;
 
 		// cr display
@@ -1042,8 +1027,6 @@ class CompendiumBrowser extends Application {
 		
 		if (game.user.isGM) {
 			game.settings.set(CMPBrowser.MODULE_NAME, 'settings', defaultSettings);
-			console.log("New default settings set");
-			console.log(defaultSettings);
 		}   
 		this.settings = defaultSettings;
 	}
