@@ -40,6 +40,7 @@
                     loadAndFilterItems(): Changed tests to switch + more explicit tests   
             0.4.5b  Show compendium source in results issue#11                                       
                     Try showing compendium in the image mouseover
+12-Jun-2021 0.5.0   Test for Foundry 0.8.x in which creature type is now data.details.type.value                    
 */
 
 const CMPBrowser = {
@@ -1405,6 +1406,7 @@ class CompendiumBrowser extends Application {
     }
 
     async addNpcFilters() {
+        const isFoundryV8 = game.data.version.startsWith("0.8");
         // NPC Filters
 
         this.addNpcFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("DND5E.Source"), 'data.details.source', 'text');
@@ -1413,7 +1415,16 @@ class CompendiumBrowser extends Application {
         this.addNpcFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.hasLegAct"), 'data.resources.legact.max', 'bool');
         this.addNpcFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.hasLegRes"), 'data.resources.legres.max', 'bool');
         this.addNpcFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.cr"), 'data.details.cr', 'numberCompare');
-        this.addNpcFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.creatureType"), 'data.details.type', 'text', {
+
+        //Foundry 0.8.x: Creature type (data.details.type) is now a structure, so we check data.details.types.value instead
+        let npcDetailsPath;
+        if (isFoundryV8) {
+            npcDetailsPath = "data.details.type.value";
+        } else {//0.7.x
+            npcDetailsPath = "data.details.type";
+        }
+
+        this.addNpcFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.creatureType"), npcDetailsPath, 'text', {
             aberration: game.i18n.localize("CMPBrowser.aberration"),
             beast: game.i18n.localize("CMPBrowser.beast"),
             celestial: game.i18n.localize("CMPBrowser.celestial"),
