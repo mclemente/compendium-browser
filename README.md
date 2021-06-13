@@ -14,7 +14,7 @@ Compendium Browser is faster and better-behaved; **it no longer loads all the co
 
 ## Installation
 1. Go to the Add-on Modules tab in Foundry Setup
-2. Click Install Module and search for **Compendium Browser** OR paste this link: `https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/latest/module.json`
+2. Click Install Module and search for **Compendium Browser** OR paste this link: `https://github.com/League-of-Foundry-Developers/compendium-browser/releases/latest/download/module.json`
 3. Open your world and go to Settings>Manage Modules and enable Compendium Browser
 
 
