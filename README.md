@@ -1,13 +1,14 @@
 # Compendium Browser
+**NEW in 0.5** Support for Foundry 0.8.x
 
 Tired of scrolling compendia? Easily brows and filter for spells, feats, items, and NPCs using Compendium Browser.
 
-**NEW** Compendium Browser is faster and better-behaved; **it no longer loads all the compendia into memory on start-up** (which sometimes hung servers because of memory or CPU requirements). Instead, it filters and loads on-demand, as well as giving you a Module Setting to control how many rows are loaded at a time.
+Compendium Browser is faster and better-behaved; **it no longer loads all the compendia into memory on start-up** (which sometimes hung servers because of memory or CPU requirements). Instead, it filters and loads on-demand, as well as giving you a Module Setting to control how many rows are loaded at a time.
 
 ## Summary
 * **Authors**: Discord: Spetzel#0103; Felix (felix.mueller.86@web.de)
-* **Version**: 0.4.5
-* **Foundry VTT Compatibility**: 0.7.2-0.7.9
+* **Version**: 0.5.0
+* **Foundry VTT Compatibility**: 0.7.2-0.8.6
 * **System Compatibility (If applicable)**: dnd5e
 * **Translation Support**: en
 
