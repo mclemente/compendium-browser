@@ -436,7 +436,7 @@
     "sunburst": "druid,sorcerer,wizard",
     "swiftquiver": "ranger",
   	"swordburst": "artificer,sorcerer,warlock,wizard",
-	  "synapticstatic": "bard,sorcerer,warlock,wizard",
+	"synapticstatic": "bard,sorcerer,warlock,wizard",
     "symbol": "bard,cleric,wizard",
     "tashascausticbrew": "artificer",
     "tashashideouslaughter": "bard,wizard",
