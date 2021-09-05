@@ -1,3 +1,6 @@
+#v0.6.0
+- Merged PR #14, #8 (classes for new spells and Optional Class Features in Tasha's)
+
 #v0.5.0
 - Fixed: Issue #17 (error in filtering NPCs by Creature Type)
 
