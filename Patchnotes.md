@@ -1,3 +1,6 @@
+#v0.5.0
+- Fixed: Issue #17 (error in filtering NPCs by Creature Type)
+
 #v0.4.5
 - Fixed: [Suggestion] Show compendium source in results; Issue #11
 - Fixed: Spells from non-system compendium show up in items tab. Issue#10
