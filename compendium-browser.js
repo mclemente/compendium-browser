@@ -41,6 +41,11 @@
             0.4.5b  Show compendium source in results issue#11                                       
                     Try showing compendium in the image mouseover
 12-Jun-2021 0.5.0   Test for Foundry 0.8.x in which creature type is now data.details.type.value                    
+9-Spt-2021  CHANGES Removed functions that are disabled in Foundry 0.9.0
+                    Speed up on spells by using queries
+                    Stops already in progress searches if a new one is started
+                    Handles monster types from older revisions
+                    Uses some built-ins for minor performance improvement
 */
 
 const CMPBrowser = {
@@ -48,6 +53,8 @@ const CMPBrowser = {
     MODULE_VERSION : "0.4.5",
     MAXLOAD : 500,      //Default for the maximum number to load before displaying a message that you need to filter to see more
 }
+
+const STOP_SEARCH = 'StopSearchException';
 
 class CompendiumBrowser extends Application {
 
@@ -149,7 +156,7 @@ class CompendiumBrowser extends Application {
             let itemId = $(ev.currentTarget).parents("li").attr("data-entry-id");
             let compendium = $(ev.currentTarget).parents("li").attr("data-entry-compendium");
             let pack = game.packs.find(p => p.collection === compendium);
-            pack.getEntity(itemId).then(entity => {
+            pack.getDocument(itemId).then(entity => {
                 entity.sheet.render(true);
             });
         });
@@ -469,79 +476,135 @@ class CompendiumBrowser extends Application {
         console.time("loadAndFilterItems");
         await this.checkListsLoaded();
 
+        const seachNumber = Date.now();
+
+        this.CurrentSeachNumber = seachNumber;
+
         const maxLoad = game.settings.get(CMPBrowser.MODULE_NAME, "maxload") ?? CMPBrowser.MAXLOAD;
-       
+
         //0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
         let unfoundSpells = '';
         let numItemsLoaded = 0;
         let compactItems = {};
 
-        //Filter the full list, but only save the core compendium information + displayed info 
-        for (let pack of game.packs) {
-            if (pack['metadata']['entity'] === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
-//FIXME: How much could we do with the loaded index rather than all content? 
-//OR filter the content up front for the decoratedItem.type??               
-                await pack.getContent().then(content => {
-                    for (let item5e of content) {
-                        let compactItem = null;
-                        const decoratedItem = this.decorateItem(item5e);
-                        if (decoratedItem) {
-                            switch (browserTab) {
-                                case "spell":
-                                    if ((decoratedItem.type === "spell") && this.passesFilter(decoratedItem, this.spellFilters.activeFilters)) {
-                                        compactItem = {
-                                            compendium : pack.collection,
-                                            name : decoratedItem.name,
-                                            img: decoratedItem.img,
-                                            data : {
-                                                level : decoratedItem.data?.level,
-                                                components : decoratedItem.data?.components
-                                            }
-                                        }
-                                    }
-                                    break;
+        try{
+            //Filter the full list, but only save the core compendium information + displayed info 
+            for (let pack of game.packs) {
+                if (pack['metadata']['entity'] === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
+                    //can query just for spells since there is only 1 type
+                    let query = {};
+                    if (browserTab === "spell"){
+                        query = {type: "spell"};
+                    }
 
-                                case "feat":
-                                    if (["feat","class"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.featFilters.activeFilters)) {
-                                        compactItem = {
-                                            compendium : pack.collection,
-                                            name : decoratedItem.name,
-                                            img: decoratedItem.img,
-                                            classRequirementString : decoratedItem.classRequirementString
-                                        }
-                                    }                                    
-                                    break;
+                    //FIXME: How much could we do with the loaded index rather than all content? 
+                    //OR filter the content up front for the decoratedItem.type??
+                    await pack.getDocuments(query).then(content => {
 
-                                case "item":
-                                    //0.4.5: Itm type for true items could be many things (weapon, consumable, etc) so we just look for everything except spells, feats, classes
-                                    if (!["spell","feat","class"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.itemFilters.activeFilters)) {
-                                        compactItem = {
-                                            compendium : pack.collection,
-                                            name : decoratedItem.name,
-                                            img: decoratedItem.img,
-                                            type : decoratedItem.type
-                                        }
-                                    }
-                                    break;
+                        if (browserTab == "spell"){
 
-                                default:
-                                    break;
-                            }
+                            content.reduce(function(itemsList, item5e){
+                                if (this.CurrentSeachNumber != seachNumber) throw STOP_SEARCH;
 
-                            if (compactItem) {  //Indicates it passed the filters
-                                compactItems[decoratedItem._id] = compactItem; 
-                                if (numItemsLoaded++ >= maxLoad) break;
-                                //0.4.2e: Update the UI (e.g. "Loading 142 spells")
-                                if (updateLoading) {updateLoading(numItemsLoaded);}
-                            }
+                                numItemsLoaded = Object.keys(itemsList).length;
+
+                                if (maxLoad <= numItemsLoaded) {
+                                    if (updateLoading) {updateLoading(numItemsLoaded);}
+                                    throw STOP_SEARCH;
+                                }
+
+                                const decoratedItem = this.decorateItem(item5e);
+
+                                if(decoratedItem && this.passesFilter(decoratedItem, this.spellFilters.activeFilters)){
+                                    itemsList[item5e.id] = {
+                                        compendium : pack.collection,
+                                        name : decoratedItem.name,
+                                        img: decoratedItem.img,
+                                        data : {
+                                            level : decoratedItem.data?.level,
+                                            components : decoratedItem.data?.components
+                                        },
+                                        id: item5e.id
+                                    };
+                                }
+
+                                return itemsList;
+                            }.bind(this), compactItems);
+
                         }
-                    }//for item5e of content
-                });
-            }//end if pack entity === Item
-            if (numItemsLoaded >= maxLoad) break;
-        }//for packs
+                        else if(browserTab == "feat"){
 
+                            content.reduce(function(itemsList, item5e){
+                                if (this.CurrentSeachNumber != seachNumber) throw STOP_SEARCH;
+
+                                numItemsLoaded = Object.keys(itemsList).length;
+
+                                if (maxLoad <= numItemsLoaded) {
+                                    if (updateLoading) {updateLoading(numItemsLoaded);}
+                                    throw STOP_SEARCH;
+                                }
+
+                                const decoratedItem = this.decorateItem(item5e);
+
+                                if(decoratedItem && ["feat","class"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.featFilters.activeFilters)){
+                                    itemsList[item5e.id] = {
+                                        compendium : pack.collection,
+                                        name : decoratedItem.name,
+                                        img: decoratedItem.img,
+                                        classRequirementString : decoratedItem.classRequirementString
+                                    };
+                                }
+
+                                return itemsList;
+                            }.bind(this), compactItems);
+
+                        }
+                        else if(browserTab == "item"){
+
+                            content.reduce(function(itemsList, item5e){
+                                if (this.CurrentSeachNumber != seachNumber) throw STOP_SEARCH;
+
+                                numItemsLoaded = Object.keys(itemsList).length;
+
+                                if (maxLoad <= numItemsLoaded) {
+                                    if (updateLoading) {updateLoading(numItemsLoaded);}
+                                    throw STOP_SEARCH;
+                                }
+
+                                const decoratedItem = this.decorateItem(item5e);
+
+                                if(decoratedItem && !["spell","feat","class"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.itemFilters.activeFilters)){
+                                    itemsList[item5e.id] = {
+                                        compendium : pack.collection,
+                                        name : decoratedItem.name,
+                                        img: decoratedItem.img,
+                                        type : decoratedItem.type
+                                    }
+                                }
+
+                                return itemsList;
+                            }.bind(this), compactItems);
+
+                        }
+
+                        numItemsLoaded = Object.keys(compactItems).length;
+                        if (updateLoading) {updateLoading(numItemsLoaded);}
+                    });
+                }//end if pack entity === Item
+            }//for packs
+        }
+        catch(e){
+            if (e === STOP_SEARCH){
+                //stopping search early
+            }
+            else{
+                throw e;
+            }
+        }
+
+        // this.removeDuplicates(compactItems);
 /*
+
         if (unfoundSpells !== '') {
             console.log(`Load and Fliter Items | List of Spells that don't have a class associated to them:`);
             console.log(unfoundSpells);
@@ -553,189 +616,70 @@ class CompendiumBrowser extends Application {
         return compactItems;
     }
 
-    async loadItems(numToPreload=CMPBrowser.PRELOAD) {
-        console.log('Item Browser | Started loading items');
-        console.time("loadItems");
-        await this.checkListsLoaded();
-
-        this.itemsLoaded = false;
-       
-        
-        let unfoundSpells = '';
-        let numSpellsLoaded = 0;
-        let numFeatsLoaded = 0;
-        let numItemsLoaded = 0;
-        let items = {
-            spells: {},
-            feats: {},
-            items: {}
-        };
-
-
-        for (let pack of game.packs) {
-            if (pack['metadata']['entity'] === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
-                await pack.getContent().then(content => {
-                    for (let item5e of content) {
-                        let item = item5e.data;
-                        if (item.type === 'spell') {
-                            //0.4.1 Only preload a limited number and fill more in as needed
-                            if (numSpellsLoaded++ > numToPreload) continue;
-
-                            item.compendium = pack.collection;
-
-                            // determining classes that can use the spell
-                            let cleanSpellName = item.name.toLowerCase().replace(/[^一-龠ぁ-ゔァ-ヴーa-zA-Z0-9ａ-ｚＡ-Ｚ０-９々〆〤]/g, '').replace("'", '').replace(/ /g, '');
-                            //let cleanSpellName = spell.name.toLowerCase().replace(/[^a-zA-Z0-9\s:]/g, '').replace("'", '').replace(/ /g, '');
-                            if (this.classList[cleanSpellName]) {
-                                let classes = this.classList[cleanSpellName];
-                                item.data.classes = classes.split(',');
-                            } else {
-                                unfoundSpells += cleanSpellName + ',';
-                            }
-
-                            // getting damage types
-                            item.damageTypes = [];
-                            if (item.data.damage && item.data.damage.parts.length > 0) {
-                                for (let part of item.data.damage.parts) {
-                                    let type = part[1];
-                                    if (item.damageTypes.indexOf(type) === -1) {
-                                        item.damageTypes.push(type);
-                                    }
-                                }
-                            }
-                            items.spells[(item._id)] = item;
-                        } else  if (item.type === 'feat' || item.type === 'class') {
-                            //0.4.1 Only preload a limited number and fill more in as needed
-                            if (numFeatsLoaded++ > numToPreload) continue;
-
-                            item.compendium = pack.collection;
-                            // getting damage types
-                            item.damageTypes = [];
-                            if (item.data.damage && item.data.damage.parts.length > 0) {
-                                for (let part of item.data.damage.parts) {
-                                    let type = part[1];
-                                    if (item.damageTypes.indexOf(type) === -1) {
-                                        item.damageTypes.push(type);
-                                    }
-                                }
-                            }
-
-                            // getting class
-                            let reqString = item.data.requirements?.replace(/[0-9]/g, '').trim();
-                            let matchedClass = [];
-                            for (let c in this.subClasses) {
-                                if (reqString && reqString.toLowerCase().indexOf(c) !== -1) {
-                                    matchedClass.push(c);
-                                } else {
-                                    for (let subClass of this.subClasses[c]) {
-                                        if (reqString && reqString.indexOf(subClass) !== -1) {
-                                            matchedClass.push(c);
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            item.classRequirement = matchedClass;
-                            item.classRequirementString = matchedClass.join(', ');
-
-                            // getting uses/ressources status
-                            item.usesRessources = item5e.hasLimitedUses;
-
-                            item.hasSave = item5e.hasSave;
-
-                            items.feats[(item._id)] = item;
-
-                        } else {
-                            //0.4.1 Only preload a limited number and fill more in as needed
-                            if (numItemsLoaded++ > numToPreload) continue;
-
-                            item.compendium = pack.collection;
-                            // getting damage types
-                            item.damageTypes = [];
-                            if (item.data.damage && item.data.damage.parts.size > 0) {
-                                for (let part of item.data.damage.parts) {
-                                    let type = part[1];
-                                    if (item.damageTypes.indexOf(type) === -1) {
-                                        item.damageTypes.push(type);
-                                    }
-                                }
-                            }
-
-                            // getting pack
-                            let matchedPacks = [];
-                            for (let pack of Object.keys(this.packList)) {
-                                for (let packItem of this.packList[pack]) {
-                                    if (item.name.toLowerCase() === packItem.toLowerCase()) {
-                                        matchedPacks.push(pack);
-                                        break;
-                                    }
-                                }
-                            }
-                            item.matchedPacks = matchedPacks;
-                            item.matchedPacksString = matchedPacks.join(', ');
-
-                            // getting uses/ressources status
-                            item.usesRessources = item5e.hasLimitedUses
-
-                            items.items[(item._id)] = item;
-                        }          
-
-                    }//for item5e of content
-                });
-            }
-            if ((numSpellsLoaded >= numToPreload) && (numFeatsLoaded >= numToPreload) && (numItemsLoaded >= numToPreload)) break;
-        }//for packs
-        if (unfoundSpells !== '') {
-            console.log(`Item Browser | List of Spells that don't have a class associated to them:`);
-            console.log(unfoundSpells);
-        }      
-        this.itemsLoaded = true;  
-        console.timeEnd("loadItems");
-        console.log(`Item Browser | Finished loading items: ${Object.keys(items.spells).length} spells, ${Object.keys(items.feats).length} features, ${Object.keys(items.items).length} items `);
-        return items;
-    }
-    
     async loadAndFilterNpcs(updateLoading=null) {
         console.log('NPC Browser | Started loading NPCs');
+
+        const seachNumber = Date.now();
+        this.CurrentSeachNumber = seachNumber;
+
         console.time("loadAndFilterNpcs");
         let npcs = {};
 
         const maxLoad = game.settings.get(CMPBrowser.MODULE_NAME, "maxload") ?? CMPBrowser.MAXLOAD;
-       
+
         let numNpcsLoaded = 0;
         this.npcsLoaded = false;
-        for (let pack of game.packs) {
-            if (pack['metadata']['entity'] == "Actor" && this.settings.loadedNpcCompendium[pack.collection].load) {
-                await pack.getContent().then(async content => {
-                    
-                    for (let npc of content) {
-                        let compactNpc = null;
-                        const decoratedNpc = this.decorateNpc(npc);
-                        if (decoratedNpc && this.passesFilter(decoratedNpc, this.npcFilters.activeFilters)) {
-                            //0.4.2: Don't store all the details - just the display elements
-                            compactNpc = {
-                                compendium : pack.collection,
-                                name : decoratedNpc.name,
-                                img: decoratedNpc.img,
-                                displayCR : decoratedNpc.displayCR,
-                                displaySize : decoratedNpc.displaySize,
-                                displayType: decoratedNpc.data?.details?.type,
-                                orderCR : decoratedNpc.data.details.cr,
-                                orderSize : decoratedNpc.filterSize
-                            }
-                            if (compactNpc) {
-                                npcs[decoratedNpc._id] = compactNpc;
-                                //0.4.2 Don't load more than maxLoad; display a message to filter
-                                if (numNpcsLoaded++ > maxLoad) break;
-                                //0.4.2e: Update the UI (e.g. "Loading 142 NPCs")
+
+        try{
+            for (let pack of game.packs) {
+                if (pack['metadata']['entity'] == "Actor" && this.settings.loadedNpcCompendium[pack.collection].load) {
+                    await pack.getDocuments().then(async content => {
+
+                        content.reduce(function(actorsList, npc5e){
+                            if (this.CurrentSeachNumber != seachNumber) {throw STOP_SEARCH;}
+
+                            numNpcsLoaded = Object.keys(npcs).length;
+
+                            if (maxLoad <= numNpcsLoaded) {
                                 if (updateLoading) {updateLoading(numNpcsLoaded);}
+                                throw STOP_SEARCH;
                             }
-                        }
-                    }
-                });
+
+                            const decoratedNpc = this.decorateNpc(npc5e);
+
+                            if (decoratedNpc && this.passesFilter(decoratedNpc, this.npcFilters.activeFilters)){
+
+                                actorsList[npc5e.id] = {
+                                    compendium : pack.collection,
+                                    name : decoratedNpc.name,
+                                    img: decoratedNpc.img,
+                                    displayCR : decoratedNpc.displayCR,
+                                    displaySize : decoratedNpc.displaySize,
+                                    displayType: this.getNPCType(decoratedNpc.data?.details?.type),
+                                    orderCR : decoratedNpc.data.details.cr,
+                                    orderSize : decoratedNpc.filterSize
+                                };
+                            }
+
+                            return actorsList;
+                        }.bind(this), npcs);
+
+                        numNpcsLoaded = Object.keys(npcs).length;
+                        if (updateLoading) {updateLoading(numNpcsLoaded);}
+
+                    });
+                }
+               //0.4.1 Only preload a limited number and fill more in as needed
             }
-           //0.4.1 Only preload a limited number and fill more in as needed
-            if (numNpcsLoaded >= maxLoad) break;
+        }
+        catch(e){
+            if (e == STOP_SEARCH){
+                //breaking out
+            }
+            else{
+                console.timeEnd("loadAndFilterNpcs");
+                throw e;
+            }
         }
 
         this.npcsLoaded = true;
@@ -1119,7 +1063,20 @@ class CompendiumBrowser extends Application {
             }
         }
 
+        //handle poorly constructed npc
+        if (decoratedNpc.data?.details?.type && !(decoratedNpc.data?.details?.type instanceof Object)){
+            decoratedNpc.data.details.type = {value: decoratedNpc.data?.details?.type};
+        }
+
         return decoratedNpc;
+    }
+
+    getNPCType(type){
+        if (type instanceof Object){
+            return type.value;
+        }
+
+        return type;
     }
 
     filterElements(list, subjects, filters) {
@@ -1187,6 +1144,29 @@ class CompendiumBrowser extends Application {
         }
 
         return true;
+    }
+
+    //incomplete removal of duplicate items
+    removeDuplicates(spellList){
+        //sort at n log n
+        let sortedList = Object.values(spellList).sort((a, b) => a.name.localeCompare(b.name));
+
+        //search through sorted list for duplicates
+        for (let index = 0; index < sortedList.length - 1;){
+
+            //all duplicates will be next to eachother
+            if (sortedList[index].name == sortedList[index + 1].name){
+                //duplicate something is getting removed
+                //TODO choose what to remove rather then the second
+                let remove = index + 1;
+
+                delete spellList[sortedList[remove].id];
+                sortedList.splice(remove, 1);
+            }
+            else{
+                index++;
+            }
+        }
     }
 
     clearObject(obj) {
