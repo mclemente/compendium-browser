@@ -1,6 +1,7 @@
 #v0.7.0 (only Foundry 0.8+)
 - Merged PR #24 (performance speed ups)
 - Fixed: Issue [League-of-Foundry-Developers/compendium-browser#19](https://github.com/League-of-Foundry-Developers/compendium-browser/issues/19)
+- Fixed: Issue [League-of-Foundry-Developers/compendium-browser#7](https://github.com/League-of-Foundry-Developers/compendium-browser/issues/7)
 
 #v0.6.0
 - Merged PR #14, #8 (classes for new spells and Optional Class Features in Tasha's)
