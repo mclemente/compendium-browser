@@ -50,7 +50,7 @@
 
 const CMPBrowser = {
     MODULE_NAME : "compendium-browser",
-    MODULE_VERSION : "0.4.5",
+    MODULE_VERSION : "0.7.1",
     MAXLOAD : 500,      //Default for the maximum number to load before displaying a message that you need to filter to see more
 }
 
