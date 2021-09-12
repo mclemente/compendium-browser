@@ -1,5 +1,6 @@
 #0.7.1
 - Merged PR [League-of-Foundry-Developers/compendium-browser#26](https://github.com/League-of-Foundry-Developers/compendium-browser/pull/26)
+- Fixed: Issue [League-of-Foundry-Developers/compendium-browser#25](https://github.com/League-of-Foundry-Developers/compendium-browser/issues/25)
 
 #v0.7.0 (only Foundry 0.8+)
 - Merged PR #24 (performance speed ups)
