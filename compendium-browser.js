@@ -46,6 +46,8 @@
                     Stops already in progress searches if a new one is started
                     Handles monster types from older revisions
                     Uses some built-ins for minor performance improvement
+12-Sep-2021 0.7.1   Issue #25 Initialization fails because of corrupted settings 
+                    Fix: Check for settings.loadedSpellCompendium and settings.loadedNpcCompendium                   
 */
 
 const CMPBrowser = {
@@ -1226,12 +1228,14 @@ class CompendiumBrowser extends Application {
         // load settings from container and apply to default settings (available compendie might have changed)
         let settings = game.settings.get(CMPBrowser.MODULE_NAME, 'settings');
         for (let compKey in defaultSettings.loadedSpellCompendium) {
-            if (settings.loadedSpellCompendium[compKey] !== undefined) {
+            //v0.7.1 Check for settings.loadedSpellCompendium
+            if (settings.loadedSpellCompendium && (settings.loadedSpellCompendium[compKey] !== undefined)) {
                 defaultSettings.loadedSpellCompendium[compKey].load = settings.loadedSpellCompendium[compKey].load;
             }
         }
         for (let compKey in defaultSettings.loadedNpcCompendium) {
-            if (settings.loadedNpcCompendium[compKey] !== undefined) {
+            //v0.7.1 Check for settings.loadedNpcCompendium
+            if (settings.loadedNpcCompendium && (settings.loadedNpcCompendium[compKey] !== undefined)) {
                 defaultSettings.loadedNpcCompendium[compKey].load = settings.loadedNpcCompendium[compKey].load;
             }
         }
