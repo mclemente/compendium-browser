@@ -48,11 +48,12 @@
                     Uses some built-ins for minor performance improvement
 12-Sep-2021 0.7.1   Issue #25 Initialization fails because of corrupted settings 
                     Fix: Check for settings.loadedSpellCompendium and settings.loadedNpcCompendium                   
+1-Jan-2022 0.7.2    Switch to isFoundryV8Plus class variable
 */
 
 const CMPBrowser = {
     MODULE_NAME : "compendium-browser",
-    MODULE_VERSION : "0.7.1",
+    MODULE_VERSION : "0.7.2",
     MAXLOAD : 500,      //Default for the maximum number to load before displaying a message that you need to filter to see more
 }
 
@@ -175,7 +176,7 @@ class CompendiumBrowser extends Application {
                     return false;
                 }
                 event.dataTransfer.setData("text/plain", JSON.stringify({
-                    type: pack.entity,
+                    type: pack.documentName,
                     pack: pack.collection,
                     id: li.getAttribute("data-entry-id")
                 }));
@@ -492,10 +493,10 @@ class CompendiumBrowser extends Application {
         try{
             //Filter the full list, but only save the core compendium information + displayed info 
             for (let pack of game.packs) {
-                if (pack['metadata']['entity'] === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
+                if (pack.documentName === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
                     //can query just for spells since there is only 1 type
                     let query = {};
-                    if (browserTab === "spell"){
+                    if (browserTab === "spell") {
                         query = {type: "spell"};
                     }
 
@@ -505,7 +506,7 @@ class CompendiumBrowser extends Application {
 
                         if (browserTab == "spell"){
 
-                            content.reduce(function(itemsList, item5e){
+                            content.reduce(function(itemsList, item5e) {
                                 if (this.CurrentSeachNumber != seachNumber) throw STOP_SEARCH;
 
                                 numItemsLoaded = Object.keys(itemsList).length;
@@ -534,7 +535,7 @@ class CompendiumBrowser extends Application {
                             }.bind(this), compactItems);
 
                         }
-                        else if(browserTab == "feat"){
+                        else if (browserTab === "feat"){
 
                             content.reduce(function(itemsList, item5e){
                                 if (this.CurrentSeachNumber != seachNumber) throw STOP_SEARCH;
@@ -561,7 +562,7 @@ class CompendiumBrowser extends Application {
                             }.bind(this), compactItems);
 
                         }
-                        else if(browserTab == "item"){
+                        else if (browserTab === "item"){
 
                             content.reduce(function(itemsList, item5e){
                                 if (this.CurrentSeachNumber != seachNumber) throw STOP_SEARCH;
@@ -634,7 +635,7 @@ class CompendiumBrowser extends Application {
 
         try{
             for (let pack of game.packs) {
-                if (pack['metadata']['entity'] == "Actor" && this.settings.loadedNpcCompendium[pack.collection].load) {
+                if (pack.documentName == "Actor" && this.settings.loadedNpcCompendium[pack.collection].load) {
                     await pack.getDocuments().then(async content => {
 
                         content.reduce(function(actorsList, npc5e){
@@ -1187,13 +1188,13 @@ class CompendiumBrowser extends Application {
             loadedNpcCompendium: {},
         };
         for (let compendium of game.packs) {
-            if (compendium['metadata']['entity'] === "Item") {
+            if (compendium.documentName === "Item") {
                 defaultSettings.loadedSpellCompendium[compendium.collection] = {
                     load: true,
                     name: `${compendium['metadata']['label']} (${compendium.collection})`
                 };
             }
-            if (compendium['metadata']['entity'] === "Actor") {
+            if (compendium.documentName === "Actor") {
                 defaultSettings.loadedNpcCompendium[compendium.collection] = {
                     load: true,
                     name: `${compendium['metadata']['label']} (${compendium.collection})`
@@ -1250,6 +1251,10 @@ class CompendiumBrowser extends Application {
             console.log(defaultSettings);
         }   
         this.settings = defaultSettings;
+
+        //0.9.5 Set the CompendiumBrowser.isFoundryV8Plus variable for different code-paths
+        //If v9, then game.data.version will throw a deprecation warning so test for v9 first
+        CompendiumBrowser.isFoundryV8Plus = (game.data.release?.generation >= 9) || (game.data.version?.startsWith("0.8"));
     }
 
     saveSettings() {
@@ -1390,7 +1395,6 @@ class CompendiumBrowser extends Application {
     }
 
     async addNpcFilters() {
-        const isFoundryV8 = game.data.version.startsWith("0.8");
         // NPC Filters
 
         this.addNpcFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("DND5E.Source"), 'data.details.source', 'text');
@@ -1402,7 +1406,7 @@ class CompendiumBrowser extends Application {
 
         //Foundry 0.8.x: Creature type (data.details.type) is now a structure, so we check data.details.types.value instead
         let npcDetailsPath;
-        if (isFoundryV8) {
+        if (CompendiumBrowser.isFoundryV8Plus) {
             npcDetailsPath = "data.details.type.value";
         } else {//0.7.x
             npcDetailsPath = "data.details.type";
