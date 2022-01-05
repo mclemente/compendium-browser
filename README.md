@@ -5,8 +5,9 @@ Compendium Browser is faster and better-behaved; **it no longer loads all the co
 
 [Patch Notes](https://raw.githubusercontent.com/League-of-Foundry-Developers/compendium-browser/master/Patchnotes.md)
 ## v0.7:
-- Only supports Foundry 0.8.x
+- Supports Foundry 0.8.x and Foundry 9
 - Faster searches using Foundry 0.8.x queries (thanks ZoltantheDM!)
+- Faster NPC searches using getIndex() (thanks kyleady!)
 ## v0.6: 
 - Additional and Optional Features spells from Tasha's
 - Spanish, German translations
