@@ -13,8 +13,8 @@ Compendium Browser is faster and better-behaved; **it no longer loads all the co
 - Spanish, German translations
 ## Summary
 * **Authors**: Discord: Spetzel#0103; Felix (felix.mueller.86@web.de); ZoltantheDM
-* **Version**: 0.7.0
-* **Foundry VTT Compatibility**: 0.8.6-0.8.9
+* **Version**: 0.7.2
+* **Foundry VTT Compatibility**: 0.8.6-9
 * **System Compatibility (If applicable)**: dnd5e
 * **Translation Support**: en, de (thanks https://github.com/CarnVanBeck), es (thanks https://github.com/JJBocanegra), fr, ja, pt-BR
 
