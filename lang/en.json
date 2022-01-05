@@ -62,8 +62,9 @@
     "CMPBrowser.Tab.Settings":"Settings",
     "CMPBrowser.SETTING.Maxload.NAME" : "Maximum load",
     "CMPBrowser.SETTING.Maxload.HINT" : "Maximum number of spells, feats, items, or NPCs to display; to see more use the filters. This setting is to allow manageing memory and server load.",
-    "CMPBrowser.LOADING.Message" : "Loaded...{numLoaded} {itemType}s",
-    "CMPBrowser.LOADING.MaxLoaded" : "(maximum displayed; to see more, use the filters)",
+    "CMPBrowser.LOADING.Message" : "Loading...{numLoaded} {itemType}s",
+    "CMPBrowser.LOADED.Message": "Loaded {numLoaded} {itemType}s",
+    "CMPBrowser.LOADED.MaxLoaded" : "(maximum displayed; to see more, use the filters)",
     "CMPBrowser.Filters.ResetFilters" : "Reset Filters"
     
 }

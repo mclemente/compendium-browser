@@ -49,6 +49,10 @@
 12-Sep-2021 0.7.1   Issue #25 Initialization fails because of corrupted settings 
                     Fix: Check for settings.loadedSpellCompendium and settings.loadedNpcCompendium                   
 1-Jan-2022 0.7.2    Switch to isFoundryV8Plus class variable
+4-Jan-2022  0.7.2   Merge PR #33 (thanks kyleady) to improve NPC filtering performance
+            0.7.2c  Fix rarity encoding (uses camelcase names) (Issue #28)
+                    Check for data.details?.cr in case you have NPCs without details (type=character)
+                    Change message to "Loading..." until we're done, then "Loaded"
 */
 
 const CMPBrowser = {
@@ -504,7 +508,7 @@ class CompendiumBrowser extends Application {
                     //OR filter the content up front for the decoratedItem.type??
                     await pack.getDocuments(query).then(content => {
 
-                        if (browserTab == "spell"){
+                        if (browserTab === "spell"){
 
                             content.reduce(function(itemsList, item5e) {
                                 if (this.CurrentSeachNumber != seachNumber) throw STOP_SEARCH;
@@ -512,7 +516,7 @@ class CompendiumBrowser extends Application {
                                 numItemsLoaded = Object.keys(itemsList).length;
 
                                 if (maxLoad <= numItemsLoaded) {
-                                    if (updateLoading) {updateLoading(numItemsLoaded);}
+                                    if (updateLoading) {updateLoading(numItemsLoaded, true);}
                                     throw STOP_SEARCH;
                                 }
 
@@ -543,7 +547,7 @@ class CompendiumBrowser extends Application {
                                 numItemsLoaded = Object.keys(itemsList).length;
 
                                 if (maxLoad <= numItemsLoaded) {
-                                    if (updateLoading) {updateLoading(numItemsLoaded);}
+                                    if (updateLoading) {updateLoading(numItemsLoaded, true);}
                                     throw STOP_SEARCH;
                                 }
 
@@ -570,7 +574,7 @@ class CompendiumBrowser extends Application {
                                 numItemsLoaded = Object.keys(itemsList).length;
 
                                 if (maxLoad <= numItemsLoaded) {
-                                    if (updateLoading) {updateLoading(numItemsLoaded);}
+                                    if (updateLoading) {updateLoading(numItemsLoaded, true);}
                                     throw STOP_SEARCH;
                                 }
 
@@ -591,7 +595,7 @@ class CompendiumBrowser extends Application {
                         }
 
                         numItemsLoaded = Object.keys(compactItems).length;
-                        if (updateLoading) {updateLoading(numItemsLoaded);}
+                        if (updateLoading) {updateLoading(numItemsLoaded, false);}
                     });
                 }//end if pack entity === Item
             }//for packs
@@ -616,6 +620,7 @@ class CompendiumBrowser extends Application {
         this.itemsLoaded = true;  
         console.timeEnd("loadAndFilterItems");
         console.log(`Load and Filter Items | Finished loading ${Object.keys(compactItems).length} ${browserTab}s`);
+        updateLoading(numItemsLoaded, true)
         return compactItems;
     }
 
@@ -660,7 +665,7 @@ class CompendiumBrowser extends Application {
                             numNpcsLoaded = Object.keys(npcs).length;
 
                             if (maxLoad <= numNpcsLoaded) {
-                                if (updateLoading) {updateLoading(numNpcsLoaded);}
+                                if (updateLoading) {updateLoading(numNpcsLoaded, true);}
                                 throw STOP_SEARCH;
                             }
 
@@ -675,7 +680,7 @@ class CompendiumBrowser extends Application {
                                     displayCR : decoratedNpc.displayCR,
                                     displaySize : decoratedNpc.displaySize,
                                     displayType: this.getNPCType(decoratedNpc.data?.details?.type),
-                                    orderCR : decoratedNpc.data.details.cr,
+                                    orderCR : decoratedNpc.data?.details?.cr,
                                     orderSize : decoratedNpc.filterSize
                                 };
                             }
@@ -684,7 +689,7 @@ class CompendiumBrowser extends Application {
                         }.bind(this), npcs);
 
                         numNpcsLoaded = Object.keys(npcs).length;
-                        if (updateLoading) {updateLoading(numNpcsLoaded);}
+                        if (updateLoading) {updateLoading(numNpcsLoaded, false);}
 
                     });
                 }
@@ -704,6 +709,7 @@ class CompendiumBrowser extends Application {
         this.npcsLoaded = true;
         console.timeEnd("loadAndFilterNpcs");
         console.log(`NPC Browser | Finished loading NPCs: ${Object.keys(npcs).length} NPCs`);
+        updateLoading(numNpcsLoaded, true) 
         return npcs;
     }
     
@@ -791,11 +797,10 @@ class CompendiumBrowser extends Application {
             if (options?.reload || !elements[0].children.length) {
 
                 const maxLoad = game.settings.get(CMPBrowser.MODULE_NAME, "maxload") ?? CMPBrowser.MAXLOAD;
-                const updateLoading = async numLoaded => {
-                    if (loadingMessage.length) {this.renderLoading(loadingMessage[0], browserTab, numLoaded, numLoaded>=maxLoad);}
+                const updateLoading = async (numLoaded,doneLoading) => {
+                    if (loadingMessage.length) {this.renderLoading(loadingMessage[0], browserTab, numLoaded, numLoaded>=maxLoad, doneLoading);}
                 }
-                updateLoading(0);
-
+                updateLoading(0, false);
                 //Uses loadAndFilterItems to read compendia for items which pass the current filters and render on this tab
                 const newItemsHTML = await this.renderItemData(browserTab, updateLoading); 
                 elements[0].innerHTML = newItemsHTML;
@@ -814,10 +819,10 @@ class CompendiumBrowser extends Application {
 
     }
 
-    async renderLoading(messageElement, itemType, numLoaded, maxLoaded=false) {
+    async renderLoading(messageElement, itemType, numLoaded, maxLoaded=false, doneLoading=false) {
         if (!messageElement) return;
 
-        let loadingHTML = await renderTemplate("modules/compendium-browser/template/loading.html", {numLoaded: numLoaded, itemType: itemType, maxLoaded: maxLoaded});
+        let loadingHTML = await renderTemplate("modules/compendium-browser/template/loading.html", {numLoaded: numLoaded, itemType: itemType, maxLoaded: maxLoaded, doneLoading: doneLoading});
         messageElement.innerHTML = loadingHTML;
     }
 
@@ -1045,8 +1050,8 @@ class CompendiumBrowser extends Application {
         const decoratedNpc = npc;
 
         // cr display
-        let cr = decoratedNpc.data.details.cr;
-        if (cr == undefined || cr == '') cr = 0;
+        let cr = decoratedNpc.data.details?.cr; //0.7.2c: Possibly because of getIndex() use we now have to check for existence of details (doesn't for Character-type NPCs)
+        if (cr === undefined || cr === '') cr = 0;
         else cr = Number(cr);
         if (cr > 0 && cr < 1) cr = "1/" + (1 / cr);
         decoratedNpc.displayCR = cr;
@@ -1066,8 +1071,8 @@ class CompendiumBrowser extends Application {
         }
 
         // getting value for HasSpells and damage types
-        decoratedNpc.hasSpells = decoratedNpc.items.type.reduce((hasSpells, itemType) => hasSpells || itemType == 'spell', false);
-        decoratedNpc.damageDealt = decoratedNpc.items.data.damage.parts.filter(p => p.length >= 2).map(p => p[1]);
+        decoratedNpc.hasSpells = decoratedNpc.items?.type?.reduce((hasSpells, itemType) => hasSpells || itemType === 'spell', false);
+        decoratedNpc.damageDealt = decoratedNpc.items?.data?.damage?.parts ? decoratedNpc.items?.data?.damage?.parts?.filter(p => p?.length >= 2).map(p => p[1]) : 0;
 
         //handle poorly constructed npc
         if (decoratedNpc.data?.details?.type && !(decoratedNpc.data?.details?.type instanceof Object)){
@@ -1358,13 +1363,14 @@ class CompendiumBrowser extends Application {
         this.addItemFilter("Item Subtype", "Equipment", 'data.armor.type', 'text', CONFIG.DND5E.equipmentTypes);
         this.addItemFilter("Item Subtype", "Consumable", 'data.consumableType', 'text', CONFIG.DND5E.consumableTypes);
         
+        //0.7.2c: Fix rarity encoding (uses camelcase names)
         this.addItemFilter("Magic Items", "Rarity", 'data.rarity', 'select', 
         {
-            Common: "Common",
-            Uncommon: "Uncommon",
-            Rare: "Rare",
-            "Very rare": "Very Rare",
-            Legendary: "Legendary"
+            common: "Common",
+            uncommon: "Uncommon",
+            rare: "Rare",
+            veryRare: "Very Rare",
+            legendary: "Legendary"
         });
     }
 
