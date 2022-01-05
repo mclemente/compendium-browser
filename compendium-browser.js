@@ -633,10 +633,26 @@ class CompendiumBrowser extends Application {
         let numNpcsLoaded = 0;
         this.npcsLoaded = false;
 
+        // fields required for displaying and decorating NPCs
+        const requiredIndexFields = [
+          'name',
+          'img',
+          'data.details.cr',
+          'data.traits.size',
+          'data.details.type',
+          'items.type',
+          'items.data.damage.parts',
+        ]
+
+        // add any fields required for currently active filters
+        const indexFields = requiredIndexFields.concat(
+                              Object.values(this.npcFilters.activeFilters).map(f => f.path)
+                            );
+
         try{
             for (let pack of game.packs) {
                 if (pack.documentName == "Actor" && this.settings.loadedNpcCompendium[pack.collection].load) {
-                    await pack.getDocuments().then(async content => {
+                    await pack.getIndex({fields: indexFields}).then(async content => {
 
                         content.reduce(function(actorsList, npc5e){
                             if (this.CurrentSeachNumber != seachNumber) {throw STOP_SEARCH;}
@@ -652,7 +668,7 @@ class CompendiumBrowser extends Application {
 
                             if (decoratedNpc && this.passesFilter(decoratedNpc, this.npcFilters.activeFilters)){
 
-                                actorsList[npc5e.id] = {
+                                actorsList[npc5e._id] = {
                                     compendium : pack.collection,
                                     name : decoratedNpc.name,
                                     img: decoratedNpc.img,
@@ -1026,7 +1042,7 @@ class CompendiumBrowser extends Application {
 
     decorateNpc(npc) {
         //console.log('%c '+npc.name, 'background: white; color: red')
-        const decoratedNpc = npc.data;
+        const decoratedNpc = npc;
 
         // cr display
         let cr = decoratedNpc.data.details.cr;
@@ -1050,21 +1066,8 @@ class CompendiumBrowser extends Application {
         }
 
         // getting value for HasSpells and damage types
-        decoratedNpc.hasSpells = false;
-        decoratedNpc.damageDealt = [];
-        for (let item of decoratedNpc.items) {
-            if (item.type == 'spell') {
-                decoratedNpc.hasSpells = true;
-            }
-            if (item.data.damage && item.data.damage.parts && item.data.damage.parts.length > 0) {
-                for (let part of item.data.damage.parts) {
-                    let type = part[1];
-                    if (decoratedNpc.damageDealt.indexOf(type) === -1) {
-                        decoratedNpc.damageDealt.push(type);
-                    }
-                }
-            }
-        }
+        decoratedNpc.hasSpells = decoratedNpc.items.type.reduce((hasSpells, itemType) => hasSpells || itemType == 'spell', false);
+        decoratedNpc.damageDealt = decoratedNpc.items.data.damage.parts.filter(p => p.length >= 2).map(p => p[1]);
 
         //handle poorly constructed npc
         if (decoratedNpc.data?.details?.type && !(decoratedNpc.data?.details?.type instanceof Object)){
