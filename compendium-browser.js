@@ -53,6 +53,7 @@
             0.7.2c  Fix rarity encoding (uses camelcase names) (Issue #28)
                     Check for data.details?.cr in case you have NPCs without details (type=character)
                     Change message to "Loading..." until we're done, then "Loaded"
+5-Jan-2022  0.7.2d  decorateNpc(): NPCs without all details or weirdly formed ones should default damageDealt to [] not 0                    
 */
 
 const CMPBrowser = {
@@ -1072,7 +1073,7 @@ class CompendiumBrowser extends Application {
 
         // getting value for HasSpells and damage types
         decoratedNpc.hasSpells = decoratedNpc.items?.type?.reduce((hasSpells, itemType) => hasSpells || itemType === 'spell', false);
-        decoratedNpc.damageDealt = decoratedNpc.items?.data?.damage?.parts ? decoratedNpc.items?.data?.damage?.parts?.filter(p => p?.length >= 2).map(p => p[1]) : 0;
+        decoratedNpc.damageDealt = decoratedNpc.items?.data?.damage?.parts ? decoratedNpc.items?.data?.damage?.parts?.filter(p => p?.length >= 2).map(p => p[1]) : [];
 
         //handle poorly constructed npc
         if (decoratedNpc.data?.details?.type && !(decoratedNpc.data?.details?.type instanceof Object)){
