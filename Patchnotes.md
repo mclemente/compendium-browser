@@ -1,3 +1,5 @@
+#0.8
+- Merged PR [League-of-Foundry-Developers/compendium-browser#40](https://github.com/League-of-Foundry-Developers/compendium-browser/pull/40): Foundry v10 support
 #0.7
 Works only with Foundry v0.8 and 9
 ##0.7.2
