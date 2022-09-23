@@ -187,11 +187,18 @@ class CompendiumBrowser extends Application {
                     event.preventDefault();
                     return false;
                 }
-                event.dataTransfer.setData("text/plain", JSON.stringify({
-                    type: pack.documentName,
-                    pack: pack.collection,
-                    id: li.getAttribute("data-entry-id")
-                }));
+                if (CompendiumBrowser.isFoundryV10Plus) {
+                    event.dataTransfer.setData("text/plain", JSON.stringify({
+                        type: pack.documentName,
+                        uuid: `Compendium.${pack.collection}.${li.getAttribute("data-entry-id")}`
+                      }));
+                } else {
+                    event.dataTransfer.setData("text/plain", JSON.stringify({
+                        type: pack.documentName,
+                        pack: pack.collection,
+                        id: li.getAttribute("data-entry-id")
+                    }));
+                }
             }, false);
         });
     }
@@ -1408,7 +1415,8 @@ class CompendiumBrowser extends Application {
             );
             this.addSpellFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.spellType"), 'system.actionType', 'select', CONFIG.DND5E.itemActionTypes);
             this.addSpellFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.damageType"), 'damageTypes', 'select', CONFIG.DND5E.damageTypes);
-            this.addSpellFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.class"), 'system.classes', 'select',
+            //JV-082: Fix for missing "Class" search feature
+            this.addSpellFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.class"), 'classes', 'select',
                 {
                     artificer: game.i18n.localize("CMPBrowser.artificer"),
                     bard: game.i18n.localize("CMPBrowser.bard"),

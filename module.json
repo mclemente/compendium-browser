@@ -2,7 +2,7 @@
     "name": "compendium-browser",
     "title": "Compendium Browser",
     "description": "<p>Easily browse and filter spells, feats, items, and npcs loaded from compendia!</p><p>Verified with Foundry 9 and 10 only</p><strong>Compendium Browser is faster and better-behaved;</strong> it no longer loads all the compendia into memory on start-up (which sometimes hung servers because of memory or CPU requirements). Instead, it filters and loads on-demand, as well as giving you a Module Setting to control how many rows are loaded at a time.<br>Changes in 0.7.0: Supports Foundry 0.8+ only; faster searches using Foundry 0.8 queries!",
-    "version": "0.8.1",
+    "version": "0.8.2",
     "author": "Spetzel#0103",
       "authors": [
         {
@@ -59,7 +59,7 @@
     ],
     "url": "https://github.com/League-of-Foundry-Developers/compendium-browser",
     "manifest": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/latest/download/module.json",
-    "download": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.8.1/compendium-browser.zip",
+    "download": "https://github.com/League-of-Foundry-Developers/compendium-browser/releases/download/v0.8.2/compendium-browser.zip",
     "minimumCoreVersion": "0.9.266",
     "compatibleCoreVersion": "10",
     "allowBugReporter": true,

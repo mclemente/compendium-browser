@@ -1,3 +1,6 @@
+#0.8.2
+- Fixed Class searching for spells - issue: #43
+- Fixed Drag-and-Drop error in Foundry V10  - issue: #41
 #0.8
 - Merged PR [League-of-Foundry-Developers/compendium-browser#40](https://github.com/League-of-Foundry-Developers/compendium-browser/pull/40): Foundry v10 support
 #0.7
