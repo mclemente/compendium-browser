@@ -568,7 +568,7 @@ class CompendiumBrowser extends Application {
 
                                 const decoratedItem = this.decorateItem(item5e);
 
-                                if(decoratedItem && ["feat","class"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.featFilters.activeFilters)){
+                                if(decoratedItem && ["feat","class","subclass"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.featFilters.activeFilters)){
                                     itemsList[item5e.id] = {
                                         compendium : pack.collection,
                                         name : decoratedItem.name,
@@ -595,7 +595,7 @@ class CompendiumBrowser extends Application {
 
                                 const decoratedItem = this.decorateItem(item5e);
 
-                                if(decoratedItem && !["spell","feat","class"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.itemFilters.activeFilters)){
+                                if(decoratedItem && !["spell","feat","class","subclass"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.itemFilters.activeFilters)){
                                     itemsList[item5e.id] = {
                                         compendium : pack.collection,
                                         name : decoratedItem.name,
@@ -1219,6 +1219,7 @@ class CompendiumBrowser extends Application {
                         return false;
                     }
                 } else {
+                    if (prop === undefined) return false;
                     if (filter.value !== undefined && prop !== undefined && prop != filter.value && !(filter.value === true && prop)) {
                         return false;
                     }
@@ -1565,6 +1566,24 @@ class CompendiumBrowser extends Application {
                 warlock: game.i18n.localize("CMPBrowser.warlock"),
                 wizard: game.i18n.localize("CMPBrowser.wizard")
             }, true);
+
+        this.addFeatFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.overall"), 'type', 'select',
+            {
+                class: game.i18n.localize("CMPBrowser.class"),
+                subclass: game.i18n.localize("CMPBrowser.subclass"),
+                feat: game.i18n.localize("CMPBrowser.feature"),
+            }
+            , false);
+
+        this.addFeatFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.featureType"), 'system.type.value', 'select',
+            Object.keys(dnd5e.config.featureTypes).reduce(function(acc, current) {
+                acc[current] = dnd5e.config.featureTypes[current].label;
+                return acc;
+            }, {})
+            , false);
+
+        this.addFeatFilter(game.i18n.localize("CMPBrowser.general"), game.i18n.localize("CMPBrowser.subfeature"), 'system.type.subtype', 'select',
+            dnd5e.config.featureTypes.class.subtypes);
 
         if (CompendiumBrowser.isFoundryV10Plus) {
             this.addFeatFilter("Game Mechanics", game.i18n.localize("DND5E.ItemActivationCost"), 'system.activation.type', 'select', CONFIG.DND5E.abilityActivationTypes);
