@@ -1508,14 +1508,14 @@ class CompendiumBrowser extends Application {
         });
         this.addItemFilter("CMPBrowser.general", "CMPBrowser.ItemsPacks", 'matchedPacks', 'select',
             {
-                burglar: game.i18n.localize("CMPBrowser.ItemsPacksBurglar"),
-                diplomat: game.i18n.localize("CMPBrowser.ItemsPacksDiplomat"),
-                dungeoneer: game.i18n.localize("CMPBrowser.ItemsPacksDungeoneer"),
-                entertainer: game.i18n.localize("CMPBrowser.ItemsPacksEntertainer"),
-                explorer: game.i18n.localize("CMPBrowser.ItemsPacksExplorer"),
-                monsterhunter: game.i18n.localize("CMPBrowser.ItemsPacksMonsterHunter"),
-                priest: game.i18n.localize("CMPBrowser.ItemsPacksPriest"),
-                scholar: game.i18n.localize("CMPBrowser.ItemsPacksScholar"),
+                burglar: "CMPBrowser.ItemsPacksBurglar",
+                diplomat: "CMPBrowser.ItemsPacksDiplomat",
+                dungeoneer: "CMPBrowser.ItemsPacksDungeoneer",
+                entertainer: "CMPBrowser.ItemsPacksEntertainer",
+                explorer: "CMPBrowser.ItemsPacksExplorer",
+                monsterhunter: "CMPBrowser.ItemsPacksMonsterHunter",
+                priest: "CMPBrowser.ItemsPacksPriest",
+                scholar: "CMPBrowser.ItemsPacksScholar",
             }, true
         );
         if (CompendiumBrowser.isFoundryV10Plus) {
@@ -1529,25 +1529,25 @@ class CompendiumBrowser extends Application {
         this.addItemFilter("CMPBrowser.GameMechanics", "CMPBrowser.UsesResources", 'usesRessources', 'bool');
         
         if (CompendiumBrowser.isFoundryV10Plus) {
-            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeWeapon"), 'system.weaponType', 'text', CONFIG.DND5E.weaponTypes);
-            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeEquipment"), 'system.armor.type', 'text', CONFIG.DND5E.equipmentTypes);
-            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeConsumable"), 'system.consumableType', 'text', CONFIG.DND5E.consumableTypes);
+            this.addItemFilter("CMPBrowser.ItemSubtype", "ITEM.TypeWeapon", 'system.weaponType', 'text', CONFIG.DND5E.weaponTypes);
+            this.addItemFilter("CMPBrowser.ItemSubtype", "ITEM.TypeEquipment", 'system.armor.type', 'text', CONFIG.DND5E.equipmentTypes);
+            this.addItemFilter("CMPBrowser.ItemSubtype", "ITEM.TypeConsumable", 'system.consumableType', 'text', CONFIG.DND5E.consumableTypes);
         }
         else {
-            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeWeapon"), 'data.weaponType', 'text', CONFIG.DND5E.weaponTypes);
-            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeEquipment"), 'data.armor.type', 'text', CONFIG.DND5E.equipmentTypes);
-            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeConsumable"), 'data.consumableType', 'text', CONFIG.DND5E.consumableTypes);            
+            this.addItemFilter("CMPBrowser.ItemSubtype", "ITEM.TypeWeapon", 'data.weaponType', 'text', CONFIG.DND5E.weaponTypes);
+            this.addItemFilter("CMPBrowser.ItemSubtype", "ITEM.TypeEquipment", 'data.armor.type', 'text', CONFIG.DND5E.equipmentTypes);
+            this.addItemFilter("CMPBrowser.ItemSubtype", "ITEM.TypeConsumable", 'data.consumableType', 'text', CONFIG.DND5E.consumableTypes);
         }
 
         
         //0.7.2c: Fix rarity encoding (uses camelcase names)
-        this.addItemFilter(game.i18n.localize("CMPBrowser.MagicItems"), game.i18n.localize("CMPBrowser.Rarity"), 'data.rarity', 'select', 
+        this.addItemFilter("CMPBrowser.MagicItems", "CMPBrowser.Rarity", 'data.rarity', 'select', 
         {
-            common: game.i18n.localize("CMPBrowser.RarityCommon"),
-            uncommon: game.i18n.localize("CMPBrowser.RarityUncommon"),
-            rare: game.i18n.localize("CMPBrowser.RarityRare"),
-            veryRare: game.i18n.localize("CMPBrowser.RarityVeryRare"),
-            legendary: game.i18n.localize("CMPBrowser.RarityLegendary")
+            common: "CMPBrowser.RarityCommon",
+            uncommon: "CMPBrowser.RarityUncommon",
+            rare: "CMPBrowser.RarityRare",
+            veryRare: "CMPBrowser.RarityVeryRare",
+            legendary: "CMPBrowser.RarityLegendary"
         });
     }
 
