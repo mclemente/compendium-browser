@@ -1909,10 +1909,10 @@ class CompendiumBrowser extends Application {
 
     static async addTidySheetButton(cb, html, actor){
 
-        html.find('.spell-browser-btn').remove()
+        await html.find('.spell-browser-btn').remove();
 
-        let tabBar = html.find("div.tab.spellbook.active .spellcasting-ability")
-        console.log(tabBar)
+        let tabBar = html.find("div.tab.spellbook .spellcasting-ability")
+        // console.log(tabBar)
         const cbButton = $(`<div style="max-width:40px;min-width:32px;"><button class="compendium-browser spell-browser-btn"><i class="fa-duotone fa-book"></i></button></div>`);
 
         tabBar.append(cbButton)
@@ -1920,9 +1920,10 @@ class CompendiumBrowser extends Application {
         CompendiumBrowser.addSpellsButton(cbButton, actor.actor)
     }
 
-    static addDefaultSheetButton(cb, html, actor){
+    static async addDefaultSheetButton(cb, html, actor){
 
-        html.find('.spell-browser-btn').remove()
+        await html.find('.spell-browser-btn').remove();
+
         let tabBar = html.find("div.spellbook-filters")
         // console.log(tabBar)
         const cbButton = $(`<div style="max-width:40px;min-width:32px;"><button class="compendium-browser spell-browser-btn"><i class="fa-duotone fa-book"></i></button></div>`);
