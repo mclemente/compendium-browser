@@ -1506,48 +1506,48 @@ class CompendiumBrowser extends Application {
             tool: "ITEM.TypeTool",
             weapon: "ITEM.TypeWeapon"
         });
-        this.addItemFilter("CMPBrowser.general", "Packs", 'matchedPacks', 'select',
+        this.addItemFilter("CMPBrowser.general", "CMPBrowser.ItemsPacks", 'matchedPacks', 'select',
             {
-                burglar: "Burglar's Pack",
-                diplomat: "Diplomat's Pack",
-                dungeoneer: "Dungeoneer's Pack",
-                entertainer: "Entertainer's Pack",
-                explorer: "Explorer's Pack",
-                monsterhunter: "Monster Hunter's Pack",
-                priest: "Priest's Pack",
-                scholar: "Scholar's Pack",
+                burglar: game.i18n.localize("CMPBrowser.ItemsPacksBurglar"),
+                diplomat: game.i18n.localize("CMPBrowser.ItemsPacksDiplomat"),
+                dungeoneer: game.i18n.localize("CMPBrowser.ItemsPacksDungeoneer"),
+                entertainer: game.i18n.localize("CMPBrowser.ItemsPacksEntertainer"),
+                explorer: game.i18n.localize("CMPBrowser.ItemsPacksExplorer"),
+                monsterhunter: game.i18n.localize("CMPBrowser.ItemsPacksMonsterHunter"),
+                priest: game.i18n.localize("CMPBrowser.ItemsPacksPriest"),
+                scholar: game.i18n.localize("CMPBrowser.ItemsPacksScholar"),
             }, true
         );
         if (CompendiumBrowser.isFoundryV10Plus) {
-            this.addItemFilter("Game Mechanics", "DND5E.ItemActivationCost", 'system.activation.type', 'select', CONFIG.DND5E.abilityActivationTypes);
+            this.addItemFilter("CMPBrowser.GameMechanics", "DND5E.ItemActivationCost", 'system.activation.type', 'select', CONFIG.DND5E.abilityActivationTypes);
         }
         else {
-            this.addItemFilter("Game Mechanics", "DND5E.ItemActivationCost", 'data.activation.type', 'select', CONFIG.DND5E.abilityActivationTypes);
+            this.addItemFilter("CMPBrowser.GameMechanics", "DND5E.ItemActivationCost", 'data.activation.type', 'select', CONFIG.DND5E.abilityActivationTypes);
         }
 
-        this.addItemFilter("Game Mechanics", "CMPBrowser.damageType", 'damageTypes', 'select', CONFIG.DND5E.damageTypes);
-        this.addItemFilter("Game Mechanics", "Uses Resources", 'usesRessources', 'bool');
+        this.addItemFilter("CMPBrowser.GameMechanics", "CMPBrowser.damageType", 'damageTypes', 'select', CONFIG.DND5E.damageTypes);
+        this.addItemFilter("CMPBrowser.GameMechanics", "CMPBrowser.UsesResources", 'usesRessources', 'bool');
         
         if (CompendiumBrowser.isFoundryV10Plus) {
-            this.addItemFilter("Item Subtype", "Weapon", 'system.weaponType', 'text', CONFIG.DND5E.weaponTypes);
-            this.addItemFilter("Item Subtype", "Equipment", 'system.armor.type', 'text', CONFIG.DND5E.equipmentTypes);
-            this.addItemFilter("Item Subtype", "Consumable", 'system.consumableType', 'text', CONFIG.DND5E.consumableTypes);
+            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeWeapon"), 'system.weaponType', 'text', CONFIG.DND5E.weaponTypes);
+            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeEquipment"), 'system.armor.type', 'text', CONFIG.DND5E.equipmentTypes);
+            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeConsumable"), 'system.consumableType', 'text', CONFIG.DND5E.consumableTypes);
         }
         else {
-            this.addItemFilter("Item Subtype", "Weapon", 'data.weaponType', 'text', CONFIG.DND5E.weaponTypes);
-            this.addItemFilter("Item Subtype", "Equipment", 'data.armor.type', 'text', CONFIG.DND5E.equipmentTypes);
-            this.addItemFilter("Item Subtype", "Consumable", 'data.consumableType', 'text', CONFIG.DND5E.consumableTypes);            
+            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeWeapon"), 'data.weaponType', 'text', CONFIG.DND5E.weaponTypes);
+            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeEquipment"), 'data.armor.type', 'text', CONFIG.DND5E.equipmentTypes);
+            this.addItemFilter(game.i18n.localize("CMPBrowser.ItemSubtype"), game.i18n.localize("DND5E.ItemTypeConsumable"), 'data.consumableType', 'text', CONFIG.DND5E.consumableTypes);            
         }
 
         
         //0.7.2c: Fix rarity encoding (uses camelcase names)
-        this.addItemFilter("Magic Items", "Rarity", 'data.rarity', 'select', 
+        this.addItemFilter(game.i18n.localize("CMPBrowser.MagicItems"), game.i18n.localize("CMPBrowser.Rarity"), 'data.rarity', 'select', 
         {
-            common: "Common",
-            uncommon: "Uncommon",
-            rare: "Rare",
-            veryRare: "Very Rare",
-            legendary: "Legendary"
+            common: game.i18n.localize("CMPBrowser.RarityCommon"),
+            uncommon: game.i18n.localize("CMPBrowser.RarityUncommon"),
+            rare: game.i18n.localize("CMPBrowser.RarityRare"),
+            veryRare: game.i18n.localize("CMPBrowser.RarityVeryRare"),
+            legendary: game.i18n.localize("CMPBrowser.RarityLegendary")
         });
     }
 
@@ -1565,15 +1565,15 @@ class CompendiumBrowser extends Application {
         this.addFeatFilter("CMPBrowser.general", "CMPBrowser.class", 'classRequirement', 'select',
             {
                 artificer: "CMPBrowser.artificer",
-                barbarian: "Barbarian",
+                barbarian: "CMPBrowser.barbarian",
                 bard: "CMPBrowser.bard",
                 cleric: "CMPBrowser.cleric",
                 druid: "CMPBrowser.druid",
-                fighter: "Fighter",
-                monk: "Monk",
+                fighter: "CMPBrowser.fighter",
+                monk: "CMPBrowser.monk",
                 paladin: "CMPBrowser.paladin",
                 ranger: "CMPBrowser.ranger",
-                rogue: "Rogue",
+                rogue: "CMPBrowser.rogue",
                 sorcerer: "CMPBrowser.sorcerer",
                 warlock: "CMPBrowser.warlock",
                 wizard: "CMPBrowser.wizard"
@@ -1608,13 +1608,13 @@ class CompendiumBrowser extends Application {
         }
 
         if (CompendiumBrowser.isFoundryV10Plus) {
-            this.addFeatFilter("Game Mechanics", "DND5E.ItemActivationCost", 'system.activation.type', 'select', CONFIG.DND5E.abilityActivationTypes);
+            this.addFeatFilter("CMPBrowser.GameMechanics", "DND5E.ItemActivationCost", 'system.activation.type', 'select', CONFIG.DND5E.abilityActivationTypes);
         }
         else {
-            this.addFeatFilter("Game Mechanics", "DND5E.ItemActivationCost", 'data.activation.type', 'select', CONFIG.DND5E.abilityActivationTypes);            
+            this.addFeatFilter("CMPBrowser.GameMechanics", "DND5E.ItemActivationCost", 'data.activation.type', 'select', CONFIG.DND5E.abilityActivationTypes);            
         }
-        this.addFeatFilter("Game Mechanics", "CMPBrowser.damageType", 'damageTypes', 'select', CONFIG.DND5E.damageTypes);
-        this.addFeatFilter("Game Mechanics", "Uses Resources", 'usesRessources', 'bool');
+        this.addFeatFilter("CMPBrowser.GameMechanics", "CMPBrowser.damageType", 'damageTypes', 'select', CONFIG.DND5E.damageTypes);
+        this.addFeatFilter("CMPBrowser.GameMechanics", "CMPBrowser.UsesResources", 'usesRessources', 'bool');
 
 
     }
