@@ -1,3 +1,7 @@
+#0.9.0
+- Button on character sheets for automatically using spell level (works on default and TidySheet5e)
+- Additional searches for sub-features
+
 #0.8.2
 - Fixed Class searching for spells - issue: #43
 - Fixed Drag-and-Drop error in Foundry V10  - issue: #41
