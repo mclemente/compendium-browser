@@ -559,7 +559,7 @@ class CompendiumBrowser extends Application {
 
                                 const decoratedItem = this.decorateItem(item5e);
 
-                                if(decoratedItem && ["feat","class","subclass"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.featFilters.activeFilters)){
+                                if(decoratedItem && ["feat","class","subclass", "background"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.featFilters.activeFilters)){
                                     itemsList[item5e.id] = {
                                         compendium : pack.collection,
                                         name : decoratedItem.name,
@@ -586,7 +586,7 @@ class CompendiumBrowser extends Application {
 
                                 const decoratedItem = this.decorateItem(item5e);
 
-                                if(decoratedItem && !["spell","feat","class","subclass"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.itemFilters.activeFilters)){
+                                if(decoratedItem && !["spell","feat","class","subclass", "background"].includes(decoratedItem.type) && this.passesFilter(decoratedItem, this.itemFilters.activeFilters)){
                                     itemsList[item5e.id] = {
                                         compendium : pack.collection,
                                         name : decoratedItem.name,
@@ -1587,6 +1587,7 @@ class CompendiumBrowser extends Application {
         //subclasses don't exist lower then version 10
         if (CompendiumBrowser.isFoundryV10Plus) {
             featureTypes.subclass = "ITEM.TypeSubclass";
+            featureTypes.background = "DND5E.Background";
         }
 
         this.addFeatFilter("CMPBrowser.general", "CMPBrowser.overall", 'type', 'select',
