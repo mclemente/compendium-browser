@@ -10,12 +10,12 @@
     <div class="spell-tags">
         <span title="Spell level">{{#if spell.data.level}}{{spell.data.level}}{{else}}C{{/if}}</span>
         <div class="spacer-large"></div>
-        <span {{#unless spell.data.components.ritual}}style="color:#bbb;" title="{{localize "No"}} {{localize "CMPBrowser.ritual"}}"{{else}} title="{{localize "CMPBrowser.ritual"}}"{{/unless}}>R</span>
-        <span {{#unless spell.data.components.concentration}}style="color:#bbb;" title="{{localize "No"}} {{localize "CMPBrowser.concentration"}}"{{else}} title="{{localize "CMPBrowser.concentration"}}"{{/unless}}>C</span>
+        <span {{#unless spell.data.components.ritual}}style="color:#bbb;" title="{{localize "No"}} {{localize "DND5E.Ritual"}}"{{else}} title="{{localize "DND5E.Ritual"}}"{{/unless}}>R</span>
+        <span {{#unless spell.data.components.concentration}}style="color:#bbb;" title="{{localize "No"}} {{localize "DND5E.Concentration"}}"{{else}} title="{{localize "DND5E.Concentration"}}"{{/unless}}>C</span>
         <div class="spacer"></div>
-        <span {{#unless spell.data.components.vocal}}style="color:#bbb;" title="{{localize "No"}} {{localize "CMPBrowser.verbal"}}"{{else}} title="{{localize "CMPBrowser.verbal"}}"{{/unless}}>V</span>
-        <span {{#unless spell.data.components.somatic}}style="color:#bbb;" title="{{localize "No"}} {{localize "CMPBrowser.somatic"}}"{{else}} title="{{localize "CMPBrowser.somatic"}}"{{/unless}}>S</span>
-        <span {{#unless spell.data.components.material}}style="color:#bbb;" title="no{{localize "No"}} {{localize "CMPBrowser.material"}}"{{else}} title="{{localize "CMPBrowser.material"}}"{{/unless}}>M</span>
+        <span {{#unless spell.data.components.vocal}}style="color:#bbb;" title="{{localize "No"}} {{localize "DND5E.ComponentVerbal"}}"{{else}} title="{{localize "DND5E.ComponentVerbal"}}"{{/unless}}>V</span>
+        <span {{#unless spell.data.components.somatic}}style="color:#bbb;" title="{{localize "No"}} {{localize "DND5E.ComponentSomatic"}}"{{else}} title="{{localize "DND5E.ComponentSomatic"}}"{{/unless}}>S</span>
+        <span {{#unless spell.data.components.material}}style="color:#bbb;" title="no{{localize "No"}} {{localize "DND5E.ComponentMaterial"}}"{{else}} title="{{localize "DND5E.ComponentMaterial"}}"{{/unless}}>M</span>
     </div>
     <div class="filter-tags">                
         <input type="hidden" name="level" value="{{spell.data.level}}">
