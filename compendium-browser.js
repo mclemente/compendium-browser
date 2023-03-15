@@ -1540,15 +1540,20 @@ class CompendiumBrowser extends Application {
         }
 
         
-        //0.7.2c: Fix rarity encoding (uses camelcase names)
-        this.addItemFilter("CMPBrowser.MagicItems", "CMPBrowser.Rarity", 'data.rarity', 'select', 
-        {
-            common: "CMPBrowser.RarityCommon",
-            uncommon: "CMPBrowser.RarityUncommon",
-            rare: "CMPBrowser.RarityRare",
-            veryRare: "CMPBrowser.RarityVeryRare",
-            legendary: "CMPBrowser.RarityLegendary"
-        });
+        if (CompendiumBrowser.isFoundryV10Plus) {
+            this.addItemFilter("CMPBrowser.MagicItems", "DND5E.Rarity", 'system.rarity', 'select', CONFIG.DND5E.itemRarity);
+        }
+        else {
+            //0.7.2c: Fix rarity encoding (uses camelcase names)
+            this.addItemFilter("CMPBrowser.MagicItems", "DND5E.Rarity", 'data.rarity', 'select', 
+            {
+                common: "DND5E.ItemRarityCommon",
+                uncommon: "DND5E.ItemRarityUncommon",
+                rare: "DND5E.ItemRarityRare",
+                veryRare: "DND5E.ItemRarityVeryRare",
+                legendary: "DND5E.ItemRarityLegendary",
+            });
+        }
     }
 
     async addFeatFilters() {
