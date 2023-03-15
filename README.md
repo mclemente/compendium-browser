@@ -9,7 +9,8 @@ Compendium Browser is faster and better-behaved; **it no longer loads all the co
 * **Foundry VTT Compatibility**: 9-10
 * **System Compatibility (If applicable)**: dnd5e
 * **Translation Support**: en, de (thanks https://github.com/CarnVanBeck), es (thanks https://github.com/JJBocanegra), fr, ja, pt-BR
-[Patch Notes](https://raw.githubusercontent.com/League-of-Foundry-Developers/compendium-browser/master/Patchnotes.md)
+
+[Patch Notes](https://github.com/ZoltanTheDM/compendium-browser/blob/master/Patchnotes.md)
 
 ## Installation
 1. Go to the Add-on Modules tab in Foundry Setup

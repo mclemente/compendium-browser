@@ -4,7 +4,7 @@
 - Additional searches for sub-features
 - Merged PR [League-of-Foundry-Developers/compendium-browser#45](https://github.com/League-of-Foundry-Developers/compendium-browser/pull/45)
 - Used more DnD5e loaclization tags. Should be less work to translate, also defaults localization to tag name
-- Fixed item rarity search in Foundry 10+ [League-of-Foundry-Developers/compendium-browser#54]https://github.com/League-of-Foundry-Developers/compendium-browser/issues/54
+- Fixed item rarity search in Foundry 10+ [League-of-Foundry-Developers/compendium-browser#54](https://github.com/League-of-Foundry-Developers/compendium-browser/issues/54)
 
 #0.8.2
 - Fixed Class searching for spells - issue: #43
