@@ -8,10 +8,11 @@
                 <dt>{{localize "CMPBrowser.sortBy"}}:</dt>
                 <dd><select class="null" name="sortorder">
                     <option value="true" selected>{{localize "Name"}}</option>
-                    <option value="false">{{localize "CMPBrowser.lvl"}}</option>
+                    <option value="false">{{localize "DND5E.Level"}}</option>
                 </select></dd>
             </dl> 
             <button id="reset-spell-filter">{{localize "CMPBrowser.Filters.ResetFilters"}}</button>
+            <button id="copy-search-spell">Export to JS</button>
         </div>
         {{> "modules/compendium-browser/template/filter-container.html" filters=spellFilters}}
     </div>

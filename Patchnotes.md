@@ -1,3 +1,11 @@
+#0.9.0
+- Button on character sheets for opening a search with class and spell level (works on default and TidySheet5e)
+- added filters for subclasses and backgrounds [League-of-Foundry-Developers/compendium-browser#48](https://github.com/League-of-Foundry-Developers/compendium-browser/issues/48)
+- Additional searches for sub-features
+- Merged PR [League-of-Foundry-Developers/compendium-browser#45](https://github.com/League-of-Foundry-Developers/compendium-browser/pull/45)
+- Used more DnD5e loaclization tags. Should be less work to translate, also defaults localization to tag name
+- Fixed item rarity search in Foundry 10+ [League-of-Foundry-Developers/compendium-browser#54](https://github.com/League-of-Foundry-Developers/compendium-browser/issues/54)
+
 #0.8.2
 - Fixed Class searching for spells - issue: #43
 - Fixed Drag-and-Drop error in Foundry V10  - issue: #41

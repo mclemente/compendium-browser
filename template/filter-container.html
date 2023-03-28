@@ -3,7 +3,7 @@
     <h3>{{cat.label}}</h3>
     <div class="filters">
         {{#each cat.filters as |filter key|}}
-        <div class="filter" data-path="{{filter.path}}" data-type="{{filter.type}}" data-valIsArray="{{filter.valIsArray}}">
+        <div class="filter" id="{{cat.labelId}}-{{filter.labelId}}" data-path="{{filter.path}}" data-type="{{filter.type}}" data-valIsArray="{{filter.valIsArray}}">
             {{#if filter.istext}}
                 <dt>{{filter.label}}</dt>
                 <dd>
