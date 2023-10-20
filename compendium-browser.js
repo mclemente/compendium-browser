@@ -336,7 +336,7 @@ class CompendiumBrowser extends Application {
         // text filters
         html.find('.filter[data-type=text] input, .filter[data-type=text] select').on('keyup change paste', ev => {
             const path = $(ev.target).parents('.filter').data('path');
-            const key = path.replace(/\./g, '');
+            const key = stripDotCharacters(path);
             const value = ev.target.value;
             const browserTab = $(ev.target).parents('.tab').data('tab');
 
@@ -359,7 +359,7 @@ class CompendiumBrowser extends Application {
         // select filters
         html.find('.filter[data-type=select] select, .filter[data-type=bool] select').on('change', ev => {
             const path = $(ev.target).parents('.filter').data('path');
-            const key = path.replace(/\./g, '');
+            const key = stripDotCharacters(path);
             const filterType = $(ev.target).parents('.filter').data('type');
             const browserTab = $(ev.target).parents('.tab').data('tab');
             let valIsArray = $(ev.target).parents('.filter').data('valisarray');
@@ -380,19 +380,14 @@ class CompendiumBrowser extends Application {
                     value:value
                 }
             }
+
             this.replaceList(html, browserTab);
-
-
-            // console.log(this.spellFilters.activeFilters);
-            // console.log(this.featFilters.activeFilters);
-            // console.log(this.itemFilters.activeFilters);
-            // console.log(this.npcFilters.activeFilters);
         });
 
         // multiselect filters
         html.find('.filter[data-type=multiSelect] input').on('change', ev => {
             const path = $(ev.target).parents('.filter').data('path');
-            const key = path.replace(/\./g, '');
+            const key = stripDotCharacters(path);
             const filterType = 'multiSelect';
             const browserTab = $(ev.target).parents('.tab').data('tab');
             let valIsArray = $(ev.target).parents('.filter').data('valisarray');
@@ -426,7 +421,7 @@ class CompendiumBrowser extends Application {
 
         html.find('.filter[data-type=numberCompare] select, .filter[data-type=numberCompare] input').on('change keyup paste', ev => {
             const path = $(ev.target).parents('.filter').data('path');
-            const key = path.replace(/\./g, '');
+            const key = stripDotCharacters(path);
             const filterType = 'numberCompare';
             const browserTab = $(ev.target).parents('.tab').data('tab');
             let valIsArray = false;
@@ -646,17 +641,18 @@ class CompendiumBrowser extends Application {
 
 
         // fields required for displaying and decorating NPCs
-        let requiredIndexFields = [
-          'name',
-          'img',
-          'data.details.cr',
-          'data.traits.size',
-          'data.details.type',
-          'items.type',
-          'items.system.damage.parts',
-        ];
+        let requiredIndexFields;
 
-        if (CompendiumBrowser.isFoundryV10Plus)
+        if (CompendiumBrowser.isFoundryV11Plus){
+            requiredIndexFields = [
+                'name',
+                'img',
+                'system.details.cr',
+                'system.traits.size',
+                'system.details.type.value',
+              ]
+        }
+        else if (CompendiumBrowser.isFoundryV10Plus)
         {
             requiredIndexFields = [
                 'name',
@@ -669,10 +665,22 @@ class CompendiumBrowser extends Application {
               ]
       
         }
+        else{
+            requiredIndexFields = [
+              'name',
+              'img',
+              'data.details.cr',
+              'data.traits.size',
+              'data.details.type',
+              'items.type',
+              'items.system.damage.parts',
+            ];
+        }
         // add any fields required for currently active filters
-        const indexFields = requiredIndexFields.concat(
-                              Object.values(this.npcFilters.activeFilters).map(f => f.path)
-                            );
+        //also remove the duplicate fields for sanity
+        const indexFields = [...new Set(requiredIndexFields.concat(
+                                        Object.values(this.npcFilters.activeFilters).map(f => f.path)
+                                    ))];
         let collectionName = "unknown";
         try{
             for (let pack of game.packs) {
@@ -692,8 +700,7 @@ class CompendiumBrowser extends Application {
                             }
                             // JV-080: Special case. Compendium Folders creates Actors called #[CF_tempEntity] as placeholders for it's functions. Avoid them
                             if (npc5e.name != "#[CF_tempEntity]") {
-                                const decoratedNpc = this.decorateNpc(npc5e);
-
+                                const decoratedNpc = this.decorateNpc(npc5e, indexFields);
                                 if (decoratedNpc && this.passesFilter(decoratedNpc, this.npcFilters.activeFilters)){
 
                                     actorsList[npc5e._id] = {
@@ -1013,7 +1020,7 @@ class CompendiumBrowser extends Application {
         //Decorate and then filter a compendium entry - returns null or the item
 
         //JV-080 - v10 does away with item.data and everything is under #system but we want to decorate the first level of the item for return
-        let item = item5e;
+        const item = {...item5e}
 
         //JV-080: Folding these down to base item.x level so we can have v10 Item#system coexist with v9- Item
         if (CompendiumBrowser.isFoundryV10Plus) {
@@ -1103,16 +1110,21 @@ class CompendiumBrowser extends Application {
         return item;
     }
 
-    decorateNpc(npc) {
+    decorateNpc(npc, indexFields) {
         try {
-            const decoratedNpc = npc;
-            
-            //0.8.0: update for V10 to use actor.system instead of actor.data
-            let npcData = decoratedNpc.data; 
+            const decoratedNpc = indexFields.reduce((npcDict, item) => {
+                set(npcDict, item, getPropByString(npc, item))
+                return npcDict
+            }, {})
 
-            if (CompendiumBrowser.isFoundryV10Plus)
-            {
-                    npcData = decoratedNpc.system;
+            //0.8.0: update for V10 to use actor.system instead of actor.data
+            let npcData;
+
+            if (CompendiumBrowser.isFoundryV10Plus){
+                npcData = npc.system;
+            }
+            else{
+                npcData = npc.data;
             }
 
             // cr display
@@ -1131,9 +1143,8 @@ class CompendiumBrowser extends Application {
             if (npcData.details) {
                 decoratedNpc.displayType = this.getNPCType(npcData.details.type);
             }
-            else
-            {
-                decoratedNpc.displayType = 'unknown';
+            else {
+                decoratedNpc.displayType = game.i18n.localize("CMPBrowser.Unknown") ?? "Unknown";
             }
 
             if (CONFIG.DND5E.actorSizes[npcData.traits.size] !== undefined) {
@@ -1141,9 +1152,9 @@ class CompendiumBrowser extends Application {
             }
             let npcSize;
             if (CompendiumBrowser.isFoundryV10Plus) {
-                npcSize = decoratedNpc.system.traits.size;
+                npcSize = npc.system.traits.size;
             } else {
-                npcSize = decoratedNpc.data.traits.size;                
+                npcSize = npc.data.traits.size;                
             }
             switch (npcSize) {
                 case 'grg': decoratedNpc.filterSize = 5; break;
@@ -1155,22 +1166,23 @@ class CompendiumBrowser extends Application {
                 default: decoratedNpc.filterSize = 2; break;
             }
 
-            // getting value for HasSpells and damage types
-            decoratedNpc.hasSpells = decoratedNpc.items?.type?.reduce((hasSpells, itemType) => hasSpells || itemType === 'spell', false);
-            let npcDamagePart;
-            if (CompendiumBrowser.isFoundryV10Plus) {
-                npcDamagePart = decoratedNpc.items?.system?.damage?.parts;
-            } else {
-                npcDamagePart = decoratedNpc.items?.data?.damage?.parts;
+            if (CompendiumBrowser.isFoundryV10Minus){
+                // getting value for HasSpells and damage types
+                decoratedNpc.hasSpells = npc.items?.type?.some(itemType => itemType === 'spell');
+                let npcDamagePart;
+                if (CompendiumBrowser.isFoundryV10Plus) {
+                    npcDamagePart = npc.items?.system?.damage?.parts;
+                } else {
+                    npcDamagePart = npc.items?.data?.damage?.parts;
+                }
+                decoratedNpc.damageDealt = npcDamagePart ? npcDamagePart.filter(p => p?.length >= 2).map(p => p[1]) : [];
             }
-            decoratedNpc.damageDealt = npcDamagePart ? npcDamagePart.filter(p => p?.length >= 2).map(p => p[1]) : [];
             
             // JV-080: Think we have covered this off above now. We're making no assumptions and assuring that all decoratedNpc fields are now not 'undef' 
             //handle poorly constructed npc
             //if (npcData.details?.type && !(npcData.details?.type instanceof Object)){
             //    npcData.details.type = {value: npcData.details?.type};
             //}
-
             return decoratedNpc;
         }
         catch(e){
@@ -1181,7 +1193,7 @@ class CompendiumBrowser extends Application {
 
     getNPCType(type){
         if (type instanceof Object){
-            return type.value;
+            return game.i18n.localize(CompendiumBrowser.CREATURE_TYPES[type.value]) ?? type.value;
         }
 
         return type;
@@ -1364,6 +1376,9 @@ class CompendiumBrowser extends Application {
         
         // If V10, we need to know this because in v10(+) Item5e#data and Actor#data have changed to Item5e#system and Actor#system
         CompendiumBrowser.isFoundryV10Plus = (game.release?.generation >= 10);
+        CompendiumBrowser.isFoundryV10Minus = ((game.release?.generation <= 10) || (game.data.release?.generation <= 9) || (game.data.version?.startsWith("0.8")));
+
+        CompendiumBrowser.isFoundryV11Plus = (game.release?.generation >= 11);
     }
 
     saveSettings() {
@@ -1624,6 +1639,23 @@ class CompendiumBrowser extends Application {
 
 
     }
+    
+    static CREATURE_TYPES = {
+        aberration: "DND5E.CreatureAberration",
+        beast: "DND5E.CreatureBeast",
+        celestial: "DND5E.CreatureCelestial",
+        construct: "DND5E.CreatureConstruct",
+        dragon: "DND5E.CreatureDragon",
+        elemental: "DND5E.CreatureElemental",
+        fey: "DND5E.CreatureFey",
+        fiend: "DND5E.CreatureFiend",
+        giant: "DND5E.CreatureGiant",
+        humanoid: "DND5E.CreatureHumanoid",
+        monstrosity: "DND5E.CreatureMonstrosity",
+        ooze: "DND5E.CreatureOoze",
+        plant: "DND5E.CreaturePlant",
+        undead: "DND5E.CreatureUndead"
+    }
 
     async addNpcFilters() {
         // NPC Filters
@@ -1632,7 +1664,11 @@ class CompendiumBrowser extends Application {
         if (CompendiumBrowser.isFoundryV10Plus) {
             this.addNpcFilter("CMPBrowser.general", "DND5E.Source", 'system.details.source', 'text');
             this.addNpcFilter("CMPBrowser.general", "DND5E.Size", 'system.traits.size', 'select', CONFIG.DND5E.actorSizes);
-            this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasSpells", 'hasSpells', 'bool');
+
+            if (CompendiumBrowser.isFoundryV10Minus){
+                this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasSpells", 'hasSpells', 'bool');
+            }
+
             this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasLegAct", 'system.resources.legact.max', 'bool');
             this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasLegRes", 'system.resources.legres.max', 'bool');
             this.addNpcFilter("CMPBrowser.general", "DND5E.ChallengeRating", 'system.details.cr', 'numberCompare');
@@ -1645,6 +1681,7 @@ class CompendiumBrowser extends Application {
             this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasLegRes", 'data.resources.legres.max', 'bool');
             this.addNpcFilter("CMPBrowser.general", "DND5E.ChallengeRating", 'data.details.cr', 'numberCompare');
         }
+
         let npcDetailsPath;
         //Foundry v10+ Actor#data is now Actor#system
         if (CompendiumBrowser.isFoundryV10Plus) {
@@ -1658,22 +1695,7 @@ class CompendiumBrowser extends Application {
             npcDetailsPath = "data.details.type";
         }
 
-        this.addNpcFilter("CMPBrowser.general", "DND5E.CreatureType", npcDetailsPath, 'text', {
-            aberration: "DND5E.CreatureAberration",
-            beast: "DND5E.CreatureBeast",
-            celestial: "DND5E.CreatureCelestial",
-            construct: "DND5E.CreatureConstruct",
-            dragon: "DND5E.CreatureDragon",
-            elemental: "DND5E.CreatureElemental",
-            fey: "DND5E.CreatureFey",
-            fiend: "DND5E.CreatureFiend",
-            giant: "DND5E.CreatureGiant",
-            humanoid: "DND5E.CreatureHumanoid",
-            monstrosity: "DND5E.CreatureMonstrosity",
-            ooze: "DND5E.CreatureOoze",
-            plant: "DND5E.CreaturePlant",
-            undead: "DND5E.CreatureUndead"
-        });
+        this.addNpcFilter("CMPBrowser.general", "DND5E.CreatureType", npcDetailsPath, 'select', CompendiumBrowser.CREATURE_TYPES);
         //Foundry v10+ Actor#data is now Actor#system
         if (CompendiumBrowser.isFoundryV10Plus) {
             this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityStr", 'system.abilities.str.value', 'numberCompare');
@@ -1687,8 +1709,7 @@ class CompendiumBrowser extends Application {
             this.addNpcFilter("CMPBrowser.dmgInteraction", "DND5E.DamRes", 'system.traits.dr.value', 'multiSelect', CONFIG.DND5E.damageTypes, true);
             this.addNpcFilter("CMPBrowser.dmgInteraction", "DND5E.DamVuln", 'system.traits.dv.value', 'multiSelect', CONFIG.DND5E.damageTypes, true);
             this.addNpcFilter("CMPBrowser.dmgInteraction", "DND5E.ConImm", 'system.traits.ci.value', 'multiSelect', CONFIG.DND5E.conditionTypes, true);
-            this.addNpcFilter("CMPBrowser.dmgInteraction", "CMPBrowser.dmgDealt", 'damageDealt', 'multiSelect', CONFIG.DND5E.damageTypes, true);
-            }
+        }
         else
         {
             this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityStr", 'data.abilities.str.value', 'numberCompare');
@@ -1702,8 +1723,11 @@ class CompendiumBrowser extends Application {
             this.addNpcFilter("CMPBrowser.dmgInteraction", "DND5E.DamRes", 'data.traits.dr.value', 'multiSelect', CONFIG.DND5E.damageTypes, true);
             this.addNpcFilter("CMPBrowser.dmgInteraction", "DND5E.DamVuln", 'data.traits.dv.value', 'multiSelect', CONFIG.DND5E.damageTypes, true);
             this.addNpcFilter("CMPBrowser.dmgInteraction", "DND5E.ConImm", 'data.traits.ci.value', 'multiSelect', CONFIG.DND5E.conditionTypes, true);
-            this.addNpcFilter("CMPBrowser.dmgInteraction", "CMPBrowser.dmgDealt", 'damageDealt', 'multiSelect', CONFIG.DND5E.damageTypes, true);
      
+        }
+
+        if (CompendiumBrowser.isFoundryV10Minus){
+            this.addNpcFilter("CMPBrowser.dmgInteraction", "CMPBrowser.dmgDealt", 'damageDealt', 'multiSelect', CONFIG.DND5E.damageTypes, true);
         }
     }
 
@@ -1918,7 +1942,6 @@ class CompendiumBrowser extends Application {
         await html.find('.spell-browser-btn').remove();
 
         let tabBar = html.find("div.tab.spellbook .spellcasting-ability")
-        // console.log(tabBar)
         const cbButton = $(`<div style="max-width:40px;min-width:32px;"><button class="compendium-browser spell-browser-btn"><i class="fa-duotone fa-book"></i></button></div>`);
 
         tabBar.append(cbButton)
@@ -1931,8 +1954,8 @@ class CompendiumBrowser extends Application {
         await html.find('.spell-browser-btn').remove();
 
         let tabBar = html.find("div.spellbook-filters")
-        // console.log(tabBar)
         const cbButton = $(`<div style="max-width:40px;min-width:32px;"><button class="compendium-browser spell-browser-btn"><i class="fa-duotone fa-book"></i></button></div>`);
+        console.log(tabBar)
 
         tabBar.append(cbButton)
 
@@ -1952,6 +1975,22 @@ class CompendiumBrowser extends Application {
                 game.compendiumBrowser.renderWith("spell", target);
             });
 
+    }
+
+    static async addASISheetButton(cb, html){
+
+        await html.find('.feat-browser-btn').remove();
+
+        let dropArea = html.find("div.drop-area")
+        const cbButton = $(`<div style="max-width:40px;min-width:32px;"><button class="compendium-browser feat-browser-btn"><i class="fa-duotone fa-book"></i></button></div>`);
+
+        dropArea.append(cbButton)
+
+        cbButton.click(async ev => {
+            ev.preventDefault();
+
+            game.compendiumBrowser.renderWith("feat", [{"section":"CMPBrowsergeneral","label":"DND5EItemFeatureType", value: "feat" }]);
+        });
     }
 
     //find the first caster class of the character
@@ -2014,7 +2053,44 @@ function stripSpecialCharacters(str){
     return str.replace(/\W/g, '');
 }
 
+function stripDotCharacters(str){
+    return str.replace(/\./g, '');
+}
+
+function set(obj, path, value) {
+    var schema = obj;  // a moving reference to internal objects within obj
+    var pList = path.split('.');
+    var len = pList.length;
+    for(var i = 0; i < len-1; i++) {
+        var elem = pList[i];
+        if( !schema[elem] ) schema[elem] = {}
+        schema = schema[elem];
+    }
+
+    schema[pList[len-1]] = value;
+}
+
+function getPropByString(obj, propString) {
+  if (!propString)
+    return obj;
+
+  var prop, props = propString.split('.');
+
+  for (var i = 0, iLen = props.length - 1; i < iLen; i++) {
+    prop = props[i];
+
+    var candidate = obj[prop];
+    if (candidate !== undefined) {
+      obj = candidate;
+    } else {
+      break;
+    }
+  }
+  return obj[props[i]];
+}
+
 Hooks.on("renderActorSheet5eCharacter", CompendiumBrowser.addDefaultSheetButton);
 Hooks.on("renderTidy5eSheet", CompendiumBrowser.addTidySheetButton);
+Hooks.on("renderAbilityScoreImprovementFlow", CompendiumBrowser.addASISheetButton);
 
 Hooks.on("renderCompendiumBrowser", CompendiumBrowser.afterRender);
