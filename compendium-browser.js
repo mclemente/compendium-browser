@@ -1323,7 +1323,7 @@ class CompendiumBrowser extends Application {
 			"DND5E.SpellSchool",
 			"system.school",
 			"select",
-			CONFIG.DND5E.spellSchools
+			this._sortPackValues(CONFIG.DND5E.spellSchools)
 		);
 		this.addSpellFilter("CMPBrowser.general", "CMPBrowser.castingTime", "system.activation.type", "select", {
 			action: "DND5E.Action",
@@ -1345,7 +1345,7 @@ class CompendiumBrowser extends Application {
 			"CMPBrowser.damageType",
 			"damageTypes",
 			"select",
-			CONFIG.DND5E.damageTypes
+			this._sortPackValues(CONFIG.DND5E.damageTypes)
 		);
 		//JV-082: Fix for missing "Class" search feature
 		this.addSpellFilter(
@@ -1353,7 +1353,7 @@ class CompendiumBrowser extends Application {
 			"ITEM.TypeClass",
 			"classes",
 			"select",
-			{
+			this._sortPackValues({
 				artificer: "CMPBrowser.artificer",
 				bard: "CMPBrowser.bard",
 				cleric: "CMPBrowser.cleric",
@@ -1363,7 +1363,7 @@ class CompendiumBrowser extends Application {
 				sorcerer: "CMPBrowser.sorcerer",
 				warlock: "CMPBrowser.warlock",
 				wizard: "CMPBrowser.wizard",
-			},
+			}),
 			true
 		);
 		this.addSpellFilter("DND5E.SpellComponents", "DND5E.Ritual", "system.components.ritual", "bool");
@@ -1384,12 +1384,13 @@ class CompendiumBrowser extends Application {
 			tool: "ITEM.TypeTool",
 			weapon: "ITEM.TypeWeapon",
 		});
+
 		this.addItemFilter(
 			"CMPBrowser.general",
 			"CMPBrowser.ItemsPacks",
 			"matchedPacks",
 			"select",
-			{
+			this._sortPackValues({
 				burglar: "CMPBrowser.ItemsPacksBurglar",
 				diplomat: "CMPBrowser.ItemsPacksDiplomat",
 				dungeoneer: "CMPBrowser.ItemsPacksDungeoneer",
@@ -1398,7 +1399,7 @@ class CompendiumBrowser extends Application {
 				monsterhunter: "CMPBrowser.ItemsPacksMonsterHunter",
 				priest: "CMPBrowser.ItemsPacksPriest",
 				scholar: "CMPBrowser.ItemsPacksScholar",
-			},
+			}),
 			true
 		);
 		this.addItemFilter(
@@ -1414,7 +1415,7 @@ class CompendiumBrowser extends Application {
 			"CMPBrowser.damageType",
 			"damageTypes",
 			"select",
-			CONFIG.DND5E.damageTypes
+			this._sortPackValues(CONFIG.DND5E.damageTypes)
 		);
 		this.addItemFilter("CMPBrowser.GameMechanics", "CMPBrowser.UsesResources", "usesRessources", "bool");
 
@@ -1430,14 +1431,14 @@ class CompendiumBrowser extends Application {
 			"ITEM.TypeEquipment",
 			"system.armor.type",
 			"text",
-			CONFIG.DND5E.equipmentTypes
+			this._sortPackValues(CONFIG.DND5E.equipmentTypes)
 		);
 		this.addItemFilter(
 			"CMPBrowser.ItemSubtype",
 			"ITEM.TypeConsumable",
 			"system.consumableType",
 			"text",
-			CONFIG.DND5E.consumableTypes
+			this._sortPackValues(CONFIG.DND5E.consumableTypes)
 		);
 
 		this.addItemFilter("CMPBrowser.MagicItems", "DND5E.Rarity", "system.rarity", "select", CONFIG.DND5E.itemRarity);
@@ -1452,7 +1453,7 @@ class CompendiumBrowser extends Application {
 			"ITEM.TypeClass",
 			"classRequirement",
 			"select",
-			{
+			this._sortPackValues({
 				artificer: "CMPBrowser.artificer",
 				barbarian: "CMPBrowser.barbarian",
 				bard: "CMPBrowser.bard",
@@ -1466,29 +1467,35 @@ class CompendiumBrowser extends Application {
 				sorcerer: "CMPBrowser.sorcerer",
 				warlock: "CMPBrowser.warlock",
 				wizard: "CMPBrowser.wizard",
-			},
+			}),
 			true
 		);
 
-		let featureTypes = {
-			class: "ITEM.TypeClass",
-			feat: "ITEM.TypeFeat",
-		};
-
-		featureTypes.subclass = "ITEM.TypeSubclass";
-		featureTypes.background = "DND5E.Background";
-
-		this.addFeatFilter("CMPBrowser.general", "CMPBrowser.overall", "type", "select", featureTypes, false);
+		this.addFeatFilter(
+			"CMPBrowser.general",
+			"CMPBrowser.overall",
+			"type",
+			"select",
+			this._sortPackValues({
+				class: "ITEM.TypeClass",
+				feat: "ITEM.TypeFeat",
+				subclass: "ITEM.TypeSubclass",
+				background: "DND5E.Background",
+			}),
+			false
+		);
 
 		this.addFeatFilter(
 			"CMPBrowser.general",
 			"DND5E.ItemFeatureType",
 			"system.type.value",
 			"select",
-			Object.keys(dnd5e.config.featureTypes).reduce(function (acc, current) {
-				acc[current] = dnd5e.config.featureTypes[current].label;
-				return acc;
-			}, {}),
+			this._sortPackValues(
+				Object.keys(dnd5e.config.featureTypes).reduce(function (acc, current) {
+					acc[current] = dnd5e.config.featureTypes[current].label;
+					return acc;
+				}, {})
+			),
 			false
 		);
 
@@ -1497,7 +1504,7 @@ class CompendiumBrowser extends Application {
 			"CMPBrowser.subfeature",
 			"system.type.subtype",
 			"select",
-			dnd5e.config.featureTypes.class.subtypes
+			this._sortPackValues(dnd5e.config.featureTypes.class.subtypes)
 		);
 
 		this.addFeatFilter(
@@ -1512,9 +1519,20 @@ class CompendiumBrowser extends Application {
 			"CMPBrowser.damageType",
 			"damageTypes",
 			"select",
-			CONFIG.DND5E.damageTypes
+			this._sortPackValues(CONFIG.DND5E.damageTypes)
 		);
 		this.addFeatFilter("CMPBrowser.GameMechanics", "CMPBrowser.UsesResources", "usesRessources", "bool");
+	}
+
+	_sortPackValues(packValue) {
+		const sortable = Object.keys(packValue)
+			.map((pack) => [pack, game.i18n.localize(packValue[pack])])
+			.sort((a, b) => a[1].localeCompare(b[1]));
+
+		return sortable.reduce((acc, item) => {
+			acc[item[0]] = item[1];
+			return acc;
+		}, {});
 	}
 
 	static CREATURE_TYPES = {
@@ -1551,7 +1569,7 @@ class CompendiumBrowser extends Application {
 			"DND5E.CreatureType",
 			npcDetailsPath,
 			"select",
-			CompendiumBrowser.CREATURE_TYPES
+			this._sortPackValues(CompendiumBrowser.CREATURE_TYPES)
 		);
 		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityStr", "system.abilities.str.value", "numberCompare");
 		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityDex", "system.abilities.dex.value", "numberCompare");
@@ -1560,12 +1578,13 @@ class CompendiumBrowser extends Application {
 		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityWis", "system.abilities.wis.value", "numberCompare");
 		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityCha", "system.abilities.cha.value", "numberCompare");
 
+		const damageTypes = this._sortPackValues(CONFIG.DND5E.damageTypes);
 		this.addNpcFilter(
 			"CMPBrowser.dmgInteraction",
 			"DND5E.DamImm",
 			"system.traits.di.value",
 			"multiSelect",
-			CONFIG.DND5E.damageTypes,
+			damageTypes,
 			true
 		);
 		this.addNpcFilter(
@@ -1573,7 +1592,7 @@ class CompendiumBrowser extends Application {
 			"DND5E.DamRes",
 			"system.traits.dr.value",
 			"multiSelect",
-			CONFIG.DND5E.damageTypes,
+			damageTypes,
 			true
 		);
 		this.addNpcFilter(
@@ -1581,7 +1600,7 @@ class CompendiumBrowser extends Application {
 			"DND5E.DamVuln",
 			"system.traits.dv.value",
 			"multiSelect",
-			CONFIG.DND5E.damageTypes,
+			damageTypes,
 			true
 		);
 		this.addNpcFilter(
@@ -1589,7 +1608,7 @@ class CompendiumBrowser extends Application {
 			"DND5E.ConImm",
 			"system.traits.ci.value",
 			"multiSelect",
-			CONFIG.DND5E.conditionTypes,
+			this._sortPackValues(CONFIG.DND5E.conditionTypes),
 			true
 		);
 	}
