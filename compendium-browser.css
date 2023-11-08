@@ -5,28 +5,28 @@
   display: block;
 }
 .compendium-browser {
-  overflow-y: hidden!important;
+  overflow-y: hidden !important;
   max-width: 1100px;
   max-height: 90vh;
 }
 .compendium-browser .window-content {
-  overflow-y: hidden!important;
+  overflow-y: hidden !important;
   height: 100%;
 }
 .compendium-browser .window-content .parent {
-  overflow-y: hidden!important;
+  overflow-y: hidden !important;
   height: 100%;
 }
 .compendium-browser .window-content .parent .content {
-  overflow-y: hidden!important;
+  overflow-y: hidden !important;
   height: calc(100% - 2em);
 }
 .compendium-browser .window-content .parent .content .tab {
-  overflow-y: hidden!important;
+  overflow-y: hidden !important;
   height: 100%;
 }
 .compendium-browser .window-content .parent .content .tab .browser {
-  overflow-y: hidden!important;
+  overflow-y: hidden !important;
   height: 100%;
 }
 .compendium-browser .window-content .parent .content .tab .browser ul {
@@ -130,10 +130,10 @@
 }
 .compendium-browser .browser {
   height: 100%;
-  overflow-y: hidden!important;
+  overflow-y: hidden !important;
 }
 .compendium-browser .browser .window-content {
-  overflow-y: hidden!important;
+  overflow-y: hidden !important;
 }
 .compendium-browser .browser ul {
   float: right;
