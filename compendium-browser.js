@@ -669,14 +669,16 @@ class CompendiumBrowser extends Application {
 				this.resetFilters();
 				//0.4.3: Reset everything (including data) when you press the button - calls afterRender() hook
 
-				if (game.user.isGM || this.settings.allowSpellBrowser) {
-					this.refreshList = "spell";
-				} else if (this.settings.allowFeatBrowser) {
-					this.refreshList = "feat";
-				} else if (this.settings.allowItemBrowser) {
-					this.refreshList = "item";
-				} else if (this.settings.allowNPCBrowser) {
-					this.refreshList = "npc";
+				if (!this.refreshList) {
+					if (game.user.isGM || this.settings.allowSpellBrowser) {
+						this.refreshList = "spell";
+					} else if (this.settings.allowFeatBrowser) {
+						this.refreshList = "feat";
+					} else if (this.settings.allowItemBrowser) {
+						this.refreshList = "item";
+					} else if (this.settings.allowNPCBrowser) {
+						this.refreshList = "npc";
+					}
 				}
 				this.render(true);
 			});
@@ -693,7 +695,7 @@ class CompendiumBrowser extends Application {
 
 		cb.replaceList(html, cb.refreshList);
 
-		cb.refreshList = null;
+		// cb.refreshList = null;
 
 		if (CompendiumBrowser.postRender) {
 			CompendiumBrowser.postRender();
@@ -724,6 +726,7 @@ class CompendiumBrowser extends Application {
 			const tabInfo = tabElements[browserTab];
 			elements = html.find(tabInfo.elements);
 			loadingMessage = html.find(tabInfo.message);
+			this.refreshList = browserTab;
 		}
 
 		if (elements?.length) {
@@ -1224,12 +1227,12 @@ class CompendiumBrowser extends Application {
 			hint: game.i18n.localize("CMPBrowser.SETTING.Maxload.HINT"),
 			scope: "world",
 			config: true,
-			default: 500,
+			default: 600,
 			type: Number,
 			range: {
 				// If range is specified, the resulting setting will be a range slider
 				min: 200,
-				max: 5000,
+				max: 2000,
 				step: 100,
 			},
 		});
