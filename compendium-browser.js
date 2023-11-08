@@ -1,12 +1,4 @@
-﻿const CMPBrowser = {
-	MODULE_NAME: "compendium-browser",
-	MODULE_VERSION: "0.8.0",
-	MAXLOAD: 500, //Default for the maximum number to load before displaying a message that you need to filter to see more
-};
-
-const STOP_SEARCH = "StopSearchException";
-
-// JV-080 - Adding a 'not-migrated' exception for v10 if the compendiums are not migrated to the new format (breaks e.g. npc compendium browser)
+﻿const STOP_SEARCH = "StopSearchException";
 const NOT_MIGRATED = "NotMigratedException";
 
 class CompendiumBrowser extends Application {
@@ -122,24 +114,13 @@ class CompendiumBrowser extends Application {
 						event.preventDefault();
 						return false;
 					}
-					if (CompendiumBrowser.isFoundryV10Plus) {
-						event.dataTransfer.setData(
-							"text/plain",
-							JSON.stringify({
-								type: pack.documentName,
-								uuid: `Compendium.${pack.collection}.${li.getAttribute("data-entry-id")}`,
-							})
-						);
-					} else {
-						event.dataTransfer.setData(
-							"text/plain",
-							JSON.stringify({
-								type: pack.documentName,
-								pack: pack.collection,
-								id: li.getAttribute("data-entry-id"),
-							})
-						);
-					}
+					event.dataTransfer.setData(
+						"text/plain",
+						JSON.stringify({
+							type: pack.documentName,
+							uuid: `Compendium.${pack.collection}.${li.getAttribute("data-entry-id")}`,
+						})
+					);
 				},
 				false
 			);
@@ -432,7 +413,6 @@ class CompendiumBrowser extends Application {
 	}
 
 	async loadAndFilterItems(browserTab = "spell", updateLoading = null) {
-		console.log(`Load and Filter Items | Started loading ${browserTab}s`);
 		console.time("loadAndFilterItems");
 		await this.checkListsLoaded();
 
@@ -440,7 +420,7 @@ class CompendiumBrowser extends Application {
 
 		this.CurrentSeachNumber = seachNumber;
 
-		const maxLoad = game.settings.get(CMPBrowser.MODULE_NAME, "maxload") ?? CMPBrowser.MAXLOAD;
+		const maxLoad = game.settings.get("compendium-browser", "maxload");
 
 		//0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
 		let unfoundSpells = "";
@@ -581,71 +561,30 @@ class CompendiumBrowser extends Application {
 			}
 		}
 
-		// this.removeDuplicates(compactItems);
-		/*
-
-        if (unfoundSpells !== '') {
-            console.log(`Load and Fliter Items | List of Spells that don't have a class associated to them:`);
-            console.log(unfoundSpells);
-        }
-*/
 		this.itemsLoaded = true;
 		console.timeEnd("loadAndFilterItems");
-		console.log(`Load and Filter Items | Finished loading ${Object.keys(compactItems).length} ${browserTab}s`);
 		updateLoading(numItemsLoaded, true);
 		return compactItems;
 	}
 
 	async loadAndFilterNpcs(updateLoading = null) {
-		console.log("NPC Browser | Started loading NPCs");
-
 		const seachNumber = Date.now();
 		this.CurrentSeachNumber = seachNumber;
 
 		console.time("loadAndFilterNpcs");
 		let npcs = {};
 
-		const maxLoad = game.settings.get(CMPBrowser.MODULE_NAME, "maxload") ?? CMPBrowser.MAXLOAD;
+		const maxLoad = game.settings.get("compendium-browser", "maxload");
 
 		let numNpcsLoaded = 0;
 		this.npcsLoaded = false;
 
-		// fields required for displaying and decorating NPCs
-		let requiredIndexFields;
-
-		if (CompendiumBrowser.isFoundryV11Plus) {
-			requiredIndexFields = [
-				"name",
-				"img",
-				"system.details.cr",
-				"system.traits.size",
-				"system.details.type.value",
-			];
-		} else if (CompendiumBrowser.isFoundryV10Plus) {
-			requiredIndexFields = [
-				"name",
-				"img",
-				"system.details.cr",
-				"system.traits.size",
-				"system.details.type",
-				"items.type",
-				"items.system.damage.parts",
-			];
-		} else {
-			requiredIndexFields = [
-				"name",
-				"img",
-				"data.details.cr",
-				"data.traits.size",
-				"data.details.type",
-				"items.type",
-				"items.system.damage.parts",
-			];
-		}
-		// add any fields required for currently active filters
-		//also remove the duplicate fields for sanity
 		const indexFields = [
-			...new Set(requiredIndexFields.concat(Object.values(this.npcFilters.activeFilters).map((f) => f.path))),
+			...new Set(
+				["name", "img", "system.details.cr", "system.traits.size", "system.details.type.value"].concat(
+					Object.values(this.npcFilters.activeFilters).map((f) => f.path)
+				)
+			),
 		];
 		let collectionName = "unknown";
 		try {
@@ -662,8 +601,7 @@ class CompendiumBrowser extends Application {
 									npc5e.img = game.dnd5e.moduleArt.map.get(npc5e.uuid.replace(".Actor", ""))?.actor;
 								}
 
-								// JV-080: We're in a v10 foundry but the data doesn't have Actor#system - this means index fields won't have populated. Can't 'browse' like this.
-								if (CompendiumBrowser.isFoundryV10Plus && npc5e.system == undefined) {
+								if (npc5e.system == undefined) {
 									collectionName = pack.collection;
 									throw NOT_MIGRATED;
 								}
@@ -676,7 +614,6 @@ class CompendiumBrowser extends Application {
 									}
 									throw STOP_SEARCH;
 								}
-								// JV-080: Special case. Compendium Folders creates Actors called #[CF_tempEntity] as placeholders for it's functions. Avoid them
 								if (npc5e.name != "#[CF_tempEntity]") {
 									const decoratedNpc = this.decorateNpc(npc5e, indexFields);
 									if (
@@ -721,7 +658,6 @@ class CompendiumBrowser extends Application {
 
 		this.npcsLoaded = true;
 		console.timeEnd("loadAndFilterNpcs");
-		console.log(`NPC Browser | Finished loading NPCs: ${Object.keys(npcs).length} NPCs`);
 		updateLoading(numNpcsLoaded, true);
 		return npcs;
 	}
@@ -813,7 +749,7 @@ class CompendiumBrowser extends Application {
 		if (elements?.length) {
 			//0.4.2b: On a tab-switch, only reload if there isn't any data already
 			if (options?.reload || !elements[0].children.length) {
-				const maxLoad = game.settings.get(CMPBrowser.MODULE_NAME, "maxload") ?? CMPBrowser.MAXLOAD;
+				const maxLoad = game.settings.get("compendium-browser", "maxload");
 				const updateLoading = async (numLoaded, doneLoading) => {
 					if (loadingMessage.length) {
 						this.renderLoading(loadingMessage[0], browserTab, numLoaded, numLoaded >= maxLoad, doneLoading);
@@ -1008,24 +944,13 @@ class CompendiumBrowser extends Application {
 		if (!item5e) return null;
 		//Decorate and then filter a compendium entry - returns null or the item
 
-		//JV-080 - v10 does away with item.data and everything is under #system but we want to decorate the first level of the item for return
 		const item = { ...item5e };
 
-		//JV-080: Folding these down to base item.x level so we can have v10 Item#system coexist with v9- Item
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			item.level = item5e.system?.level;
-			item.components = item5e.system?.components;
-			item.damage = item5e.system?.damage;
-			item.classes = item5e.system?.classes;
-			item.requirements = item5e.system?.requirements;
-		} else {
-			item = item5e.data;
-			item.level = item5e.data?.level;
-			item.components = item5e.data?.level;
-			item.damage = item.data?.damage; // equivalent to: item5e.data.data.xxx - Ugh. The 'fold down' in v10 makes sense now.
-			item.classes = item.data?.classes;
-			item.requirements = item.data?.requirements;
-		}
+		item.level = item5e.system?.level;
+		item.components = item5e.system?.components;
+		item.damage = item5e.system?.damage;
+		item.classes = item5e.system?.classes;
+		item.requirements = item5e.system?.requirements;
 		// getting damage types (common to all Items, although some won't have any)
 		item.damageTypes = [];
 
@@ -1073,11 +998,6 @@ class CompendiumBrowser extends Application {
 
 			// getting uses/ressources status
 			item.usesRessources = item5e.hasLimitedUses;
-
-			//JV-080: In v10 this is only a getter (and will already exist since item = item5e.system)
-			if (!CompendiumBrowser.isFoundryV10Plus) {
-				item.hasSave = item5e.hasSave;
-			}
 		} else if (item.type === "subclass") {
 			//subclasses dont exist lower then version 10
 			item.classRequirement = [item.system.classIdentifier];
@@ -1110,20 +1030,13 @@ class CompendiumBrowser extends Application {
 			}, {});
 
 			//0.8.0: update for V10 to use actor.system instead of actor.data
-			let npcData;
-
-			if (CompendiumBrowser.isFoundryV10Plus) {
-				npcData = npc.system;
-			} else {
-				npcData = npc.data;
-			}
+			let npcData = npc.system;
 
 			// cr display
 			let cr = npcData.details?.cr; //0.7.2c: Possibly because of getIndex() use we now have to check for existence of details (doesn't for Character-type NPCs)
 			if (cr === undefined || cr === "") cr = 0;
 			else cr = Number(cr);
 
-			// JV-080: moved here because we want the OG number for orderCR but can't depend on .details.cr being present
 			decoratedNpc.orderCR = cr;
 
 			if (cr > 0 && cr < 1) cr = "1/" + 1 / cr;
@@ -1140,12 +1053,7 @@ class CompendiumBrowser extends Application {
 			if (CONFIG.DND5E.actorSizes[npcData.traits.size] !== undefined) {
 				decoratedNpc.displaySize = CONFIG.DND5E.actorSizes[npcData.traits.size];
 			}
-			let npcSize;
-			if (CompendiumBrowser.isFoundryV10Plus) {
-				npcSize = npc.system.traits.size;
-			} else {
-				npcSize = npc.data.traits.size;
-			}
+			let npcSize = npc.system.traits.size;
 			switch (npcSize) {
 				case "grg":
 					decoratedNpc.filterSize = 5;
@@ -1167,29 +1075,8 @@ class CompendiumBrowser extends Application {
 					decoratedNpc.filterSize = 2;
 					break;
 			}
-
-			if (CompendiumBrowser.isFoundryV10Minus) {
-				// getting value for HasSpells and damage types
-				decoratedNpc.hasSpells = npc.items?.type?.some((itemType) => itemType === "spell");
-				let npcDamagePart;
-				if (CompendiumBrowser.isFoundryV10Plus) {
-					npcDamagePart = npc.items?.system?.damage?.parts;
-				} else {
-					npcDamagePart = npc.items?.data?.damage?.parts;
-				}
-				decoratedNpc.damageDealt = npcDamagePart
-					? npcDamagePart.filter((p) => p?.length >= 2).map((p) => p[1])
-					: [];
-			}
-
-			// JV-080: Think we have covered this off above now. We're making no assumptions and assuring that all decoratedNpc fields are now not 'undef'
-			//handle poorly constructed npc
-			//if (npcData.details?.type && !(npcData.details?.type instanceof Object)){
-			//    npcData.details.type = {value: npcData.details?.type};
-			//}
 			return decoratedNpc;
 		} catch (e) {
-			console.log("%c Error loading NPC:" + npc.name, "background: white; color: red");
 			throw e;
 		}
 	}
@@ -1337,7 +1224,7 @@ class CompendiumBrowser extends Application {
 			}
 		}
 		// creating game setting container
-		game.settings.register(CMPBrowser.MODULE_NAME, "settings", {
+		game.settings.register("compendium-browser", "settings", {
 			name: "Compendium Browser Settings",
 			hint: "Settings to exclude packs from loading and visibility of the browser",
 			default: defaultSettings,
@@ -1347,12 +1234,12 @@ class CompendiumBrowser extends Application {
 				this.settings = settings;
 			},
 		});
-		game.settings.register(CMPBrowser.MODULE_NAME, "maxload", {
+		game.settings.register("compendium-browser", "maxload", {
 			name: game.i18n.localize("CMPBrowser.SETTING.Maxload.NAME"),
 			hint: game.i18n.localize("CMPBrowser.SETTING.Maxload.HINT"),
 			scope: "world",
 			config: true,
-			default: CMPBrowser.MAXLOAD,
+			default: 500,
 			type: Number,
 			range: {
 				// If range is specified, the resulting setting will be a range slider
@@ -1363,7 +1250,7 @@ class CompendiumBrowser extends Application {
 		});
 
 		// load settings from container and apply to default settings (available compendie might have changed)
-		let settings = game.settings.get(CMPBrowser.MODULE_NAME, "settings");
+		let settings = game.settings.get("compendium-browser", "settings");
 		for (let compKey in defaultSettings.loadedSpellCompendium) {
 			//v0.7.1 Check for settings.loadedSpellCompendium
 			if (settings.loadedSpellCompendium && settings.loadedSpellCompendium[compKey] !== undefined) {
@@ -1382,31 +1269,13 @@ class CompendiumBrowser extends Application {
 		defaultSettings.allowNpcBrowser = settings.allowNpcBrowser ? true : false;
 
 		if (game.user.isGM) {
-			game.settings.set(CMPBrowser.MODULE_NAME, "settings", defaultSettings);
-			console.log("New default settings set");
-			console.log(defaultSettings);
+			game.settings.set("compendium-browser", "settings", defaultSettings);
 		}
 		this.settings = defaultSettings;
-
-		//0.9.5 Set the CompendiumBrowser.isFoundryV8Plus variable for different code-paths
-		//If v9, then game.data.version will throw a deprecation warning so test for v9 first
-		CompendiumBrowser.isFoundryV8Plus =
-			game.release?.generation >= 10 ||
-			game.data.release?.generation >= 9 ||
-			game.data.version?.startsWith("0.8");
-
-		// If V10, we need to know this because in v10(+) Item5e#data and Actor#data have changed to Item5e#system and Actor#system
-		CompendiumBrowser.isFoundryV10Plus = game.release?.generation >= 10;
-		CompendiumBrowser.isFoundryV10Minus =
-			game.release?.generation <= 10 ||
-			game.data.release?.generation <= 9 ||
-			game.data.version?.startsWith("0.8");
-
-		CompendiumBrowser.isFoundryV11Plus = game.release?.generation >= 11;
 	}
 
 	saveSettings() {
-		game.settings.set(CMPBrowser.MODULE_NAME, "settings", this.settings);
+		game.settings.set("compendium-browser", "settings", this.settings);
 	}
 
 	//FILTERS - Added on the Ready hook
@@ -1450,155 +1319,72 @@ class CompendiumBrowser extends Application {
 	async addSpellFilters() {
 		// Spellfilters
 		//Foundry v10+ Item#data is now Item#system
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			this.addSpellFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
-			this.addSpellFilter("CMPBrowser.general", "DND5E.Level", "system.level", "multiSelect", {
-				0: "DND5E.SpellCantrip",
-				1: "1",
-				2: "2",
-				3: "3",
-				4: "4",
-				5: "5",
-				6: "6",
-				7: "7",
-				8: "8",
-				9: "9",
-			});
-			this.addSpellFilter(
-				"CMPBrowser.general",
-				"DND5E.SpellSchool",
-				"system.school",
-				"select",
-				CONFIG.DND5E.spellSchools
-			);
-			this.addSpellFilter("CMPBrowser.general", "CMPBrowser.castingTime", "system.activation.type", "select", {
-				action: "DND5E.Action",
-				bonus: "DND5E.BonusAction",
-				reaction: "DND5E.Reaction",
-				minute: "DND5E.TimeMinute",
-				hour: "DND5E.TimeHour",
-				day: "DND5E.TimeDay",
-			});
-			this.addSpellFilter(
-				"CMPBrowser.general",
-				"CMPBrowser.spellType",
-				"system.actionType",
-				"select",
-				CONFIG.DND5E.itemActionTypes
-			);
-			this.addSpellFilter(
-				"CMPBrowser.general",
-				"CMPBrowser.damageType",
-				"damageTypes",
-				"select",
-				CONFIG.DND5E.damageTypes
-			);
-			//JV-082: Fix for missing "Class" search feature
-			this.addSpellFilter(
-				"CMPBrowser.general",
-				"ITEM.TypeClass",
-				"classes",
-				"select",
-				{
-					artificer: "CMPBrowser.artificer",
-					bard: "CMPBrowser.bard",
-					cleric: "CMPBrowser.cleric",
-					druid: "CMPBrowser.druid",
-					paladin: "CMPBrowser.paladin",
-					ranger: "CMPBrowser.ranger",
-					sorcerer: "CMPBrowser.sorcerer",
-					warlock: "CMPBrowser.warlock",
-					wizard: "CMPBrowser.wizard",
-				},
-				true
-			);
-			this.addSpellFilter("DND5E.SpellComponents", "DND5E.Ritual", "system.components.ritual", "bool");
-			this.addSpellFilter(
-				"DND5E.SpellComponents",
-				"DND5E.Concentration",
-				"system.components.concentration",
-				"bool"
-			);
-			this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentVerbal", "system.components.vocal", "bool");
-			this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentSomatic", "system.components.somatic", "bool");
-			this.addSpellFilter(
-				"DND5E.SpellComponents",
-				"DND5E.ComponentMaterial",
-				"system.components.material",
-				"bool"
-			);
-		} else {
-			this.addSpellFilter("CMPBrowser.general", "DND5E.Source", "data.source", "text");
-			this.addSpellFilter("CMPBrowser.general", "DND5E.Level", "data.level", "multiSelect", {
-				0: "DND5E.SpellCantrip",
-				1: "1",
-				2: "2",
-				3: "3",
-				4: "4",
-				5: "5",
-				6: "6",
-				7: "7",
-				8: "8",
-				9: "9",
-			});
-			this.addSpellFilter(
-				"CMPBrowser.general",
-				"DND5E.SpellSchool",
-				"data.school",
-				"select",
-				CONFIG.DND5E.spellSchools
-			);
-			this.addSpellFilter("CMPBrowser.general", "CMPBrowser.castingTime", "data.activation.type", "select", {
-				action: "DND5E.Action",
-				bonus: "DND5E.BonusAction",
-				reaction: "DND5E.Reaction",
-				minute: "DND5E.TimeMinute",
-				hour: "DND5E.TimeHour",
-				day: "DND5E.TimeDay",
-			});
-			this.addSpellFilter(
-				"CMPBrowser.general",
-				"CMPBrowser.spellType",
-				"data.actionType",
-				"select",
-				CONFIG.DND5E.itemActionTypes
-			);
-			this.addSpellFilter(
-				"CMPBrowser.general",
-				"CMPBrowser.damageType",
-				"damageTypes",
-				"select",
-				CONFIG.DND5E.damageTypes
-			);
-			this.addSpellFilter(
-				"CMPBrowser.general",
-				"ITEM.TypeClass",
-				"data.classes",
-				"select",
-				{
-					artificer: "CMPBrowser.artificer",
-					bard: "CMPBrowser.bard",
-					cleric: "CMPBrowser.cleric",
-					druid: "CMPBrowser.druid",
-					paladin: "CMPBrowser.paladin",
-					ranger: "CMPBrowser.ranger",
-					sorcerer: "CMPBrowser.sorcerer",
-					warlock: "CMPBrowser.warlock",
-					wizard: "CMPBrowser.wizard",
-				},
-				true
-			);
-			this.addSpellFilter("DND5E.SpellComponents", "DND5E.Ritual", "data.components.ritual", "bool");
-			this.addSpellFilter(
-				"DND5E.SpellComponents",
-				"DND5E.Concentration",
-				"data.components.concentration",
-				"bool"
-			);
-			this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentVerbal", "data.components.vocal", "bool");
-			this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentSomatic", "data.components.somatic", "bool");
-			this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentMaterial", "data.components.material", "bool");
-		}
+		this.addSpellFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
+		this.addSpellFilter("CMPBrowser.general", "DND5E.Level", "system.level", "multiSelect", {
+			0: "DND5E.SpellCantrip",
+			1: "1",
+			2: "2",
+			3: "3",
+			4: "4",
+			5: "5",
+			6: "6",
+			7: "7",
+			8: "8",
+			9: "9",
+		});
+		this.addSpellFilter(
+			"CMPBrowser.general",
+			"DND5E.SpellSchool",
+			"system.school",
+			"select",
+			CONFIG.DND5E.spellSchools
+		);
+		this.addSpellFilter("CMPBrowser.general", "CMPBrowser.castingTime", "system.activation.type", "select", {
+			action: "DND5E.Action",
+			bonus: "DND5E.BonusAction",
+			reaction: "DND5E.Reaction",
+			minute: "DND5E.TimeMinute",
+			hour: "DND5E.TimeHour",
+			day: "DND5E.TimeDay",
+		});
+		this.addSpellFilter(
+			"CMPBrowser.general",
+			"CMPBrowser.spellType",
+			"system.actionType",
+			"select",
+			CONFIG.DND5E.itemActionTypes
+		);
+		this.addSpellFilter(
+			"CMPBrowser.general",
+			"CMPBrowser.damageType",
+			"damageTypes",
+			"select",
+			CONFIG.DND5E.damageTypes
+		);
+		//JV-082: Fix for missing "Class" search feature
+		this.addSpellFilter(
+			"CMPBrowser.general",
+			"ITEM.TypeClass",
+			"classes",
+			"select",
+			{
+				artificer: "CMPBrowser.artificer",
+				bard: "CMPBrowser.bard",
+				cleric: "CMPBrowser.cleric",
+				druid: "CMPBrowser.druid",
+				paladin: "CMPBrowser.paladin",
+				ranger: "CMPBrowser.ranger",
+				sorcerer: "CMPBrowser.sorcerer",
+				warlock: "CMPBrowser.warlock",
+				wizard: "CMPBrowser.wizard",
+			},
+			true
+		);
+		this.addSpellFilter("DND5E.SpellComponents", "DND5E.Ritual", "system.components.ritual", "bool");
+		this.addSpellFilter("DND5E.SpellComponents", "DND5E.Concentration", "system.components.concentration", "bool");
+		this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentVerbal", "system.components.vocal", "bool");
+		this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentSomatic", "system.components.somatic", "bool");
+		this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentMaterial", "system.components.material", "bool");
 	}
 
 	async addItemFilters() {
@@ -1606,11 +1392,7 @@ class CompendiumBrowser extends Application {
 
 		// Feature Filters
 		//Foundry v10+ Item#data is now Item#system
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			this.addItemFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
-		} else {
-			this.addItemFilter("CMPBrowser.general", "DND5E.Source", "data.source", "text");
-		}
+		this.addItemFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
 
 		this.addItemFilter("CMPBrowser.general", "Item Type", "type", "select", {
 			consumable: "ITEM.TypeConsumable",
@@ -1637,23 +1419,13 @@ class CompendiumBrowser extends Application {
 			},
 			true
 		);
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			this.addItemFilter(
-				"CMPBrowser.GameMechanics",
-				"DND5E.ItemActivationCost",
-				"system.activation.type",
-				"select",
-				CONFIG.DND5E.abilityActivationTypes
-			);
-		} else {
-			this.addItemFilter(
-				"CMPBrowser.GameMechanics",
-				"DND5E.ItemActivationCost",
-				"data.activation.type",
-				"select",
-				CONFIG.DND5E.abilityActivationTypes
-			);
-		}
+		this.addItemFilter(
+			"CMPBrowser.GameMechanics",
+			"DND5E.ItemActivationCost",
+			"system.activation.type",
+			"select",
+			CONFIG.DND5E.abilityActivationTypes
+		);
 
 		this.addItemFilter(
 			"CMPBrowser.GameMechanics",
@@ -1664,80 +1436,35 @@ class CompendiumBrowser extends Application {
 		);
 		this.addItemFilter("CMPBrowser.GameMechanics", "CMPBrowser.UsesResources", "usesRessources", "bool");
 
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			this.addItemFilter(
-				"CMPBrowser.ItemSubtype",
-				"ITEM.TypeWeapon",
-				"system.weaponType",
-				"text",
-				CONFIG.DND5E.weaponTypes
-			);
-			this.addItemFilter(
-				"CMPBrowser.ItemSubtype",
-				"ITEM.TypeEquipment",
-				"system.armor.type",
-				"text",
-				CONFIG.DND5E.equipmentTypes
-			);
-			this.addItemFilter(
-				"CMPBrowser.ItemSubtype",
-				"ITEM.TypeConsumable",
-				"system.consumableType",
-				"text",
-				CONFIG.DND5E.consumableTypes
-			);
-		} else {
-			this.addItemFilter(
-				"CMPBrowser.ItemSubtype",
-				"ITEM.TypeWeapon",
-				"data.weaponType",
-				"text",
-				CONFIG.DND5E.weaponTypes
-			);
-			this.addItemFilter(
-				"CMPBrowser.ItemSubtype",
-				"ITEM.TypeEquipment",
-				"data.armor.type",
-				"text",
-				CONFIG.DND5E.equipmentTypes
-			);
-			this.addItemFilter(
-				"CMPBrowser.ItemSubtype",
-				"ITEM.TypeConsumable",
-				"data.consumableType",
-				"text",
-				CONFIG.DND5E.consumableTypes
-			);
-		}
+		this.addItemFilter(
+			"CMPBrowser.ItemSubtype",
+			"ITEM.TypeWeapon",
+			"system.weaponType",
+			"text",
+			CONFIG.DND5E.weaponTypes
+		);
+		this.addItemFilter(
+			"CMPBrowser.ItemSubtype",
+			"ITEM.TypeEquipment",
+			"system.armor.type",
+			"text",
+			CONFIG.DND5E.equipmentTypes
+		);
+		this.addItemFilter(
+			"CMPBrowser.ItemSubtype",
+			"ITEM.TypeConsumable",
+			"system.consumableType",
+			"text",
+			CONFIG.DND5E.consumableTypes
+		);
 
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			this.addItemFilter(
-				"CMPBrowser.MagicItems",
-				"DND5E.Rarity",
-				"system.rarity",
-				"select",
-				CONFIG.DND5E.itemRarity
-			);
-		} else {
-			//0.7.2c: Fix rarity encoding (uses camelcase names)
-			this.addItemFilter("CMPBrowser.MagicItems", "DND5E.Rarity", "data.rarity", "select", {
-				common: "DND5E.ItemRarityCommon",
-				uncommon: "DND5E.ItemRarityUncommon",
-				rare: "DND5E.ItemRarityRare",
-				veryRare: "DND5E.ItemRarityVeryRare",
-				legendary: "DND5E.ItemRarityLegendary",
-			});
-		}
+		this.addItemFilter("CMPBrowser.MagicItems", "DND5E.Rarity", "system.rarity", "select", CONFIG.DND5E.itemRarity);
 	}
 
 	async addFeatFilters() {
 		// Feature Filters
 		//Foundry v10+ Item#data is now Item#system
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			this.addFeatFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
-		} else {
-			this.addFeatFilter("CMPBrowser.general", "DND5E.Source", "data.source", "text");
-		}
+		this.addFeatFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
 		this.addFeatFilter(
 			"CMPBrowser.general",
 			"ITEM.TypeClass",
@@ -1766,55 +1493,38 @@ class CompendiumBrowser extends Application {
 			feat: "ITEM.TypeFeat",
 		};
 
-		//subclasses don't exist lower then version 10
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			featureTypes.subclass = "ITEM.TypeSubclass";
-			featureTypes.background = "DND5E.Background";
-		}
+		featureTypes.subclass = "ITEM.TypeSubclass";
+		featureTypes.background = "DND5E.Background";
 
 		this.addFeatFilter("CMPBrowser.general", "CMPBrowser.overall", "type", "select", featureTypes, false);
 
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			this.addFeatFilter(
-				"CMPBrowser.general",
-				"DND5E.ItemFeatureType",
-				"system.type.value",
-				"select",
-				Object.keys(dnd5e.config.featureTypes).reduce(function (acc, current) {
-					acc[current] = dnd5e.config.featureTypes[current].label;
-					return acc;
-				}, {}),
-				false
-			);
-		}
+		this.addFeatFilter(
+			"CMPBrowser.general",
+			"DND5E.ItemFeatureType",
+			"system.type.value",
+			"select",
+			Object.keys(dnd5e.config.featureTypes).reduce(function (acc, current) {
+				acc[current] = dnd5e.config.featureTypes[current].label;
+				return acc;
+			}, {}),
+			false
+		);
 
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			this.addFeatFilter(
-				"CMPBrowser.general",
-				"CMPBrowser.subfeature",
-				"system.type.subtype",
-				"select",
-				dnd5e.config.featureTypes.class.subtypes
-			);
-		}
+		this.addFeatFilter(
+			"CMPBrowser.general",
+			"CMPBrowser.subfeature",
+			"system.type.subtype",
+			"select",
+			dnd5e.config.featureTypes.class.subtypes
+		);
 
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			this.addFeatFilter(
-				"CMPBrowser.GameMechanics",
-				"DND5E.ItemActivationCost",
-				"system.activation.type",
-				"select",
-				CONFIG.DND5E.abilityActivationTypes
-			);
-		} else {
-			this.addFeatFilter(
-				"CMPBrowser.GameMechanics",
-				"DND5E.ItemActivationCost",
-				"data.activation.type",
-				"select",
-				CONFIG.DND5E.abilityActivationTypes
-			);
-		}
+		this.addFeatFilter(
+			"CMPBrowser.GameMechanics",
+			"DND5E.ItemActivationCost",
+			"system.activation.type",
+			"select",
+			CONFIG.DND5E.abilityActivationTypes
+		);
 		this.addFeatFilter(
 			"CMPBrowser.GameMechanics",
 			"CMPBrowser.damageType",
@@ -1845,51 +1555,14 @@ class CompendiumBrowser extends Application {
 	async addNpcFilters() {
 		// NPC Filters
 
-		//Foundry v10+ Actor#data is now Actor#system
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			this.addNpcFilter("CMPBrowser.general", "DND5E.Source", "system.details.source", "text");
-			this.addNpcFilter(
-				"CMPBrowser.general",
-				"DND5E.Size",
-				"system.traits.size",
-				"select",
-				CONFIG.DND5E.actorSizes
-			);
+		this.addNpcFilter("CMPBrowser.general", "DND5E.Source", "system.details.source", "text");
+		this.addNpcFilter("CMPBrowser.general", "DND5E.Size", "system.traits.size", "select", CONFIG.DND5E.actorSizes);
 
-			if (CompendiumBrowser.isFoundryV10Minus) {
-				this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasSpells", "hasSpells", "bool");
-			}
+		this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasLegAct", "system.resources.legact.max", "bool");
+		this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasLegRes", "system.resources.legres.max", "bool");
+		this.addNpcFilter("CMPBrowser.general", "DND5E.ChallengeRating", "system.details.cr", "numberCompare");
 
-			this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasLegAct", "system.resources.legact.max", "bool");
-			this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasLegRes", "system.resources.legres.max", "bool");
-			this.addNpcFilter("CMPBrowser.general", "DND5E.ChallengeRating", "system.details.cr", "numberCompare");
-		} else {
-			this.addNpcFilter("CMPBrowser.general", "DND5E.Source", "data.details.source", "text");
-			this.addNpcFilter(
-				"CMPBrowser.general",
-				"DND5E.Size",
-				"data.traits.size",
-				"select",
-				CONFIG.DND5E.actorSizes
-			);
-			this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasSpells", "hasSpells", "bool");
-			this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasLegAct", "data.resources.legact.max", "bool");
-			this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasLegRes", "data.resources.legres.max", "bool");
-			this.addNpcFilter("CMPBrowser.general", "DND5E.ChallengeRating", "data.details.cr", "numberCompare");
-		}
-
-		let npcDetailsPath;
-		//Foundry v10+ Actor#data is now Actor#system
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			npcDetailsPath = "system.details.type.value";
-		}
-		//Foundry 0.8.x: Creature type (data.details.type) is now a structure, so we check data.details.types.value instead
-		else if (CompendiumBrowser.isFoundryV8Plus) {
-			npcDetailsPath = "data.details.type.value";
-		} else {
-			//0.7.x
-			npcDetailsPath = "data.details.type";
-		}
+		let npcDetailsPath = "system.details.type.value";
 
 		this.addNpcFilter(
 			"CMPBrowser.general",
@@ -1898,99 +1571,45 @@ class CompendiumBrowser extends Application {
 			"select",
 			CompendiumBrowser.CREATURE_TYPES
 		);
-		//Foundry v10+ Actor#data is now Actor#system
-		if (CompendiumBrowser.isFoundryV10Plus) {
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityStr", "system.abilities.str.value", "numberCompare");
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityDex", "system.abilities.dex.value", "numberCompare");
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityCon", "system.abilities.con.value", "numberCompare");
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityInt", "system.abilities.int.value", "numberCompare");
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityWis", "system.abilities.wis.value", "numberCompare");
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityCha", "system.abilities.cha.value", "numberCompare");
+		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityStr", "system.abilities.str.value", "numberCompare");
+		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityDex", "system.abilities.dex.value", "numberCompare");
+		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityCon", "system.abilities.con.value", "numberCompare");
+		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityInt", "system.abilities.int.value", "numberCompare");
+		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityWis", "system.abilities.wis.value", "numberCompare");
+		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityCha", "system.abilities.cha.value", "numberCompare");
 
-			this.addNpcFilter(
-				"CMPBrowser.dmgInteraction",
-				"DND5E.DamImm",
-				"system.traits.di.value",
-				"multiSelect",
-				CONFIG.DND5E.damageTypes,
-				true
-			);
-			this.addNpcFilter(
-				"CMPBrowser.dmgInteraction",
-				"DND5E.DamRes",
-				"system.traits.dr.value",
-				"multiSelect",
-				CONFIG.DND5E.damageTypes,
-				true
-			);
-			this.addNpcFilter(
-				"CMPBrowser.dmgInteraction",
-				"DND5E.DamVuln",
-				"system.traits.dv.value",
-				"multiSelect",
-				CONFIG.DND5E.damageTypes,
-				true
-			);
-			this.addNpcFilter(
-				"CMPBrowser.dmgInteraction",
-				"DND5E.ConImm",
-				"system.traits.ci.value",
-				"multiSelect",
-				CONFIG.DND5E.conditionTypes,
-				true
-			);
-		} else {
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityStr", "data.abilities.str.value", "numberCompare");
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityDex", "data.abilities.dex.value", "numberCompare");
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityCon", "data.abilities.con.value", "numberCompare");
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityInt", "data.abilities.int.value", "numberCompare");
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityWis", "data.abilities.wis.value", "numberCompare");
-			this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityCha", "data.abilities.cha.value", "numberCompare");
-
-			this.addNpcFilter(
-				"CMPBrowser.dmgInteraction",
-				"DND5E.DamImm",
-				"data.traits.di.value",
-				"multiSelect",
-				CONFIG.DND5E.damageTypes,
-				true
-			);
-			this.addNpcFilter(
-				"CMPBrowser.dmgInteraction",
-				"DND5E.DamRes",
-				"data.traits.dr.value",
-				"multiSelect",
-				CONFIG.DND5E.damageTypes,
-				true
-			);
-			this.addNpcFilter(
-				"CMPBrowser.dmgInteraction",
-				"DND5E.DamVuln",
-				"data.traits.dv.value",
-				"multiSelect",
-				CONFIG.DND5E.damageTypes,
-				true
-			);
-			this.addNpcFilter(
-				"CMPBrowser.dmgInteraction",
-				"DND5E.ConImm",
-				"data.traits.ci.value",
-				"multiSelect",
-				CONFIG.DND5E.conditionTypes,
-				true
-			);
-		}
-
-		if (CompendiumBrowser.isFoundryV10Minus) {
-			this.addNpcFilter(
-				"CMPBrowser.dmgInteraction",
-				"CMPBrowser.dmgDealt",
-				"damageDealt",
-				"multiSelect",
-				CONFIG.DND5E.damageTypes,
-				true
-			);
-		}
+		this.addNpcFilter(
+			"CMPBrowser.dmgInteraction",
+			"DND5E.DamImm",
+			"system.traits.di.value",
+			"multiSelect",
+			CONFIG.DND5E.damageTypes,
+			true
+		);
+		this.addNpcFilter(
+			"CMPBrowser.dmgInteraction",
+			"DND5E.DamRes",
+			"system.traits.dr.value",
+			"multiSelect",
+			CONFIG.DND5E.damageTypes,
+			true
+		);
+		this.addNpcFilter(
+			"CMPBrowser.dmgInteraction",
+			"DND5E.DamVuln",
+			"system.traits.dv.value",
+			"multiSelect",
+			CONFIG.DND5E.damageTypes,
+			true
+		);
+		this.addNpcFilter(
+			"CMPBrowser.dmgInteraction",
+			"DND5E.ConImm",
+			"system.traits.ci.value",
+			"multiSelect",
+			CONFIG.DND5E.conditionTypes,
+			true
+		);
 	}
 
 	/**
@@ -2109,7 +1728,6 @@ class CompendiumBrowser extends Application {
 					}
 				} else {
 					ui.notifications.warn(`Unknown filter type?`);
-					console.log(filter);
 				}
 			}
 		};
@@ -2149,7 +1767,6 @@ class CompendiumBrowser extends Application {
 		} catch (err) {
 			ui.notifications.warn("failed to copy javascript to clipboard, check logs for string");
 			console.error("Failed to copy: ", err);
-			console.log(text);
 		}
 	}
 
@@ -2194,7 +1811,11 @@ class CompendiumBrowser extends Application {
 
 		let tabBar = html.find("div.tab.spellbook .spellcasting-ability");
 		const cbButton = $(
-			`<div style="max-width:40px;min-width:32px;"><button class="compendium-browser spell-browser-btn"><i class="fa-duotone fa-book"></i></button></div>`
+			`<div style="flex: 0 0 22px; align-self: center; text-align: center;">
+				<a class="compendium-browser spell-browser-btn">
+					<i class="fa-duotone fa-book"></i>
+				</a>
+			</div>`
 		);
 
 		tabBar.append(cbButton);
@@ -2207,9 +1828,12 @@ class CompendiumBrowser extends Application {
 
 		let tabBar = html.find("div.spellbook-filters");
 		const cbButton = $(
-			`<div style="max-width:40px;min-width:32px;"><button class="compendium-browser spell-browser-btn"><i class="fa-duotone fa-book"></i></button></div>`
+			`<div style="flex: 0 0 22px; align-self: center; text-align: center;">
+				<a class="compendium-browser spell-browser-btn">
+					<i class="fa-duotone fa-book"></i>
+				</a>
+			</div>`
 		);
-		console.log(tabBar);
 
 		tabBar.append(cbButton);
 
@@ -2232,9 +1856,13 @@ class CompendiumBrowser extends Application {
 	static async addASISheetButton(cb, html) {
 		await html.find(".feat-browser-btn").remove();
 
-		let dropArea = html.find("div.drop-area");
+		let dropArea = html.find("h3:nth-child(3)");
 		const cbButton = $(
-			`<div style="max-width:40px;min-width:32px;"><button class="compendium-browser feat-browser-btn"><i class="fa-duotone fa-book"></i></button></div>`
+			`<span style="font-size: 16px;">
+				<a class="compendium-browser feat-browser-btn">
+					<i class="fa-duotone fa-book"></i>
+				</a>
+			</span>`
 		);
 
 		dropArea.append(cbButton);
@@ -2258,7 +1886,7 @@ class CompendiumBrowser extends Application {
 
 		for (let cls of Object.keys(character.classes)) {
 			if (options.includes(cls)) {
-				return [{ section: "CMPBrowsergeneral", label: "ITEMTypeClass", value: cls }];
+				return [{ section: "CMPBrowsergeneral", label: "ITEM.TypeClass", value: cls }];
 			}
 		}
 
