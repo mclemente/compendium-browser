@@ -1,15 +1,13 @@
-#compendium .directory-footer .compendium-browser-btn {
-	margin-top: 5px;
-}
 #compendium .directory-footer {
 	display: block;
+}
+#compendium .directory-footer .compendium-browser-btn {
+	margin-top: 5px;
 }
 .compendium-browser {
 	overflow-y: hidden !important;
 	max-width: 1100px;
 	max-height: 90vh;
-}
-.compendium-browser {
 	min-width: 630px;
 	min-height: 500px;
 }
@@ -23,7 +21,7 @@
 }
 .compendium-browser .window-content .parent .content {
 	overflow-y: hidden !important;
-	height: calc(100% - 2em);
+	height: calc(98%);
 }
 .compendium-browser .window-content .parent .content .tab {
 	overflow-y: hidden !important;
@@ -47,7 +45,7 @@
 	border-bottom: 1px solid var(--color-border-light-primary);
 }
 .compendium-browser .tabContainer {
-	height: calc(100% - 2em);
+	height: calc(98%);
 }
 .compendium-browser .tabContainer .tab {
 	width: 100%;
@@ -63,19 +61,6 @@
 	height: 100%;
 	padding-right: 5px;
 	overflow: auto;
-}
-.compendium-browser .list-area {
-	position: sticky;
-	display: flex;
-	min-width: 250px;
-	max-width: 55%;
-	width: 400px;
-	height: 100%;
-	padding-right: 5px;
-}
-.compendium-browser .list-area .loading {
-	flex: 0;
-	text-align: center;
 }
 .compendium-browser .control-area button {
 	background: rgba(0, 0, 0, 0.05);
@@ -94,7 +79,9 @@
 	margin: 0;
 	cursor: pointer;
 }
-.compendium-browser .control-area .filtercontainer dl,
+.compendium-browser .control-area .filtercontainer dl {
+	margin: 5px 0;
+}
 .compendium-browser .control-area .filtercontainer div {
 	margin: 5px 0;
 }
@@ -125,7 +112,7 @@
 	vertical-align: middle;
 }
 .compendium-browser .control-area .filtercontainer .small-input {
-	width: calc(100% - 44px);
+	width: calc(56%);
 	height: 27px;
 	background: rgba(0, 0, 0, 0.05);
 	border: 1px solid #444;
@@ -135,6 +122,19 @@
 }
 .compendium-browser .control-area .filtercontainer .small-select {
 	width: 40px;
+}
+.compendium-browser .list-area {
+	position: sticky;
+	display: flex;
+	min-width: 250px;
+	max-width: 55%;
+	width: 400px;
+	height: 100%;
+	padding-right: 5px;
+}
+.compendium-browser .list-area .loading {
+	flex: 0;
+	text-align: center;
 }
 .compendium-browser .browser {
 	height: 100%;
@@ -162,6 +162,16 @@
 .compendium-browser .browser ul li .spell-tags span.negative {
 	color: #bbb;
 }
+.compendium-browser .browser ul li .item-name span {
+	white-space: break-spaces;
+	height: inherit;
+	display: block;
+}
+.compendium-browser .browser ul li .feat-tags span {
+	white-space: break-spaces;
+	height: inherit;
+	display: block;
+}
 .compendium-browser .browser .spacer {
 	display: inline-block;
 	min-width: 5px;
@@ -170,8 +180,64 @@
 	display: inline-block;
 	min-width: 15px;
 }
-.compendium-browser .item-browser li,
-.compendium-browser .feat-browser li,
+.compendium-browser .item-browser li {
+	cursor: default;
+	vertical-align: middle;
+	line-height: 16px;
+	margin: 2px 0;
+	height: 32px;
+}
+.compendium-browser .item-browser li .item-image {
+	max-width: 32px;
+	height: 32px;
+}
+.compendium-browser .item-browser li .item-name {
+	padding-left: 5px;
+	flex: 2;
+}
+.compendium-browser .item-browser li .feat-tags {
+	text-align: right;
+	margin-right: 3px;
+	margin-left: 3px;
+	text-transform: capitalize;
+	height: 32px;
+}
+.compendium-browser .item-browser li .item-tags {
+	text-align: right;
+	margin-right: 3px;
+	margin-left: 3px;
+	text-transform: capitalize;
+	height: 32px;
+}
+.compendium-browser .feat-browser li {
+	cursor: default;
+	vertical-align: middle;
+	line-height: 16px;
+	margin: 2px 0;
+	height: 32px;
+}
+.compendium-browser .feat-browser li .item-image {
+	max-width: 32px;
+	height: 32px;
+}
+.compendium-browser .feat-browser li .item-name {
+	padding-left: 5px;
+	flex: 2;
+}
+.compendium-browser .feat-browser li .feat-tags {
+	text-align: right;
+	margin-right: 3px;
+	margin-left: 3px;
+	text-transform: capitalize;
+	height: 32px;
+}
+.compendium-browser .feat-browser li .item-tags {
+	text-align: right;
+	margin-right: 3px;
+	margin-left: 3px;
+	text-transform: capitalize;
+	height: 32px;
+}
 .compendium-browser .spell-browser li {
 	cursor: default;
 	vertical-align: middle;
@@ -179,29 +245,21 @@
 	margin: 2px 0;
 	height: 32px;
 }
-.compendium-browser .item-browser li .item-image,
-.compendium-browser .feat-browser li .item-image,
 .compendium-browser .spell-browser li .item-image {
 	max-width: 32px;
 	height: 32px;
 }
-.compendium-browser .item-browser li .item-name,
-.compendium-browser .feat-browser li .item-name,
 .compendium-browser .spell-browser li .item-name {
 	padding-left: 5px;
 	flex: 2;
 }
-.compendium-browser .browser ul li .item-name span,
-.compendium-browser .browser ul li .feat-tags span {
-	white-space: break-spaces;
-	height: inherit;
-	display: block;
+.compendium-browser .spell-browser li .feat-tags {
+	text-align: right;
+	margin-right: 3px;
+	margin-left: 3px;
+	text-transform: capitalize;
+	height: 32px;
 }
-.compendium-browser .item-browser li .feat-tags,
-.compendium-browser .feat-browser li .feat-tags,
-.compendium-browser .spell-browser li .feat-tags,
-.compendium-browser .item-browser li .item-tags,
-.compendium-browser .feat-browser li .item-tags,
 .compendium-browser .spell-browser li .item-tags {
 	text-align: right;
 	margin-right: 3px;
