@@ -48,10 +48,10 @@
 		"dmgInteraction": "Damage Interaction",
 		"dmgDealt": "Damage Dealt",
 		"Tab": {
-			"SpellBrowser": "Spell Browser",
-			"FeatBrowser": "Feat Browser",
-			"ItemBrowser": "Item Browser",
-			"NPCBrowser": "NPC Browser",
+			"SpellBrowser": "Spells",
+			"FeatBrowser": "Feats",
+			"ItemBrowser": "Items",
+			"NPCBrowser": "Actors",
 			"Settings": "Settings"
 		},
 		"SETTING": {
