@@ -405,7 +405,6 @@ class CompendiumBrowser extends Application {
 	}
 
 	async loadAndFilterItems(browserTab = "spell", updateLoading = null) {
-		console.time("loadAndFilterItems");
 		await this.checkListsLoaded();
 
 		const seachNumber = Date.now();
@@ -552,7 +551,6 @@ class CompendiumBrowser extends Application {
 		}
 
 		this.itemsLoaded = true;
-		console.timeEnd("loadAndFilterItems");
 		updateLoading(numItemsLoaded, true);
 		return compactItems;
 	}
@@ -561,7 +559,6 @@ class CompendiumBrowser extends Application {
 		const seachNumber = Date.now();
 		this.CurrentSeachNumber = seachNumber;
 
-		console.time("loadAndFilterNpcs");
 		let npcs = {};
 
 		let numNpcsLoaded = 0;
@@ -639,13 +636,11 @@ class CompendiumBrowser extends Application {
 			} else if (e == NOT_MIGRATED) {
 				console.log("Cannot browse compendium %s as it is not migrated to v10 format", collectionName);
 			} else {
-				console.timeEnd("loadAndFilterNpcs");
 				throw e;
 			}
 		}
 
 		this.npcsLoaded = true;
-		console.timeEnd("loadAndFilterNpcs");
 		updateLoading(numNpcsLoaded, true);
 		return npcs;
 	}
