@@ -1,17 +1,28 @@
 {{#each listItems as |feat id|}}
-<li class="feat flexrow draggable" data-entry-compendium="{{feat.compendium}}" data-entry-id="{{id}}">
-    <div class="item-image">
-        <img class="" data-src="{{feat.img}}" title="{{feat.name}}" width="32" height="32" />
-    </div>
-    <div class="item-name">
-        <span class="item-edit"><a title="({{feat.compendium}})">{{feat.name}}</a></span>
-    </div>
-    <div class="feat-tags">
-        <span title="Class Requirement">{{feat.classRequirementString}}</span>
-
-    </div>
-    <div class="filter-tags">
-        <input type="hidden" name="class" value="{{feat.classRequirementString}}">
-    </div>
+<li
+  class="feat flexrow draggable"
+  data-entry-compendium="{{feat.compendium}}"
+  data-entry-id="{{id}}"
+>
+  <div class="item-image">
+    <img
+      class=""
+      data-src="{{feat.img}}"
+      title="{{feat.name}}"
+      width="32"
+      height="32"
+    />
+  </div>
+  <div class="item-name">
+    <span class="item-edit"
+      ><a title="({{feat.compendium}})">{{feat.name}}</a></span
+    >
+  </div>
+  <div class="feat-tags">
+    <span title="Class Requirement">{{feat.classRequirementString}}</span>
+  </div>
+  <div class="filter-tags">
+    <input type="hidden" name="class" value="{{feat.classRequirementString}}" />
+  </div>
 </li>
 {{/each}}

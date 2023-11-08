@@ -1,26 +1,32 @@
 <div class="feat-browser browser flexrow">
-    <div class="control-area">
-        <div class="filtercontainer" id="tagfilter">            
-            <div class="filter"  data-type="text" data-path="name">
-                <input class="" name="textFilter" type="text" value="" data-dtype="String" placeholder="{{localize "Name"}}"/>
-            </div>
-            <dl id="sorter">
-                <dt>{{localize "CMPBrowser.sortBy"}}:</dt>
-                <dd><select class="null" name="sortorder">
-                    <option value="true" selected>{{localize "Name"}}</option>
-                    <option value="false">{{localize "DND5E.ItemTypeClass"}}</option>
-                </select></dd>
-            </dl> 
-            <button id="reset-feat-filter">{{localize "CMPBrowser.Filters.ResetFilters"}}</button>
-            <!-- <button id="copy-search-feat">Export to <i class="fa-brands fa-square-js"></i></button> -->
-        </div>
-        {{> "modules/compendium-browser/template/filter-container.html" filters=featFilters}}
+  <div class="control-area">
+    <div class="filtercontainer" id="tagfilter">
+      <div class="filter" data-type="text" data-path="name">
+        <input class="" name="textFilter" type="text" value=""
+        data-dtype="String" placeholder="{{localize "Name"}}"/>
+      </div>
+      <dl id="sorter">
+        <dt>{{localize "CMPBrowser.sortBy"}}:</dt>
+        <dd>
+          <select class="null" name="sortorder">
+            <option value="true" selected>{{localize "Name"}}</option>
+            <option value="false">{{localize "DND5E.ItemTypeClass"}}</option>
+          </select>
+        </dd>
+      </dl>
+      <button id="reset-feat-filter">
+        {{localize "CMPBrowser.Filters.ResetFilters"}}
+      </button>
+      <!-- <button id="copy-search-feat">Export to <i class="fa-brands fa-square-js"></i></button> -->
     </div>
-    <div class="list-area flexcol">
-        <span id="CBFeatsMessage" style="flex:0"></span>
-        <ul id="CBFeats">
-            {{> "modules/compendium-browser/template/feat-browser-list.html" feats=items}}
-        </ul>
-    </div>
-
+    {{> "modules/compendium-browser/template/filter-container.html"
+    filters=featFilters}}
+  </div>
+  <div class="list-area flexcol">
+    <span id="CBFeatsMessage" style="flex: 0"></span>
+    <ul id="CBFeats">
+      {{> "modules/compendium-browser/template/feat-browser-list.html"
+      feats=items}}
+    </ul>
+  </div>
 </div>

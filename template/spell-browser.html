@@ -1,25 +1,32 @@
 <div class="spell-browser browser flexrow">
-    <div class="control-area">
-        <div class="filtercontainer" id="tagfilter">            
-            <div class="filter"  data-type="text" data-path="name">
-                <input class="" name="textFilter" type="text" value="" data-dtype="String" placeholder="{{localize "Name"}}"/>
-            </div>
-            <dl id="sorter">
-                <dt>{{localize "CMPBrowser.sortBy"}}:</dt>
-                <dd><select class="null" name="sortorder">
-                    <option value="true" selected>{{localize "Name"}}</option>
-                    <option value="false">{{localize "DND5E.Level"}}</option>
-                </select></dd>
-            </dl> 
-            <button id="reset-spell-filter">{{localize "CMPBrowser.Filters.ResetFilters"}}</button>
-            <!-- <button id="copy-search-spell">Export to <i class="fa-brands fa-square-js"></i></button> -->
-        </div>
-        {{> "modules/compendium-browser/template/filter-container.html" filters=spellFilters}}
+  <div class="control-area">
+    <div class="filtercontainer" id="tagfilter">
+      <div class="filter" data-type="text" data-path="name">
+        <input class="" name="textFilter" type="text" value=""
+        data-dtype="String" placeholder="{{localize "Name"}}"/>
+      </div>
+      <dl id="sorter">
+        <dt>{{localize "CMPBrowser.sortBy"}}:</dt>
+        <dd>
+          <select class="null" name="sortorder">
+            <option value="true" selected>{{localize "Name"}}</option>
+            <option value="false">{{localize "DND5E.Level"}}</option>
+          </select>
+        </dd>
+      </dl>
+      <button id="reset-spell-filter">
+        {{localize "CMPBrowser.Filters.ResetFilters"}}
+      </button>
+      <!-- <button id="copy-search-spell">Export to <i class="fa-brands fa-square-js"></i></button> -->
     </div>
-    <div class="list-area flexcol">
-        <span id="CBSpellsMessage" style="flex:0"></span>
-        <ul id="CBSpells">
-            {{> "modules/compendium-browser/template/spell-browser-list.html" spells=items}}
-        </ul>
-    </div>
+    {{> "modules/compendium-browser/template/filter-container.html"
+    filters=spellFilters}}
+  </div>
+  <div class="list-area flexcol">
+    <span id="CBSpellsMessage" style="flex: 0"></span>
+    <ul id="CBSpells">
+      {{> "modules/compendium-browser/template/spell-browser-list.html"
+      spells=items}}
+    </ul>
+  </div>
 </div>
