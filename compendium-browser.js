@@ -415,8 +415,6 @@ class CompendiumBrowser extends Application {
 
 		this.CurrentSeachNumber = seachNumber;
 
-		const maxLoad = game.settings.get("compendium-browser", "maxload");
-
 		//0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
 		let unfoundSpells = "";
 		let numItemsLoaded = 0;
