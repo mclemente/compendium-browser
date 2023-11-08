@@ -9,6 +9,10 @@
 	max-width: 1100px;
 	max-height: 90vh;
 }
+.compendium-browser {
+	min-width: 630px;
+	min-height: 500px;
+}
 .compendium-browser .window-content {
 	overflow-y: hidden !important;
 	height: 100%;
@@ -171,8 +175,9 @@
 .compendium-browser .spell-browser li {
 	cursor: default;
 	vertical-align: middle;
-	line-height: 32px;
+	line-height: 16px;
 	margin: 2px 0;
+	height: 32px;
 }
 .compendium-browser .item-browser li .item-image,
 .compendium-browser .feat-browser li .item-image,
@@ -183,8 +188,14 @@
 .compendium-browser .item-browser li .item-name,
 .compendium-browser .feat-browser li .item-name,
 .compendium-browser .spell-browser li .item-name {
-	height: 32px;
 	padding-left: 5px;
+	flex: 2;
+}
+.compendium-browser .browser ul li .item-name span,
+.compendium-browser .browser ul li .feat-tags span {
+	white-space: break-spaces;
+	height: inherit;
+	display: block;
 }
 .compendium-browser .item-browser li .feat-tags,
 .compendium-browser .feat-browser li .feat-tags,
