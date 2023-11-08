@@ -151,6 +151,9 @@
 	white-space: nowrap;
 	overflow: hidden;
 }
+.compendium-browser .browser ul li .spell-tags span.negative {
+	color: #bbb;
+}
 .compendium-browser .browser .spacer {
 	display: inline-block;
 	min-width: 5px;

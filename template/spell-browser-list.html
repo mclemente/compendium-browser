@@ -1,25 +1,50 @@
-
 {{#each listItems as |spell id|}}
 <li class="spell flexrow draggable" data-entry-compendium="{{spell.compendium}}" data-entry-id="{{id}}">
-    <div class="item-image">
-        <img class="" data-src="{{spell.img}}" title="{{spell.name}}" width="32" height="32"/>
-    </div>  
-    <div class="item-name">
-        <span class="item-edit" ><a title="({{spell.compendium}})">{{spell.name}}</a></span>
-    </div>
-    <div class="spell-tags">
-        <span title="Spell level">{{#if spell.data.level}}{{spell.data.level}}{{else}}C{{/if}}</span>
-        <div class="spacer-large"></div>
-        <span {{#unless spell.data.components.ritual}}style="color:#bbb;" title="{{localize "No"}} {{localize "DND5E.Ritual"}}"{{else}} title="{{localize "DND5E.Ritual"}}"{{/unless}}>R</span>
-        <span {{#unless spell.data.components.concentration}}style="color:#bbb;" title="{{localize "No"}} {{localize "DND5E.Concentration"}}"{{else}} title="{{localize "DND5E.Concentration"}}"{{/unless}}>C</span>
-        <div class="spacer"></div>
-        <span {{#unless spell.data.components.vocal}}style="color:#bbb;" title="{{localize "No"}} {{localize "DND5E.ComponentVerbal"}}"{{else}} title="{{localize "DND5E.ComponentVerbal"}}"{{/unless}}>V</span>
-        <span {{#unless spell.data.components.somatic}}style="color:#bbb;" title="{{localize "No"}} {{localize "DND5E.ComponentSomatic"}}"{{else}} title="{{localize "DND5E.ComponentSomatic"}}"{{/unless}}>S</span>
-        <span {{#unless spell.data.components.material}}style="color:#bbb;" title="no{{localize "No"}} {{localize "DND5E.ComponentMaterial"}}"{{else}} title="{{localize "DND5E.ComponentMaterial"}}"{{/unless}}>M</span>
-    </div>
-    <div class="filter-tags">                
-        <input type="hidden" name="level" value="{{spell.data.level}}">
-    </div>
+	<div class="item-image">
+		<img
+			class=""
+			data-src="{{spell.img}}"
+			data-tooltip="{{spell.name}}"
+			data-tooltip-direction="UP"
+			width="32"
+			height="32"
+		/>
+	</div>
+	<div class="item-name">
+		<span class="item-edit"><a data-tooltip="({{spell.compendium}})">{{spell.name}}</a></span>
+	</div>
+	<div class="spell-tags">
+		<span data-tooltip="Spell level">{{#if spell.data.level}}{{spell.data.level}}{{else}}C{{/if}}</span>
+		<div class="spacer-large"></div>
+		<span
+			class="{{#unless spell.data.components.ritual}}negative{{/unless}}"
+			data-tooltip="{{localize 'DND5E.Ritual'}}"
+			>R</span
+		>
+		<span
+			class="{{#unless spell.data.components.concentration}}negative{{/unless}}"
+			data-tooltip="{{localize 'DND5E.Concentration'}}"
+			>C</span
+		>
+		<div class="spacer"></div>
+		<span
+			class="{{#unless spell.data.components.vocal}}negative{{/unless}}"
+			data-tooltip="{{localize 'DND5E.ComponentVerbal'}}"
+			>V</span
+		>
+		<span
+			class="{{#unless spell.data.components.somatic}}negative{{/unless}}"
+			data-tooltip="{{localize 'DND5E.ComponentSomatic'}}"
+			>S</span
+		>
+		<span
+			class="{{#unless spell.data.components.material}}negative{{/unless}}"
+			data-tooltip="{{localize 'DND5E.ComponentMaterial'}}"
+			>M</span
+		>
+	</div>
+	<div class="filter-tags">
+		<input type="hidden" name="level" value="{{spell.data.level}}" />
+	</div>
 </li>
 {{/each}}
-   
