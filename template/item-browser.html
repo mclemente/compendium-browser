@@ -2,8 +2,15 @@
 	<div class="control-area">
 		<div class="filtercontainer" id="tagfilter">
 			<div class="filter" data-type="text" data-path="name">
-				<input class="" name="textFilter" type="text" value="" data-dtype="String" placeholder="{{localize
-				"Name"}}"/>
+				<input
+					class=""
+					name="textFilter"
+					type="text"
+					value=""
+					data-dtype="String"
+					placeholder="{{localize
+				'Name'}}"
+				/>
 			</div>
 			<dl id="sorter">
 				<dt>{{localize "CMPBrowser.sortBy"}}:</dt>
@@ -20,9 +27,9 @@
 		{{> "modules/compendium-browser/template/filter-container.html" filters=itemFilters}}
 	</div>
 	<div class="list-area flexcol">
-		<span id="CBItemsMessage" style="flex: 0"></span>
 		<ul id="CBItems">
 			{{> "modules/compendium-browser/template/item-browser-list.html" items=items}}
 		</ul>
+		<span class="loading" id="CBItemsMessage" style="flex: 0"></span>
 	</div>
 </div>

@@ -2,8 +2,15 @@
 	<div class="control-area">
 		<div class="filtercontainer" id="tagfilter">
 			<div class="filter" data-type="text" data-path="name">
-				<input class="" name="textFilter" type="text" value="" data-dtype="String" placeholder="{{localize
-				"Name"}}"/>
+				<input
+					class=""
+					name="textFilter"
+					type="text"
+					value=""
+					data-dtype="String"
+					placeholder="{{localize
+				'Name'}}"
+				/>
 			</div>
 			<dl id="sorter">
 				<dt>{{localize "CMPBrowser.sortBy"}}:</dt>
@@ -21,9 +28,9 @@
 		{{> "modules/compendium-browser/template/filter-container.html" filters=npcFilters}}
 	</div>
 	<div class="list-area flexcol">
-		<span id="CBNpcsMessage" style="flex: 0"></span>
 		<ul id="CBNPCs">
 			{{> "modules/compendium-browser/template/npc-browser-list.html" npcs=npcs}}
 		</ul>
+		<span class="loading" id="CBNpcsMessage" style="flex: 0"></span>
 	</div>
 </div>

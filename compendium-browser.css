@@ -31,6 +31,7 @@
 }
 .compendium-browser .window-content .parent .content .tab .browser ul {
 	overflow-y: auto;
+	overflow-x: hidden;
 	height: 100%;
 }
 .compendium-browser .window-content .parent .content .tab .settings {
@@ -57,7 +58,7 @@
 	width: 350px;
 	height: 100%;
 	padding-right: 5px;
-	overflow: scroll;
+	overflow: auto;
 }
 .compendium-browser .list-area {
 	position: sticky;
@@ -67,7 +68,10 @@
 	width: 400px;
 	height: 100%;
 	padding-right: 5px;
-	overflow-y: scroll;
+}
+.compendium-browser .list-area .loading {
+	flex: 0;
+	text-align: center;
 }
 .compendium-browser .control-area button {
 	background: rgba(0, 0, 0, 0.05);

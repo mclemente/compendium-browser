@@ -3,18 +3,15 @@ const NOT_MIGRATED = "NotMigratedException";
 
 class CompendiumBrowser extends Application {
 	static get defaultOptions() {
-		const options = super.defaultOptions;
-		mergeObject(options, {
+		return mergeObject(super.defaultOptions, {
 			title: "CMPBrowser.compendiumBrowser",
 			tabs: [{ navSelector: ".tabs", contentSelector: ".content", initial: "spell" }],
-			classes: options.classes.concat("compendium-browser"),
+			classes: ["compendium-browser"],
 			template: "modules/compendium-browser/template/template.html",
 			width: 800,
-			height: 700,
+			height: 730,
 			resizable: true,
-			minimizable: true,
 		});
-		return options;
 	}
 
 	get maxLoad() {
