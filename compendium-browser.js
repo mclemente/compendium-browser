@@ -17,27 +17,22 @@ class CompendiumBrowser extends Application {
 		return options;
 	}
 
+	get maxLoad() {
+		return game.settings.get("compendium-browser", "maxload");
+	}
+
 	async initialize() {
 		// load settings
-		if (this.settings === undefined) {
-			this.initSettings();
-		}
+		this.initSettings();
 
-		await loadTemplates([
-			"modules/compendium-browser/template/spell-browser.html",
-			"modules/compendium-browser/template/spell-browser-list.html",
-			"modules/compendium-browser/template/npc-browser.html",
-			"modules/compendium-browser/template/npc-browser-list.html",
-			"modules/compendium-browser/template/feat-browser.html",
-			"modules/compendium-browser/template/feat-browser-list.html",
-			"modules/compendium-browser/template/item-browser.html",
-			"modules/compendium-browser/template/item-browser-list.html",
-			"modules/compendium-browser/template/filter-container.html",
-			"modules/compendium-browser/template/settings.html",
-			"modules/compendium-browser/template/loading.html",
-		]);
-
-		this.hookCompendiumList();
+		Hooks.on("changeSidebarTab", (app) => {
+			if (app.tabName !== "compendium") return;
+			this.hookCompendiumList(app.element);
+		});
+		Hooks.on("renderSidebarTab", (app, html, data) => {
+			if (app.tabName !== "compendium") return;
+			this.hookCompendiumList(html);
+		});
 
 		//Reset the filters used in the dialog
 		this.spellFilters = {
@@ -58,14 +53,14 @@ class CompendiumBrowser extends Application {
 		};
 	}
 
-	/** override */
+	/** @override */
 	_onChangeTab(event, tabs, active) {
 		super._onChangeTab(event, tabs, active);
 		const html = this.element;
 		this.replaceList(html, active, { reload: false });
 	}
 
-	/** override */
+	/** @override */
 	async getData() {
 		//0.4.1 Filter as we load to support new way of filtering
 		//Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
@@ -127,7 +122,7 @@ class CompendiumBrowser extends Application {
 		});
 	}
 
-	/** override */
+	/** @override */
 	activateListeners(html) {
 		super.activateListeners(html);
 
@@ -447,7 +442,7 @@ class CompendiumBrowser extends Application {
 
 									numItemsLoaded = Object.keys(itemsList).length;
 
-									if (maxLoad <= numItemsLoaded) {
+									if (this.maxLoad <= numItemsLoaded) {
 										if (updateLoading) {
 											updateLoading(numItemsLoaded, true);
 										}
@@ -483,7 +478,7 @@ class CompendiumBrowser extends Application {
 
 									numItemsLoaded = Object.keys(itemsList).length;
 
-									if (maxLoad <= numItemsLoaded) {
+									if (this.maxLoad <= numItemsLoaded) {
 										if (updateLoading) {
 											updateLoading(numItemsLoaded, true);
 										}
@@ -516,7 +511,7 @@ class CompendiumBrowser extends Application {
 
 									numItemsLoaded = Object.keys(itemsList).length;
 
-									if (maxLoad <= numItemsLoaded) {
+									if (this.maxLoad <= numItemsLoaded) {
 										if (updateLoading) {
 											updateLoading(numItemsLoaded, true);
 										}
@@ -574,8 +569,6 @@ class CompendiumBrowser extends Application {
 		console.time("loadAndFilterNpcs");
 		let npcs = {};
 
-		const maxLoad = game.settings.get("compendium-browser", "maxload");
-
 		let numNpcsLoaded = 0;
 		this.npcsLoaded = false;
 
@@ -608,7 +601,7 @@ class CompendiumBrowser extends Application {
 
 								numNpcsLoaded = Object.keys(npcs).length;
 
-								if (maxLoad <= numNpcsLoaded) {
+								if (this.maxLoad <= numNpcsLoaded) {
 									if (updateLoading) {
 										updateLoading(numNpcsLoaded, true);
 									}
@@ -662,15 +655,7 @@ class CompendiumBrowser extends Application {
 		return npcs;
 	}
 
-	hookCompendiumList() {
-		Hooks.on("renderCompendiumDirectory", (app, html, data) => {
-			this.hookCompendiumList();
-		});
-
-		let html = $("#compendium");
-		if (this.settings === undefined) {
-			this.initSettings();
-		}
+	hookCompendiumList(html) {
 		if (game.user.isGM || this.settings.allowSpellBrowser || this.settings.allowNpcBrowser) {
 			const cbButton = $(
 				`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize(
@@ -733,26 +718,31 @@ class CompendiumBrowser extends Application {
 		let elements = null;
 		//0.4.2 Display a Loading... message while the data is being loaded and filtered
 		let loadingMessage = null;
-		if (browserTab === "spell") {
-			elements = html.find("ul#CBSpells");
-			loadingMessage = html.find("#CBSpellsMessage");
-		} else if (browserTab === "npc") {
-			elements = html.find("ul#CBNPCs");
-			loadingMessage = html.find("#CBNpcsMessage");
-		} else if (browserTab === "feat") {
-			elements = html.find("ul#CBFeats");
-			loadingMessage = html.find("#CBFeatsMessage");
-		} else if (browserTab === "item") {
-			elements = html.find("ul#CBItems");
-			loadingMessage = html.find("#CBItemsMessage");
+		const tabElements = {
+			spell: { elements: "ul#CBSpells", message: "#CBSpellsMessage" },
+			npc: { elements: "ul#CBNPCs", message: "#CBNpcsMessage" },
+			feat: { elements: "ul#CBFeats", message: "#CBFeatsMessage" },
+			item: { elements: "ul#CBItems", message: "#CBItemsMessage" },
+		};
+
+		if (browserTab in tabElements) {
+			const tabInfo = tabElements[browserTab];
+			elements = html.find(tabInfo.elements);
+			loadingMessage = html.find(tabInfo.message);
 		}
+
 		if (elements?.length) {
 			//0.4.2b: On a tab-switch, only reload if there isn't any data already
 			if (options?.reload || !elements[0].children.length) {
-				const maxLoad = game.settings.get("compendium-browser", "maxload");
 				const updateLoading = async (numLoaded, doneLoading) => {
 					if (loadingMessage.length) {
-						this.renderLoading(loadingMessage[0], browserTab, numLoaded, numLoaded >= maxLoad, doneLoading);
+						this.renderLoading(
+							loadingMessage[0],
+							browserTab,
+							numLoaded,
+							numLoaded >= this.maxLoad,
+							doneLoading
+						);
 					}
 				};
 				updateLoading(0, false);
@@ -1317,8 +1307,6 @@ class CompendiumBrowser extends Application {
 	}
 
 	async addSpellFilters() {
-		// Spellfilters
-		//Foundry v10+ Item#data is now Item#system
 		this.addSpellFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
 		this.addSpellFilter("CMPBrowser.general", "DND5E.Level", "system.level", "multiSelect", {
 			0: "DND5E.SpellCantrip",
@@ -1388,10 +1376,6 @@ class CompendiumBrowser extends Application {
 	}
 
 	async addItemFilters() {
-		// Item Filters
-
-		// Feature Filters
-		//Foundry v10+ Item#data is now Item#system
 		this.addItemFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
 
 		this.addItemFilter("CMPBrowser.general", "Item Type", "type", "select", {
@@ -1924,12 +1908,28 @@ class CompendiumBrowser extends Application {
 	}
 }
 
-Hooks.on("ready", async () => {
+Hooks.on("init", async () => {
+	await loadTemplates([
+		"modules/compendium-browser/template/spell-browser.html",
+		"modules/compendium-browser/template/spell-browser-list.html",
+		"modules/compendium-browser/template/npc-browser.html",
+		"modules/compendium-browser/template/npc-browser-list.html",
+		"modules/compendium-browser/template/feat-browser.html",
+		"modules/compendium-browser/template/feat-browser-list.html",
+		"modules/compendium-browser/template/item-browser.html",
+		"modules/compendium-browser/template/item-browser-list.html",
+		"modules/compendium-browser/template/filter-container.html",
+		"modules/compendium-browser/template/settings.html",
+		"modules/compendium-browser/template/loading.html",
+	]);
+});
+
+Hooks.on("ready", () => {
 	if (game.compendiumBrowser === undefined) {
 		game.compendiumBrowser = new CompendiumBrowser();
 		//0.4.0 Defer loading content until we actually use the Compendium Browser
 		//A compromise approach would be better (periodic loading) except would still create the memory use problem
-		await game.compendiumBrowser.initialize();
+		game.compendiumBrowser.initialize();
 	}
 
 	game.compendiumBrowser.addSpellFilters();
