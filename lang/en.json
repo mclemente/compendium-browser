@@ -59,7 +59,7 @@
 			"Maxload.HINT": "Maximum number of spells, feats, items, or NPCs to display; to see more use the filters. This setting is to allow manageing memory and server load."
 		},
 		"LOADING": {
-			"Message": "Loading...{numLoaded} {itemType}s"
+			"Message": "Loading..."
 		},
 		"LOADED": {
 			"Message": {
