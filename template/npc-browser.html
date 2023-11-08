@@ -1,37 +1,29 @@
 <div class="npc-browser browser flexrow">
-  <div class="control-area">
-    <div class="filtercontainer" id="tagfilter">
-      <div class="filter" data-type="text" data-path="name">
-        <input class="" name="textFilter" type="text" value=""
-        data-dtype="String" placeholder="{{localize "Name"}}"/>
-      </div>
-      <dl id="sorter">
-        <dt>{{localize "CMPBrowser.sortBy"}}:</dt>
-        <dd>
-          <select name="sortorder">
-            <option value="name" selected>{{localize "Name"}}</option>
-            <option value="cr">{{localize "DND5E.ChallengeRating"}}</option>
-            <option value="size">{{localize "DND5E.Size"}}</option>
-          </select>
-        </dd>
-      </dl>
-      <button id="reset-npc-filter">
-        {{localize "CMPBrowser.Filters.ResetFilters"}}
-      </button>
-      <<<<<<< HEAD
-      <!-- <button id="copy-search-npc">Export to <i class="fa-brands fa-square-js"></i></button> -->
-      =======
-      <button id="copy-search-npc">Export to JS</button>
-      >>>>>>> lofd/master
-    </div>
-    {{> "modules/compendium-browser/template/filter-container.html"
-    filters=npcFilters}}
-  </div>
-  <div class="list-area flexcol">
-    <span id="CBNpcsMessage" style="flex: 0"></span>
-    <ul id="CBNPCs">
-      {{> "modules/compendium-browser/template/npc-browser-list.html"
-      npcs=npcs}}
-    </ul>
-  </div>
+	<div class="control-area">
+		<div class="filtercontainer" id="tagfilter">
+			<div class="filter" data-type="text" data-path="name">
+				<input class="" name="textFilter" type="text" value="" data-dtype="String" placeholder="{{localize
+				"Name"}}"/>
+			</div>
+			<dl id="sorter">
+				<dt>{{localize "CMPBrowser.sortBy"}}:</dt>
+				<dd>
+					<select name="sortorder">
+						<option value="name" selected>{{localize "Name"}}</option>
+						<option value="cr">{{localize "DND5E.ChallengeRating"}}</option>
+						<option value="size">{{localize "DND5E.Size"}}</option>
+					</select>
+				</dd>
+			</dl>
+			<button id="reset-npc-filter">{{localize "CMPBrowser.Filters.ResetFilters"}}</button>
+			<!-- <button id="copy-search-item">Export to <i class="fa-brands fa-square-js"></i></button> -->
+		</div>
+		{{> "modules/compendium-browser/template/filter-container.html" filters=npcFilters}}
+	</div>
+	<div class="list-area flexcol">
+		<span id="CBNpcsMessage" style="flex: 0"></span>
+		<ul id="CBNPCs">
+			{{> "modules/compendium-browser/template/npc-browser-list.html" npcs=npcs}}
+		</ul>
+	</div>
 </div>
