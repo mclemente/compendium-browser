@@ -40,7 +40,7 @@
 }
 .compendium-browser .tabs {
 	max-height: 2em;
-	border-bottom: solid #782e22;
+	border-bottom: 1px solid var(--color-border-light-primary);
 }
 .compendium-browser .tabContainer {
 	height: calc(100% - 2em);
