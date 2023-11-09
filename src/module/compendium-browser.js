@@ -945,62 +945,57 @@ class CompendiumBrowser extends Application {
 	}
 
 	decorateNpc(npc, indexFields) {
-		try {
-			const decoratedNpc = indexFields.reduce((npcDict, item) => {
-				set(npcDict, item, getPropByString(npc, item));
-				return npcDict;
-			}, {});
+		const decoratedNpc = indexFields.reduce((npcDict, item) => {
+			set(npcDict, item, getPropByString(npc, item));
+			return npcDict;
+		}, {});
 
-			// 0.8.0: update for V10 to use actor.system instead of actor.data
-			let npcData = npc.system;
+		let npcData = npc.system;
 
-			// cr display
-			let cr = npcData.details?.cr; // 0.7.2c: Possibly because of getIndex() use we now have to check for existence of details (doesn't for Character-type NPCs)
-			if (cr === undefined || cr === "") cr = 0;
-			else cr = Number(cr);
+		// cr display
+		let cr = npcData.details?.cr; // 0.7.2c: Possibly because of getIndex() use we now have to check for existence of details (doesn't for Character-type NPCs)
+		if (cr === undefined || cr === "") cr = 0;
+		else cr = Number(cr);
 
-			decoratedNpc.orderCR = cr;
+		decoratedNpc.orderCR = cr;
 
-			if (cr > 0 && cr < 1) cr = `1/${1 / cr}`;
-			decoratedNpc.displayCR = cr;
+		if (cr > 0 && cr < 1) cr = `1/${1 / cr}`;
+		decoratedNpc.displayCR = cr;
 
-			decoratedNpc.displaySize = "unset";
-			decoratedNpc.filterSize = 2;
-			if (npcData.details) {
-				decoratedNpc.displayType = this.getNPCType(npcData.details.type);
-			} else {
-				decoratedNpc.displayType = game.i18n.localize("CMPBrowser.Unknown") ?? "Unknown";
-			}
-
-			if (CONFIG.DND5E.actorSizes[npcData.traits.size] !== undefined) {
-				decoratedNpc.displaySize = CONFIG.DND5E.actorSizes[npcData.traits.size];
-			}
-			let npcSize = npc.system.traits.size;
-			switch (npcSize) {
-				case "grg":
-					decoratedNpc.filterSize = 5;
-					break;
-				case "huge":
-					decoratedNpc.filterSize = 4;
-					break;
-				case "lg":
-					decoratedNpc.filterSize = 3;
-					break;
-				case "sm":
-					decoratedNpc.filterSize = 1;
-					break;
-				case "tiny":
-					decoratedNpc.filterSize = 0;
-					break;
-				case "med":
-				default:
-					decoratedNpc.filterSize = 2;
-					break;
-			}
-			return decoratedNpc;
-		} catch(e) {
-			throw e;
+		decoratedNpc.displaySize = "unset";
+		decoratedNpc.filterSize = 2;
+		if (npcData.details) {
+			decoratedNpc.displayType = this.getNPCType(npcData.details.type);
+		} else {
+			decoratedNpc.displayType = game.i18n.localize("CMPBrowser.Unknown") ?? "Unknown";
 		}
+
+		if (CONFIG.DND5E.actorSizes[npcData.traits.size] !== undefined) {
+			decoratedNpc.displaySize = CONFIG.DND5E.actorSizes[npcData.traits.size];
+		}
+		let npcSize = npc.system.traits.size;
+		switch (npcSize) {
+			case "grg":
+				decoratedNpc.filterSize = 5;
+				break;
+			case "huge":
+				decoratedNpc.filterSize = 4;
+				break;
+			case "lg":
+				decoratedNpc.filterSize = 3;
+				break;
+			case "sm":
+				decoratedNpc.filterSize = 1;
+				break;
+			case "tiny":
+				decoratedNpc.filterSize = 0;
+				break;
+			case "med":
+			default:
+				decoratedNpc.filterSize = 2;
+				break;
+		}
+		return decoratedNpc;
 	}
 
 	getNPCType(type) {
