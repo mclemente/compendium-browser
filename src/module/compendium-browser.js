@@ -800,128 +800,82 @@ class CompendiumBrowser extends Application {
 	}
 
 	sortSpells(list, byName) {
-		if (byName) {
-			list.sort((a, b) => {
-				let aName = $(a).find(".item-name a")[0].innerHTML;
-				let bName = $(b).find(".item-name a")[0].innerHTML;
-				if (aName < bName) return -1;
-				if (aName > bName) return 1;
-				return 0;
-			});
-		} else {
-			list.sort((a, b) => {
-				let aVal = $(a).find("input[name=level]").val();
-				let bVal = $(b).find("input[name=level]").val();
-				if (aVal < bVal) return -1;
-				if (aVal > bVal) return 1;
-				if (aVal == bVal) {
-					let aName = $(a).find(".item-name a")[0].innerHTML;
-					let bName = $(b).find(".item-name a")[0].innerHTML;
-					if (aName < bName) return -1;
-					if (aName > bName) return 1;
-					return 0;
+		list.sort((a, b) => {
+			const aName = $(a).find(".item-name a")[0].innerHTML;
+			const bName = $(b).find(".item-name a")[0].innerHTML;
+
+			if (!byName) {
+				const aLevel = $(a).find("input[name=level]").val();
+				const bLevel = $(b).find("input[name=level]").val();
+				const levelComparison = aLevel.localeCompare(bLevel);
+
+				if (levelComparison !== 0) {
+					return levelComparison;
 				}
-			});
-		}
+			}
+			return aName.localeCompare(bName);
+		});
 		return list;
 	}
 
 	sortFeats(list, byName) {
-		if (byName) {
-			list.sort((a, b) => {
-				let aName = $(a).find(".item-name a")[0].innerHTML;
-				let bName = $(b).find(".item-name a")[0].innerHTML;
-				if (aName < bName) return -1;
-				if (aName > bName) return 1;
-				return 0;
-			});
-		} else {
-			list.sort((a, b) => {
-				let aVal = $(a).find("input[name=class]").val();
-				let bVal = $(b).find("input[name=class]").val();
-				if (aVal < bVal) return -1;
-				if (aVal > bVal) return 1;
-				if (aVal == bVal) {
-					let aName = $(a).find(".item-name a")[0].innerHTML;
-					let bName = $(b).find(".item-name a")[0].innerHTML;
-					if (aName < bName) return -1;
-					if (aName > bName) return 1;
-					return 0;
+		list.sort((a, b) => {
+			const aName = $(a).find(".item-name a")[0].innerHTML;
+			const bName = $(b).find(".item-name a")[0].innerHTML;
+
+			if (!byName) {
+				const aLevel = $(a).find("input[name=class]").val();
+				const bLevel = $(b).find("input[name=class]").val();
+				const levelComparison = aLevel.localeCompare(bLevel);
+
+				if (levelComparison !== 0) {
+					return levelComparison;
 				}
-			});
-		}
+			}
+			return aName.localeCompare(bName);
+		});
 		return list;
 	}
 
 	sortItems(list, byName) {
-		if (byName) {
-			list.sort((a, b) => {
-				let aName = $(a).find(".item-name a")[0].innerHTML;
-				let bName = $(b).find(".item-name a")[0].innerHTML;
-				if (aName < bName) return -1;
-				if (aName > bName) return 1;
-				return 0;
-			});
-		} else {
-			list.sort((a, b) => {
-				let aVal = $(a).find("input[name=type]").val();
-				let bVal = $(b).find("input[name=type]").val();
-				if (aVal < bVal) return -1;
-				if (aVal > bVal) return 1;
-				if (aVal == bVal) {
-					let aName = $(a).find(".item-name a")[0].innerHTML;
-					let bName = $(b).find(".item-name a")[0].innerHTML;
-					if (aName < bName) return -1;
-					if (aName > bName) return 1;
-					return 0;
+		list.sort((a, b) => {
+			const aName = $(a).find(".item-name a")[0].innerHTML;
+			const bName = $(b).find(".item-name a")[0].innerHTML;
+
+			if (!byName) {
+				const aLevel = $(a).find("input[name=type]").val();
+				const bLevel = $(b).find("input[name=type]").val();
+				const levelComparison = aLevel.localeCompare(bLevel);
+
+				if (levelComparison !== 0) {
+					return levelComparison;
 				}
-			});
-		}
+			}
+			return aName.localeCompare(bName);
+		});
 		return list;
 	}
 
 	sortNpcs(list, orderBy) {
-		switch (orderBy) {
-			case "name":
-				list.sort((a, b) => {
-					let aName = $(a).find(".npc-name a")[0].innerHTML;
-					let bName = $(b).find(".npc-name a")[0].innerHTML;
-					if (aName < bName) return -1;
-					if (aName > bName) return 1;
-					return 0;
-				});
-				break;
-			case "cr":
-				list.sort((a, b) => {
-					let aVal = Number($(a).find('input[name="order.cr"]').val());
-					let bVal = Number($(b).find('input[name="order.cr"]').val());
-					if (aVal < bVal) return -1;
-					if (aVal > bVal) return 1;
-					if (aVal == bVal) {
-						let aName = $(a).find(".npc-name a")[0].innerHTML;
-						let bName = $(b).find(".npc-name a")[0].innerHTML;
-						if (aName < bName) return -1;
-						if (aName > bName) return 1;
-						return 0;
-					}
-				});
-				break;
-			case "size":
-				list.sort((a, b) => {
-					let aVal = $(a).find('input[name="order.size"]').val();
-					let bVal = $(b).find('input[name="order.size"]').val();
-					if (aVal < bVal) return -1;
-					if (aVal > bVal) return 1;
-					if (aVal == bVal) {
-						let aName = $(a).find(".npc-name a")[0].innerHTML;
-						let bName = $(b).find(".npc-name a")[0].innerHTML;
-						if (aName < bName) return -1;
-						if (aName > bName) return 1;
-						return 0;
-					}
-				});
-				break;
-		}
+		list.sort((a, b) => {
+			const aName = $(a).find(".item-name a")[0].innerHTML;
+			const bName = $(b).find(".item-name a")[0].innerHTML;
+
+			if (orderBy === "cr") {
+				const aLevel = Number($(a).find('input[name="order.cr"]').val());
+				const bLevel = Number($(b).find('input[name="order.cr"]').val());
+				if (aLevel !== bLevel) {
+					return aLevel - bLevel;
+				}
+			} else if (orderBy === "size") {
+				const aLevel = Number($(a).find('input[name="order.size"]').val());
+				const bLevel = Number($(b).find('input[name="order.size"]').val());
+				if (aLevel !== bLevel) {
+					return aLevel - bLevel;
+				}
+			}
+			return aName.localeCompare(bName);
+		});
 		return list;
 	}
 
