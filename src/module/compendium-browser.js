@@ -63,6 +63,11 @@ class CompendiumBrowser extends Application {
 
 	/** @override */
 	async getData() {
+		// 0.4.1 Filter as we load to support new way of filtering
+		// Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
+		// First time (when you press Compendium Browser button) is called with filters unset
+
+		// 0.4.1k: Don't do any item/npc loading until tab is visible
 		let data = {
 			items: [],
 			npcs: [],
@@ -93,6 +98,7 @@ class CompendiumBrowser extends Application {
 		});
 
 		// make draggable
+		// 0.4.1: Avoid the game.packs lookup
 		html.find(".draggable").each((i, li) => {
 			li.setAttribute("draggable", true);
 			li.addEventListener(
@@ -125,10 +131,14 @@ class CompendiumBrowser extends Application {
 			for (let e of entries) {
 				if (!e.isIntersecting) continue;
 				const img = e.target;
+				// Avatar image
+				// const img = li.querySelector("img");
 				if (img && img.dataset.src) {
 					img.src = img.dataset.src;
 					delete img.dataset.src;
 				}
+
+				// No longer observe the target
 				observer.unobserve(e.target);
 			}
 		});
@@ -141,33 +151,64 @@ class CompendiumBrowser extends Application {
 		});
 		html.find(".multiselect label").trigger("click");
 
-		function initializeSortableList(tabName, sortFunction) {
-			html.find(`.${tabName}-browser select[name=sortorder]`).on("change", (ev) => {
-				const listElement = html.find(`.${tabName}-browser li`);
-				const byName = ev.target.value === "true";
-				const sortedList = sortFunction(listElement, byName);
-				const ol = $(html.find(`.${tabName}-browser ul`));
-				ol.empty();
-				ol.append(sortedList);
-			});
-		}
-
-		initializeSortableList("spell", this.sortSpells.bind(this));
+		// sort spell list
+		html.find(".spell-browser select[name=sortorder]").on("change", (ev) => {
+			let spellList = html.find(".spell-browser li");
+			let byName = ev.target.value === "true";
+			let sortedList = this.sortSpells(spellList, byName);
+			let ol = $(html.find(".spell-browser ul"));
+			ol[0].innerHTML = [];
+			for (let element of sortedList) {
+				ol[0].append(element);
+			}
+		});
 		this.triggerSort(html, "spell");
 
-		initializeSortableList("feat", this.sortFeats.bind(this));
+		// sort feat list in place
+		html.find(".feat-browser select[name=sortorder]").on("change", (ev) => {
+			let featList = html.find(".feat-browser li");
+			let byName = ev.target.value === "true";
+			let sortedList = this.sortFeats(featList, byName);
+			let ol = $(html.find(".feat-browser ul"));
+			ol[0].innerHTML = [];
+			for (let element of sortedList) {
+				ol[0].append(element);
+			}
+		});
 		this.triggerSort(html, "feat");
 
-		initializeSortableList("item", this.sortItems.bind(this));
+		// sort item list in place
+		html.find(".item-browser select[name=sortorder]").on("change", (ev) => {
+			let itemList = html.find(".item-browser li");
+			let byName = ev.target.value === "true";
+			let sortedList = this.sortItems(itemList, byName);
+			let ol = $(html.find(".item-browser ul"));
+			ol[0].innerHTML = [];
+			for (let element of sortedList) {
+				ol[0].append(element);
+			}
+		});
 		this.triggerSort(html, "item");
 
-		initializeSortableList("npc", this.sortNpcs.bind(this));
+		// sort npc list in place
+		html.find(".npc-browser select[name=sortorder]").on("change", (ev) => {
+			let npcList = html.find(".npc-browser li");
+			let orderBy = ev.target.value;
+			let sortedList = this.sortNpcs(npcList, orderBy);
+			let ol = $(html.find(".npc-browser ul"));
+			ol[0].innerHTML = [];
+			for (let element of sortedList) {
+				ol[0].append(element);
+			}
+		});
 		this.triggerSort(html, "npc");
 
 		for (let tab of ["spell", "feat", "item", "npc"]) {
 			// reset filters and re-render
+			// 0.4.3: Reset ALL filters because when we do a re-render it affects all tabs
 			html.find(`#reset-${tab}-filter`).click((ev) => {
 				this.resetFilters();
+				// v0.4.3: Re-render so that we display the filters correctly
 				this.refreshList = tab;
 				this.render();
 			});
@@ -209,6 +250,7 @@ class CompendiumBrowser extends Application {
 		});
 
 		// activating or deactivating filters
+		// 0.4.1: Now does a re-load and updates just the data side
 		// text filters
 		html.find(".filter[data-type=text] input, .filter[data-type=text] select").on("keyup change paste", (ev) => {
 			const path = $(ev.target).parents(".filter").data("path");
@@ -354,6 +396,8 @@ class CompendiumBrowser extends Application {
 		const seachNumber = Date.now();
 
 		this.CurrentSeachNumber = seachNumber;
+
+		// 0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
 		let numItemsLoaded = 0;
 		let compactItems = {};
 
@@ -569,6 +613,7 @@ class CompendiumBrowser extends Application {
 						}
 					});
 				}
+				// 0.4.1 Only preload a limited number and fill more in as needed
 			}
 		} catch(e) {
 			if (e === STOP_SEARCH) {
@@ -600,7 +645,9 @@ class CompendiumBrowser extends Application {
 			// Handle button clicks
 			cbButton.click((ev) => {
 				ev.preventDefault();
+				// 0.4.1: Reset filters when you click button
 				this.resetFilters();
+				// 0.4.3: Reset everything (including data) when you press the button - calls afterRender() hook
 
 				if (!this.refreshList) {
 					if (game.user.isGM || this.settings.allowSpellBrowser) {
@@ -620,6 +667,8 @@ class CompendiumBrowser extends Application {
 
 	/* Hook to load the first data */
 	static afterRender(cb, html) {
+		// 0.4.3: Because a render always resets ALL the displayed filters (on all tabs) to unselected , we have to blank all the lists as well
+		// (because the current HTML template doesn't set the selected filter values)
 		if (!cb?.refreshList) {
 			return;
 		}
@@ -644,6 +693,7 @@ class CompendiumBrowser extends Application {
 		// After rendering the first time or re-rendering trigger the load/reload of visible data
 
 		let elements = null;
+		// 0.4.2 Display a Loading... message while the data is being loaded and filtered
 		let loadingMessage = null;
 		const tabElements = {
 			spell: { elements: "ul#CBSpells", message: "#CBSpellsMessage" },
@@ -660,6 +710,7 @@ class CompendiumBrowser extends Application {
 		}
 
 		if (elements?.length) {
+			// 0.4.2b: On a tab-switch, only reload if there isn't any data already
 			if (options?.reload || !elements[0].children.length) {
 				const updateLoading = async (numLoaded, doneLoading) => {
 					if (loadingMessage.length) {
@@ -902,12 +953,9 @@ class CompendiumBrowser extends Application {
 		let npcData = npc.system;
 
 		// cr display
-		let cr = npcData.details?.cr;
-		if (cr === undefined || cr === "") {
-			cr = 0;
-		} else {
-			cr = Number(cr);
-		}
+		let cr = npcData.details?.cr; // 0.7.2c: Possibly because of getIndex() use we now have to check for existence of details (doesn't for Character-type NPCs)
+		if (cr === undefined || cr === "") cr = 0;
+		else cr = Number(cr);
 
 		decoratedNpc.orderCR = cr;
 
@@ -1144,6 +1192,7 @@ class CompendiumBrowser extends Application {
 	}
 
 	// FILTERS - Added on the Ready hook
+	// 0.4.0 Make this async so filters can be added all at once
 	async addFilter(entityType, category, label, path, type, possibleValues = null, valIsArray = false) {
 		let target = `${entityType}Filters`;
 		let filter = {};
@@ -1809,6 +1858,8 @@ Hooks.once("init", async () => {
 Hooks.on("ready", () => {
 	if (game.compendiumBrowser === undefined) {
 		game.compendiumBrowser = new CompendiumBrowser();
+		// 0.4.0 Defer loading content until we actually use the Compendium Browser
+		// A compromise approach would be better (periodic loading) except would still create the memory use problem
 		game.compendiumBrowser.initialize();
 	}
 
