@@ -1915,20 +1915,17 @@ function set(obj, path, value) {
 function getPropByString(obj, propString) {
 	if (!propString) return obj;
 
-	let prop;
-	let props = propString.split(".");
+	const props = propString.split(".");
+	let result = obj;
 
-	for (var i = 0, iLen = props.length - 1; i < iLen; i++) {
-		prop = props[i];
-
-		let candidate = obj[prop];
-		if (candidate !== undefined) {
-			obj = candidate;
+	for (const prop of props) {
+		if (result !== undefined) {
+			result = result[prop];
 		} else {
 			break;
 		}
 	}
-	return obj[props[i]];
+	return result;
 }
 
 Hooks.on("renderActorSheet5eCharacter", CompendiumBrowser.addDefaultSheetButton);
