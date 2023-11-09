@@ -153,7 +153,7 @@ class CompendiumBrowser extends Application {
 		// sort spell list
 		html.find(".spell-browser select[name=sortorder]").on("change", (ev) => {
 			let spellList = html.find(".spell-browser li");
-			let byName = ev.target.value == "true";
+			let byName = ev.target.value === "true";
 			let sortedList = this.sortSpells(spellList, byName);
 			let ol = $(html.find(".spell-browser ul"));
 			ol[0].innerHTML = [];
@@ -166,7 +166,7 @@ class CompendiumBrowser extends Application {
 		// sort feat list in place
 		html.find(".feat-browser select[name=sortorder]").on("change", (ev) => {
 			let featList = html.find(".feat-browser li");
-			let byName = ev.target.value == "true";
+			let byName = ev.target.value === "true";
 			let sortedList = this.sortFeats(featList, byName);
 			let ol = $(html.find(".feat-browser ul"));
 			ol[0].innerHTML = [];
@@ -179,7 +179,7 @@ class CompendiumBrowser extends Application {
 		// sort item list in place
 		html.find(".item-browser select[name=sortorder]").on("change", (ev) => {
 			let itemList = html.find(".item-browser li");
-			let byName = ev.target.value == "true";
+			let byName = ev.target.value === "true";
 			let sortedList = this.sortItems(itemList, byName);
 			let ol = $(html.find(".item-browser ul"));
 			ol[0].innerHTML = [];
@@ -415,7 +415,6 @@ class CompendiumBrowser extends Application {
 		this.CurrentSeachNumber = seachNumber;
 
 		// 0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
-		let unfoundSpells = "";
 		let numItemsLoaded = 0;
 		let compactItems = {};
 
@@ -435,7 +434,7 @@ class CompendiumBrowser extends Application {
 						if (browserTab === "spell") {
 							content.reduce(
 								function (itemsList, item5e) {
-									if (this.CurrentSeachNumber != seachNumber) throw STOP_SEARCH;
+									if (this.CurrentSeachNumber !== seachNumber) throw STOP_SEARCH;
 
 									numItemsLoaded = Object.keys(itemsList).length;
 
@@ -471,7 +470,7 @@ class CompendiumBrowser extends Application {
 						} else if (browserTab === "feat") {
 							content.reduce(
 								function (itemsList, item5e) {
-									if (this.CurrentSeachNumber != seachNumber) throw STOP_SEARCH;
+									if (this.CurrentSeachNumber !== seachNumber) throw STOP_SEARCH;
 
 									numItemsLoaded = Object.keys(itemsList).length;
 
@@ -504,7 +503,7 @@ class CompendiumBrowser extends Application {
 						} else if (browserTab === "item") {
 							content.reduce(
 								function (itemsList, item5e) {
-									if (this.CurrentSeachNumber != seachNumber) throw STOP_SEARCH;
+									if (this.CurrentSeachNumber !== seachNumber) throw STOP_SEARCH;
 
 									numItemsLoaded = Object.keys(itemsList).length;
 
@@ -577,11 +576,11 @@ class CompendiumBrowser extends Application {
 		let collectionName = "unknown";
 		try {
 			for (let pack of game.packs) {
-				if (pack.documentName == "Actor" && this.settings.loadedNpcCompendium[pack.collection].load) {
+				if (pack.documentName === "Actor" && this.settings.loadedNpcCompendium[pack.collection].load) {
 					await pack.getIndex({ fields: indexFields }).then(async (content) => {
 						content.reduce(
 							function (actorsList, npc5e) {
-								if (this.CurrentSeachNumber != seachNumber) {
+								if (this.CurrentSeachNumber !== seachNumber) {
 									throw STOP_SEARCH;
 								}
 
@@ -589,7 +588,7 @@ class CompendiumBrowser extends Application {
 									npc5e.img = game.dnd5e.moduleArt.map.get(npc5e.uuid.replace(".Actor", ""))?.actor;
 								}
 
-								if (npc5e.system == undefined) {
+								if (npc5e.system === undefined) {
 									collectionName = pack.collection;
 									throw NOT_MIGRATED;
 								}
@@ -602,7 +601,7 @@ class CompendiumBrowser extends Application {
 									}
 									throw STOP_SEARCH;
 								}
-								if (npc5e.name != "#[CF_tempEntity]") {
+								if (npc5e.name !== "#[CF_tempEntity]") {
 									const decoratedNpc = this.decorateNpc(npc5e, indexFields);
 									if (
 										decoratedNpc
@@ -634,9 +633,9 @@ class CompendiumBrowser extends Application {
 				// 0.4.1 Only preload a limited number and fill more in as needed
 			}
 		} catch(e) {
-			if (e == STOP_SEARCH) {
+			if (e === STOP_SEARCH) {
 				// breaking out
-			} else if (e == NOT_MIGRATED) {
+			} else if (e === NOT_MIGRATED) {
 				console.log("Cannot browse compendium %s as it is not migrated to v10 format", collectionName);
 			} else {
 				throw e;
@@ -1078,7 +1077,7 @@ class CompendiumBrowser extends Application {
 	filterElements(list, subjects, filters) {
 		for (let element of list) {
 			let subject = subjects[element.dataset.entryId];
-			if (this.passesFilter(subject, filters) == false) {
+			if (this.passesFilter(subject, filters) === false) {
 				$(element).hide();
 			} else {
 				$(element).show();
@@ -1092,7 +1091,7 @@ class CompendiumBrowser extends Application {
 			if (filter.type === "numberCompare") {
 				switch (filter.operator) {
 					case "=":
-						if (prop != filter.value) {
+						if (prop !== filter.value) {
 							return false;
 						}
 						break;
@@ -1121,7 +1120,7 @@ class CompendiumBrowser extends Application {
 					if (
 						filter.value !== undefined
 						&& prop !== undefined
-						&& prop != filter.value
+						&& prop !== filter.value
 						&& !(filter.value === true && prop)
 					) {
 						return false;
@@ -1167,7 +1166,7 @@ class CompendiumBrowser extends Application {
 		// search through sorted list for duplicates
 		for (let index = 0; index < sortedList.length - 1; ) {
 			// all duplicates will be next to eachother
-			if (sortedList[index].name == sortedList[index + 1].name) {
+			if (sortedList[index].name === sortedList[index + 1].name) {
 				// duplicate something is getting removed
 				// TODO choose what to remove rather then the second
 				let remove = index + 1;
@@ -1183,7 +1182,7 @@ class CompendiumBrowser extends Application {
 	clearObject(obj) {
 		let newObj = {};
 		for (let key in obj) {
-			if (obj[key] == true) {
+			if (obj[key] === true) {
 				newObj[key] = true;
 			}
 		}
@@ -1714,7 +1713,7 @@ class CompendiumBrowser extends Application {
 					);
 
 					component[0].value = input.value;
-				} else if (filter.type == "multiSelect") {
+				} else if (filter.type === "multiSelect") {
 					let components = html.element.find(`div.tab.active #${input.section}-${input.label}`);
 
 					for (let v of input.values) {
@@ -1740,7 +1739,7 @@ class CompendiumBrowser extends Application {
 			return;
 		}
 
-		let filter = this[target].registeredFilterCategorys[catId].filters.find((x) => x.labelId == label);
+		let filter = this[target].registeredFilterCategorys[catId].filters.find((x) => x.labelId === label);
 
 		if (!filter) {
 			return;
@@ -1790,7 +1789,7 @@ class CompendiumBrowser extends Application {
 	findFilterR(target, filterTarget) {
 		for (let cat of Object.keys(this[target].registeredFilterCategorys)) {
 			for (let filter of this[target].registeredFilterCategorys[cat].filters) {
-				if (filterTarget.path == filter.path) {
+				if (filterTarget.path === filter.path) {
 					return { section: `${cat}`, label: `${filter.labelId}` };
 				}
 			}
@@ -1892,7 +1891,7 @@ class CompendiumBrowser extends Application {
 		// find max spell level
 		let maxLevel = Object.keys(character.system.spells).reduce((acc, spell) => {
 			// special case for pact magic
-			if (spell == "pact") {
+			if (spell === "pact") {
 				return Math.max(character.system.spells[spell].level, acc);
 			} else {
 				let spellObject = character.system.spells[spell];
@@ -1963,7 +1962,7 @@ function getPropByString(obj, propString) {
 	if (!propString) return obj;
 
 	let prop;
-		let props = propString.split(".");
+	let props = propString.split(".");
 
 	for (var i = 0, iLen = props.length - 1; i < iLen; i++) {
 		prop = props[i];

@@ -20,6 +20,10 @@ module.exports = {
 
   plugins: [],
 
+  globals: {
+    dnd5e: false
+  },
+
   rules: {
     "array-bracket-spacing": ["warn", "never"],
     "array-callback-return": "warn",
