@@ -858,8 +858,8 @@ class CompendiumBrowser extends Application {
 
 	sortNpcs(list, orderBy) {
 		list.sort((a, b) => {
-			const aName = $(a).find(".item-name a")[0].innerHTML;
-			const bName = $(b).find(".item-name a")[0].innerHTML;
+			const aName = $(a).find(".npc-name a")[0].innerHTML;
+			const bName = $(b).find(".npc-name a")[0].innerHTML;
 
 			if (orderBy === "cr") {
 				const aLevel = Number($(a).find('input[name="order.cr"]').val());
