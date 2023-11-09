@@ -1,3 +1,7 @@
+# 2.0.0
+- Updated for V11.
+- Small visual enhancements.
+
 #0.9.0
 
 - Button on character sheets for opening a search with class and spell level (works on default and TidySheet5e)
