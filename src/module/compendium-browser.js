@@ -1,4 +1,5 @@
 import { preloadTemplates } from "./preloadTemplates.js";
+import { dnd5eProvider } from "./providers/dnd5e.js";
 import { registerSettings } from "./settings.js";
 
 const STOP_SEARCH = "StopSearchException";
@@ -377,33 +378,15 @@ class CompendiumBrowser extends Application {
 	async checkListsLoaded() {
 		// Provides extra info not in the standard SRD, like which classes can learn a spell
 		if (!this.classList) {
-			this.classList = await fetch("modules/compendium-browser/spell-classes.json")
-				.then((result) => {
-					return result.json();
-				})
-				.then((obj) => {
-					return (this.classList = obj);
-				});
+			this.classList = dnd5eProvider.classList;
 		}
 
 		if (!this.packList) {
-			this.packList = await fetch("modules/compendium-browser/item-packs.json")
-				.then((result) => {
-					return result.json();
-				})
-				.then((obj) => {
-					return (this.packList = obj);
-				});
+			this.packList = dnd5eProvider.packList;
 		}
 
 		if (!this.subClasses) {
-			this.subClasses = await fetch("modules/compendium-browser/sub-classes.json")
-				.then((result) => {
-					return result.json();
-				})
-				.then((obj) => {
-					return (this.subClasses = obj);
-				});
+			this.subClasses = dnd5eProvider.subClasses;
 		}
 	}
 
