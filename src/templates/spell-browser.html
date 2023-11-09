@@ -24,11 +24,11 @@
 			<button id="reset-spell-filter">{{localize "CMPBrowser.Filters.ResetFilters"}}</button>
 			<!-- <button id="copy-search-spell">Export to <i class="fa-brands fa-square-js"></i></button> -->
 		</div>
-		{{> "modules/compendium-browser/template/filter-container.html" filters=spellFilters}}
+		{{> "modules/compendium-browser/templates/filter-container.html" filters=spellFilters}}
 	</div>
 	<div class="list-area flexcol">
 		<ul id="CBSpells">
-			{{> "modules/compendium-browser/template/spell-browser-list.html" spells=items}}
+			{{> "modules/compendium-browser/templates/spell-browser-list.html" spells=items}}
 		</ul>
 		<span class="loading" id="CBSpellsMessage" style="flex: 0"></span>
 	</div>

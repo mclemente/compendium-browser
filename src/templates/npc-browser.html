@@ -25,11 +25,11 @@
 			<button id="reset-npc-filter">{{localize "CMPBrowser.Filters.ResetFilters"}}</button>
 			<!-- <button id="copy-search-item">Export to <i class="fa-brands fa-square-js"></i></button> -->
 		</div>
-		{{> "modules/compendium-browser/template/filter-container.html" filters=npcFilters}}
+		{{> "modules/compendium-browser/templates/filter-container.html" filters=npcFilters}}
 	</div>
 	<div class="list-area flexcol">
 		<ul id="CBNPCs">
-			{{> "modules/compendium-browser/template/npc-browser-list.html" npcs=npcs}}
+			{{> "modules/compendium-browser/templates/npc-browser-list.html" npcs=npcs}}
 		</ul>
 		<span class="loading" id="CBNpcsMessage" style="flex: 0"></span>
 	</div>

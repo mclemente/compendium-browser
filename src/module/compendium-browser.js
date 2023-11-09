@@ -1,4 +1,7 @@
-﻿const STOP_SEARCH = "StopSearchException";
+import { preloadTemplates } from "./preloadTemplates.js";
+import { registerSettings } from "./settings.js";
+
+const STOP_SEARCH = "StopSearchException";
 const NOT_MIGRATED = "NotMigratedException";
 
 class CompendiumBrowser extends Application {
@@ -7,7 +10,7 @@ class CompendiumBrowser extends Application {
 			title: "CMPBrowser.compendiumBrowser",
 			tabs: [{ navSelector: ".tabs", contentSelector: ".content", initial: "spell" }],
 			classes: ["compendium-browser"],
-			template: "modules/compendium-browser/template/template.html",
+			template: "modules/compendium-browser/templates/template.html",
 			width: 800,
 			height: 730,
 			resizable: true,
@@ -31,7 +34,7 @@ class CompendiumBrowser extends Application {
 			this.hookCompendiumList(html);
 		});
 
-		//Reset the filters used in the dialog
+		// Reset the filters used in the dialog
 		this.spellFilters = {
 			registeredFilterCategorys: {},
 			activeFilters: {},
@@ -59,11 +62,11 @@ class CompendiumBrowser extends Application {
 
 	/** @override */
 	async getData() {
-		//0.4.1 Filter as we load to support new way of filtering
-		//Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
-		//First time (when you press Compendium Browser button) is called with filters unset
+		// 0.4.1 Filter as we load to support new way of filtering
+		// Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
+		// First time (when you press Compendium Browser button) is called with filters unset
 
-		//0.4.1k: Don't do any item/npc loading until tab is visible
+		// 0.4.1k: Don't do any item/npc loading until tab is visible
 		let data = {
 			items: [],
 			npcs: [],
@@ -94,7 +97,7 @@ class CompendiumBrowser extends Application {
 		});
 
 		// make draggable
-		//0.4.1: Avoid the game.packs lookup
+		// 0.4.1: Avoid the game.packs lookup
 		html.find(".draggable").each((i, li) => {
 			li.setAttribute("draggable", true);
 			li.addEventListener(
@@ -128,7 +131,7 @@ class CompendiumBrowser extends Application {
 				if (!e.isIntersecting) continue;
 				const img = e.target;
 				// Avatar image
-				//const img = li.querySelector("img");
+				// const img = li.querySelector("img");
 				if (img && img.dataset.src) {
 					img.src = img.dataset.src;
 					delete img.dataset.src;
@@ -201,15 +204,15 @@ class CompendiumBrowser extends Application {
 
 		for (let tab of ["spell", "feat", "item", "npc"]) {
 			// reset filters and re-render
-			//0.4.3: Reset ALL filters because when we do a re-render it affects all tabs
+			// 0.4.3: Reset ALL filters because when we do a re-render it affects all tabs
 			html.find(`#reset-${tab}-filter`).click((ev) => {
 				this.resetFilters();
-				//v0.4.3: Re-render so that we display the filters correctly
+				// v0.4.3: Re-render so that we display the filters correctly
 				this.refreshList = tab;
 				this.render();
 			});
 
-			//copy Javascript seach to clipboard
+			// copy Javascript seach to clipboard
 			html.find(`#copy-search-${tab}`).click(async (ev) => {
 				this.copySearchToClipboard(tab);
 			});
@@ -246,7 +249,7 @@ class CompendiumBrowser extends Application {
 		});
 
 		// activating or deactivating filters
-		//0.4.1: Now does a re-load and updates just the data side
+		// 0.4.1: Now does a re-load and updates just the data side
 		// text filters
 		html.find(".filter[data-type=text] input, .filter[data-type=text] select").on("keyup change paste", (ev) => {
 			const path = $(ev.target).parents(".filter").data("path");
@@ -365,14 +368,14 @@ class CompendiumBrowser extends Application {
 			}
 		);
 
-		//Just for the loading image
+		// Just for the loading image
 		if (this.observer) {
 			html.find("img").each((i, img) => this.observer.observe(img));
 		}
 	}
 
 	async checkListsLoaded() {
-		//Provides extra info not in the standard SRD, like which classes can learn a spell
+		// Provides extra info not in the standard SRD, like which classes can learn a spell
 		if (!this.classList) {
 			this.classList = await fetch("modules/compendium-browser/spell-classes.json")
 				.then((result) => {
@@ -411,23 +414,23 @@ class CompendiumBrowser extends Application {
 
 		this.CurrentSeachNumber = seachNumber;
 
-		//0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
+		// 0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
 		let unfoundSpells = "";
 		let numItemsLoaded = 0;
 		let compactItems = {};
 
 		try {
-			//Filter the full list, but only save the core compendium information + displayed info
+			// Filter the full list, but only save the core compendium information + displayed info
 			for (let pack of game.packs) {
 				if (pack.documentName === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
-					//can query just for spells since there is only 1 type
+					// can query just for spells since there is only 1 type
 					let query = {};
 					if (browserTab === "spell") {
 						query = { type: "spell" };
 					}
 
-					//FIXME: How much could we do with the loaded index rather than all content?
-					//OR filter the content up front for the decoratedItem.type??
+					// FIXME: How much could we do with the loaded index rather than all content?
+					// OR filter the content up front for the decoratedItem.type??
 					await pack.getDocuments(query).then((content) => {
 						if (browserTab === "spell") {
 							content.reduce(
@@ -446,8 +449,8 @@ class CompendiumBrowser extends Application {
 									const decoratedItem = this.decorateItem(item5e);
 
 									if (
-										decoratedItem &&
-										this.passesFilter(decoratedItem, this.spellFilters.activeFilters)
+										decoratedItem
+										&& this.passesFilter(decoratedItem, this.spellFilters.activeFilters)
 									) {
 										itemsList[item5e.id] = {
 											compendium: pack.collection,
@@ -482,9 +485,9 @@ class CompendiumBrowser extends Application {
 									const decoratedItem = this.decorateItem(item5e);
 
 									if (
-										decoratedItem &&
-										["feat", "class", "subclass", "background"].includes(decoratedItem.type) &&
-										this.passesFilter(decoratedItem, this.featFilters.activeFilters)
+										decoratedItem
+										&& ["feat", "class", "subclass", "background"].includes(decoratedItem.type)
+										&& this.passesFilter(decoratedItem, this.featFilters.activeFilters)
 									) {
 										itemsList[item5e.id] = {
 											compendium: pack.collection,
@@ -515,11 +518,11 @@ class CompendiumBrowser extends Application {
 									const decoratedItem = this.decorateItem(item5e);
 
 									if (
-										decoratedItem &&
-										!["spell", "feat", "class", "subclass", "background"].includes(
+										decoratedItem
+										&& !["spell", "feat", "class", "subclass", "background"].includes(
 											decoratedItem.type
-										) &&
-										this.passesFilter(decoratedItem, this.itemFilters.activeFilters)
+										)
+										&& this.passesFilter(decoratedItem, this.itemFilters.activeFilters)
 									) {
 										itemsList[item5e.id] = {
 											compendium: pack.collection,
@@ -540,11 +543,11 @@ class CompendiumBrowser extends Application {
 							updateLoading(numItemsLoaded, false);
 						}
 					});
-				} //end if pack entity === Item
-			} //for packs
-		} catch (e) {
+				} // end if pack entity === Item
+			} // for packs
+		} catch(e) {
 			if (e === STOP_SEARCH) {
-				//stopping search early
+				// stopping search early
 			} else {
 				throw e;
 			}
@@ -602,8 +605,8 @@ class CompendiumBrowser extends Application {
 								if (npc5e.name != "#[CF_tempEntity]") {
 									const decoratedNpc = this.decorateNpc(npc5e, indexFields);
 									if (
-										decoratedNpc &&
-										this.passesFilter(decoratedNpc, this.npcFilters.activeFilters)
+										decoratedNpc
+										&& this.passesFilter(decoratedNpc, this.npcFilters.activeFilters)
 									) {
 										actorsList[npc5e._id] = {
 											compendium: pack.collection,
@@ -628,11 +631,11 @@ class CompendiumBrowser extends Application {
 						}
 					});
 				}
-				//0.4.1 Only preload a limited number and fill more in as needed
+				// 0.4.1 Only preload a limited number and fill more in as needed
 			}
-		} catch (e) {
+		} catch(e) {
 			if (e == STOP_SEARCH) {
-				//breaking out
+				// breaking out
 			} else if (e == NOT_MIGRATED) {
 				console.log("Cannot browse compendium %s as it is not migrated to v10 format", collectionName);
 			} else {
@@ -660,9 +663,9 @@ class CompendiumBrowser extends Application {
 			// Handle button clicks
 			cbButton.click((ev) => {
 				ev.preventDefault();
-				//0.4.1: Reset filters when you click button
+				// 0.4.1: Reset filters when you click button
 				this.resetFilters();
-				//0.4.3: Reset everything (including data) when you press the button - calls afterRender() hook
+				// 0.4.3: Reset everything (including data) when you press the button - calls afterRender() hook
 
 				if (!this.refreshList) {
 					if (game.user.isGM || this.settings.allowSpellBrowser) {
@@ -682,7 +685,7 @@ class CompendiumBrowser extends Application {
 
 	/* Hook to load the first data */
 	static afterRender(cb, html) {
-		//0.4.3: Because a render always resets ALL the displayed filters (on all tabs) to unselected , we have to blank all the lists as well
+		// 0.4.3: Because a render always resets ALL the displayed filters (on all tabs) to unselected , we have to blank all the lists as well
 		// (because the current HTML template doesn't set the selected filter values)
 		if (!cb?.refreshList) {
 			return;
@@ -705,10 +708,10 @@ class CompendiumBrowser extends Application {
 	}
 
 	async replaceList(html, browserTab, options = { reload: true }) {
-		//After rendering the first time or re-rendering trigger the load/reload of visible data
+		// After rendering the first time or re-rendering trigger the load/reload of visible data
 
 		let elements = null;
-		//0.4.2 Display a Loading... message while the data is being loaded and filtered
+		// 0.4.2 Display a Loading... message while the data is being loaded and filtered
 		let loadingMessage = null;
 		const tabElements = {
 			spell: { elements: "ul#CBSpells", message: "#CBSpellsMessage" },
@@ -725,7 +728,7 @@ class CompendiumBrowser extends Application {
 		}
 
 		if (elements?.length) {
-			//0.4.2b: On a tab-switch, only reload if there isn't any data already
+			// 0.4.2b: On a tab-switch, only reload if there isn't any data already
 			if (options?.reload || !elements[0].children.length) {
 				const updateLoading = async (numLoaded, doneLoading) => {
 					if (loadingMessage.length) {
@@ -739,20 +742,20 @@ class CompendiumBrowser extends Application {
 					}
 				};
 				updateLoading(0, false);
-				//Uses loadAndFilterItems to read compendia for items which pass the current filters and render on this tab
+				// Uses loadAndFilterItems to read compendia for items which pass the current filters and render on this tab
 				const newItemsHTML = await this.renderItemData(browserTab, updateLoading);
 				elements[0].innerHTML = newItemsHTML;
-				//Re-sort before setting up lazy loading
+				// Re-sort before setting up lazy loading
 				this.triggerSort(html, browserTab);
 
-				//Lazy load images
+				// Lazy load images
 				if (this.observer) {
 					$(elements)
 						.find("img")
 						.each((i, img) => this.observer.observe(img));
 				}
 
-				//Reactivate listeners for clicking and dragging
+				// Reactivate listeners for clicking and dragging
 				this.activateItemListListeners($(elements));
 			}
 		}
@@ -761,7 +764,7 @@ class CompendiumBrowser extends Application {
 	async renderLoading(messageElement, itemType, numLoaded, maxLoaded = false, doneLoading = false) {
 		if (!messageElement) return;
 
-		let loadingHTML = await renderTemplate("modules/compendium-browser/template/loading.html", {
+		let loadingHTML = await renderTemplate("modules/compendium-browser/templates/loading.html", {
 			numLoaded: numLoaded,
 			itemType: itemType,
 			maxLoaded: maxLoaded,
@@ -777,14 +780,14 @@ class CompendiumBrowser extends Application {
 		} else {
 			listItems = await this.loadAndFilterItems(browserTab, updateLoading);
 		}
-		const html = await renderTemplate(`modules/compendium-browser/template/${browserTab}-browser-list.html`, {
+		const html = await renderTemplate(`modules/compendium-browser/templates/${browserTab}-browser-list.html`, {
 			listItems: listItems,
 		});
 
 		return html;
 	}
 
-	//SORTING
+	// SORTING
 	triggerSort(html, browserTab) {
 		if (browserTab === "spell") {
 			html.find(".spell-browser select[name=sortorder]").trigger("change");
@@ -925,7 +928,7 @@ class CompendiumBrowser extends Application {
 
 	decorateItem(item5e) {
 		if (!item5e) return null;
-		//Decorate and then filter a compendium entry - returns null or the item
+		// Decorate and then filter a compendium entry - returns null or the item
 
 		const item = { ...item5e };
 
@@ -953,12 +956,12 @@ class CompendiumBrowser extends Application {
 				.replace(/[^一-龠ぁ-ゔァ-ヴーa-zA-Z0-9ａ-ｚＡ-Ｚ０-９々〆〤]/g, "")
 				.replace("'", "")
 				.replace(/ /g, "");
-			//let cleanSpellName = spell.name.toLowerCase().replace(/[^a-zA-Z0-9\s:]/g, '').replace("'", '').replace(/ /g, '');
+			// let cleanSpellName = spell.name.toLowerCase().replace(/[^a-zA-Z0-9\s:]/g, '').replace("'", '').replace(/ /g, '');
 			if (this.classList[cleanSpellName]) {
 				let classes = this.classList[cleanSpellName];
 				item.classes = classes.split(",");
 			} else {
-				//FIXME: unfoundSpells += cleanSpellName + ',';
+				// FIXME: unfoundSpells += cleanSpellName + ',';
 			}
 		} else if (item.type === "feat" || item.type === "class") {
 			// getting class
@@ -982,7 +985,7 @@ class CompendiumBrowser extends Application {
 			// getting uses/ressources status
 			item.usesRessources = item5e.hasLimitedUses;
 		} else if (item.type === "subclass") {
-			//subclasses dont exist lower then version 10
+			// subclasses dont exist lower then version 10
 			item.classRequirement = [item.system.classIdentifier];
 			item.classRequirementString = item.system.classIdentifier;
 		} else {
@@ -1012,17 +1015,17 @@ class CompendiumBrowser extends Application {
 				return npcDict;
 			}, {});
 
-			//0.8.0: update for V10 to use actor.system instead of actor.data
+			// 0.8.0: update for V10 to use actor.system instead of actor.data
 			let npcData = npc.system;
 
 			// cr display
-			let cr = npcData.details?.cr; //0.7.2c: Possibly because of getIndex() use we now have to check for existence of details (doesn't for Character-type NPCs)
+			let cr = npcData.details?.cr; // 0.7.2c: Possibly because of getIndex() use we now have to check for existence of details (doesn't for Character-type NPCs)
 			if (cr === undefined || cr === "") cr = 0;
 			else cr = Number(cr);
 
 			decoratedNpc.orderCR = cr;
 
-			if (cr > 0 && cr < 1) cr = "1/" + 1 / cr;
+			if (cr > 0 && cr < 1) cr = `1/${1 / cr}`;
 			decoratedNpc.displayCR = cr;
 
 			decoratedNpc.displaySize = "unset";
@@ -1059,7 +1062,7 @@ class CompendiumBrowser extends Application {
 					break;
 			}
 			return decoratedNpc;
-		} catch (e) {
+		} catch(e) {
 			throw e;
 		}
 	}
@@ -1116,10 +1119,10 @@ class CompendiumBrowser extends Application {
 				} else {
 					if (prop === undefined) return false;
 					if (
-						filter.value !== undefined &&
-						prop !== undefined &&
-						prop != filter.value &&
-						!(filter.value === true && prop)
+						filter.value !== undefined
+						&& prop !== undefined
+						&& prop != filter.value
+						&& !(filter.value === true && prop)
 					) {
 						return false;
 					}
@@ -1156,17 +1159,17 @@ class CompendiumBrowser extends Application {
 		return true;
 	}
 
-	//incomplete removal of duplicate items
+	// incomplete removal of duplicate items
 	removeDuplicates(spellList) {
-		//sort at n log n
+		// sort at n log n
 		let sortedList = Object.values(spellList).sort((a, b) => a.name.localeCompare(b.name));
 
-		//search through sorted list for duplicates
+		// search through sorted list for duplicates
 		for (let index = 0; index < sortedList.length - 1; ) {
-			//all duplicates will be next to eachother
+			// all duplicates will be next to eachother
 			if (sortedList[index].name == sortedList[index + 1].name) {
-				//duplicate something is getting removed
-				//TODO choose what to remove rather then the second
+				// duplicate something is getting removed
+				// TODO choose what to remove rather then the second
 				let remove = index + 1;
 
 				delete spellList[sortedList[remove].id];
@@ -1196,13 +1199,13 @@ class CompendiumBrowser extends Application {
 			if (compendium.documentName === "Item") {
 				defaultSettings.loadedSpellCompendium[compendium.collection] = {
 					load: true,
-					name: `${compendium["metadata"]["label"]} (${compendium.collection})`,
+					name: `${compendium.metadata.label} (${compendium.collection})`,
 				};
 			}
 			if (compendium.documentName === "Actor") {
 				defaultSettings.loadedNpcCompendium[compendium.collection] = {
 					load: true,
-					name: `${compendium["metadata"]["label"]} (${compendium.collection})`,
+					name: `${compendium.metadata.label} (${compendium.collection})`,
 				};
 			}
 		}
@@ -1235,21 +1238,21 @@ class CompendiumBrowser extends Application {
 		// load settings from container and apply to default settings (available compendie might have changed)
 		let settings = game.settings.get("compendium-browser", "settings");
 		for (let compKey in defaultSettings.loadedSpellCompendium) {
-			//v0.7.1 Check for settings.loadedSpellCompendium
+			// v0.7.1 Check for settings.loadedSpellCompendium
 			if (settings.loadedSpellCompendium && settings.loadedSpellCompendium[compKey] !== undefined) {
 				defaultSettings.loadedSpellCompendium[compKey].load = settings.loadedSpellCompendium[compKey].load;
 			}
 		}
 		for (let compKey in defaultSettings.loadedNpcCompendium) {
-			//v0.7.1 Check for settings.loadedNpcCompendium
+			// v0.7.1 Check for settings.loadedNpcCompendium
 			if (settings.loadedNpcCompendium && settings.loadedNpcCompendium[compKey] !== undefined) {
 				defaultSettings.loadedNpcCompendium[compKey].load = settings.loadedNpcCompendium[compKey].load;
 			}
 		}
-		defaultSettings.allowSpellBrowser = settings.allowSpellBrowser ? true : false;
-		defaultSettings.allowFeatBrowser = settings.allowFeatBrowser ? true : false;
-		defaultSettings.allowItemBrowser = settings.allowItemBrowser ? true : false;
-		defaultSettings.allowNpcBrowser = settings.allowNpcBrowser ? true : false;
+		defaultSettings.allowSpellBrowser = !!settings.allowSpellBrowser;
+		defaultSettings.allowFeatBrowser = !!settings.allowFeatBrowser;
+		defaultSettings.allowItemBrowser = !!settings.allowItemBrowser;
+		defaultSettings.allowNpcBrowser = !!settings.allowNpcBrowser;
 
 		if (game.user.isGM) {
 			game.settings.set("compendium-browser", "settings", defaultSettings);
@@ -1257,8 +1260,8 @@ class CompendiumBrowser extends Application {
 		this.settings = defaultSettings;
 	}
 
-	//FILTERS - Added on the Ready hook
-	//0.4.0 Make this async so filters can be added all at once
+	// FILTERS - Added on the Ready hook
+	// 0.4.0 Make this async so filters can be added all at once
 	async addFilter(entityType, category, label, path, type, possibleValues = null, valIsArray = false) {
 		let target = `${entityType}Filters`;
 		let filter = {};
@@ -1338,7 +1341,7 @@ class CompendiumBrowser extends Application {
 			"select",
 			this._sortPackValues(CONFIG.DND5E.damageTypes)
 		);
-		//JV-082: Fix for missing "Class" search feature
+		// JV-082: Fix for missing "Class" search feature
 		this.addSpellFilter(
 			"CMPBrowser.general",
 			"ITEM.TypeClass",
@@ -1437,7 +1440,7 @@ class CompendiumBrowser extends Application {
 
 	async addFeatFilters() {
 		// Feature Filters
-		//Foundry v10+ Item#data is now Item#system
+		// Foundry v10+ Item#data is now Item#system
 		this.addFeatFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
 		this.addFeatFilter(
 			"CMPBrowser.general",
@@ -1651,7 +1654,7 @@ class CompendiumBrowser extends Application {
 	}
 
 	async renderWith(tab = "spell", filters = []) {
-		//if there isn't a tab error out
+		// if there isn't a tab error out
 		if (!this[`${tab}Filters`]) {
 			ui.notifications.warn(`no tab by name ${tab}`);
 			return;
@@ -1685,8 +1688,8 @@ class CompendiumBrowser extends Application {
 
 		this[`${tab}Filters`].activeFilters = activateFilters;
 
-		//wait for after the afterRender function to change tabs
-		//this avoids some errors when initially opening the window
+		// wait for after the afterRender function to change tabs
+		// this avoids some errors when initially opening the window
 		CompendiumBrowser.postRender = async () => {
 			CompendiumBrowser.postRender = () => {};
 
@@ -1719,7 +1722,7 @@ class CompendiumBrowser extends Application {
 						c.prop("checked", true);
 					}
 				} else {
-					ui.notifications.warn(`Unknown filter type?`);
+					ui.notifications.warn("Unknown filter type?");
 				}
 			}
 		};
@@ -1756,7 +1759,7 @@ class CompendiumBrowser extends Application {
 		try {
 			await navigator.clipboard.writeText(text);
 			ui.notifications.info("Javascript Copied to clipboard");
-		} catch (err) {
+		} catch(err) {
 			ui.notifications.warn("failed to copy javascript to clipboard, check logs for string");
 			console.error("Failed to copy: ", err);
 		}
@@ -1765,9 +1768,9 @@ class CompendiumBrowser extends Application {
 	getSearchText(tab) {
 		const target = `${tab}Filters`;
 
-		//map active filters to their labels
+		// map active filters to their labels
 		let output = Object.values(this[target].activeFilters).map((filter) => {
-			//find Filters from paths
+			// find Filters from paths
 			let out = this.findFilterR(target, filter);
 
 			if (filter.value) {
@@ -1795,7 +1798,7 @@ class CompendiumBrowser extends Application {
 
 		ui.notifications.warn("Could not find the filter!!");
 		console.warn(filterTarget);
-		return;
+
 	}
 
 	static async addTidySheetButton(cb, html, actor) {
@@ -1872,7 +1875,7 @@ class CompendiumBrowser extends Application {
 		});
 	}
 
-	//find the first caster class of the character
+	// find the first caster class of the character
 	static findCasterClass(character) {
 		const options = ["artificer", "bard", "cleric", "druid", "paladin", "ranger", "sorcerer", "warlock", "wizard"];
 
@@ -1886,9 +1889,9 @@ class CompendiumBrowser extends Application {
 	}
 
 	static findMaxCasterLevel(character) {
-		//find max spell level
+		// find max spell level
 		let maxLevel = Object.keys(character.system.spells).reduce((acc, spell) => {
-			//special case for pact magic
+			// special case for pact magic
 			if (spell == "pact") {
 				return Math.max(character.system.spells[spell].level, acc);
 			} else {
@@ -1916,27 +1919,16 @@ class CompendiumBrowser extends Application {
 	}
 }
 
-Hooks.on("init", async () => {
-	await loadTemplates([
-		"modules/compendium-browser/template/spell-browser.html",
-		"modules/compendium-browser/template/spell-browser-list.html",
-		"modules/compendium-browser/template/npc-browser.html",
-		"modules/compendium-browser/template/npc-browser-list.html",
-		"modules/compendium-browser/template/feat-browser.html",
-		"modules/compendium-browser/template/feat-browser-list.html",
-		"modules/compendium-browser/template/item-browser.html",
-		"modules/compendium-browser/template/item-browser-list.html",
-		"modules/compendium-browser/template/filter-container.html",
-		"modules/compendium-browser/template/settings.html",
-		"modules/compendium-browser/template/loading.html",
-	]);
+Hooks.once("init", async () => {
+	registerSettings();
+	await preloadTemplates();
 });
 
 Hooks.on("ready", () => {
 	if (game.compendiumBrowser === undefined) {
 		game.compendiumBrowser = new CompendiumBrowser();
-		//0.4.0 Defer loading content until we actually use the Compendium Browser
-		//A compromise approach would be better (periodic loading) except would still create the memory use problem
+		// 0.4.0 Defer loading content until we actually use the Compendium Browser
+		// A compromise approach would be better (periodic loading) except would still create the memory use problem
 		game.compendiumBrowser.initialize();
 	}
 
@@ -1955,11 +1947,11 @@ function stripDotCharacters(str) {
 }
 
 function set(obj, path, value) {
-	var schema = obj; // a moving reference to internal objects within obj
-	var pList = path.split(".");
-	var len = pList.length;
-	for (var i = 0; i < len - 1; i++) {
-		var elem = pList[i];
+	let schema = obj; // a moving reference to internal objects within obj
+	let pList = path.split(".");
+	let len = pList.length;
+	for (let i = 0; i < len - 1; i++) {
+		let elem = pList[i];
 		if (!schema[elem]) schema[elem] = {};
 		schema = schema[elem];
 	}
@@ -1970,13 +1962,13 @@ function set(obj, path, value) {
 function getPropByString(obj, propString) {
 	if (!propString) return obj;
 
-	var prop,
-		props = propString.split(".");
+	let prop;
+		let props = propString.split(".");
 
 	for (var i = 0, iLen = props.length - 1; i < iLen; i++) {
 		prop = props[i];
 
-		var candidate = obj[prop];
+		let candidate = obj[prop];
 		if (candidate !== undefined) {
 			obj = candidate;
 		} else {
