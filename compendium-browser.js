@@ -242,7 +242,7 @@ class CompendiumBrowser extends Application {
 			if (setting === "allow-npc-browser") {
 				this.settings.allowNpcBrowser = value;
 			}
-			this.saveSettings();
+			game.settings.set("compendium-browser", "settings", this.settings);
 		});
 
 		// activating or deactivating filters
@@ -1255,10 +1255,6 @@ class CompendiumBrowser extends Application {
 			game.settings.set("compendium-browser", "settings", defaultSettings);
 		}
 		this.settings = defaultSettings;
-	}
-
-	saveSettings() {
-		game.settings.set("compendium-browser", "settings", this.settings);
 	}
 
 	//FILTERS - Added on the Ready hook
