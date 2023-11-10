@@ -953,9 +953,12 @@ class CompendiumBrowser extends Application {
 		let npcData = npc.system;
 
 		// cr display
-		let cr = npcData.details?.cr; // 0.7.2c: Possibly because of getIndex() use we now have to check for existence of details (doesn't for Character-type NPCs)
-		if (cr === undefined || cr === "") cr = 0;
-		else cr = Number(cr);
+		let cr = npcData.details?.cr;
+		if (cr === undefined || cr === "") {
+			cr = 0;
+		} else {
+			cr = Number(cr);
+		}
 
 		decoratedNpc.orderCR = cr;
 
