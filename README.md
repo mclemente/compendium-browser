@@ -18,8 +18,6 @@ Only the Gamemaster has access to the Settings, where they can enable or disable
 
 This application enables anyone to add their own custom spell or npc filters via the api. After initialization the app can be found under game.compendiumBrowser where either addSpellFilter or addNpcFilter can be used to add a filter. This does support any data that the spell or npc has, including flags.
 
-All filters featured in the app are included in this manner and can be found in the compendium-browser.js at around line 726.
-
 ## License
 
 This project is a fork of Compendium Browser by [Felix Müller](https://github.com/syl3r86).
