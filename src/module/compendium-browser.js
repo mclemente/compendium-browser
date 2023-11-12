@@ -631,7 +631,12 @@ class CompendiumBrowser extends Application {
 	}
 
 	hookCompendiumList(html) {
-		if (game.user.isGM || this.settings.allowSpellBrowser || this.settings.allowNpcBrowser) {
+		if (game.user.isGM
+			|| this.settings.allowSpellBrowser
+			|| this.settings.allowNpcBrowser
+			|| this.settings.allowFeatBrowser
+			|| this.settings.allowItemBrowser) {
+
 			const cbButton = $(
 				`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize(
 					"CMPBrowser.compendiumBrowser"
@@ -1304,14 +1309,20 @@ class CompendiumBrowser extends Application {
 	async addItemFilters() {
 		this.addItemFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
 
-		this.addItemFilter("CMPBrowser.general", "Item Type", "type", "select", {
-			consumable: "ITEM.TypeConsumable",
-			backpack: "ITEM.TypeContainer",
-			equipment: "ITEM.TypeEquipment",
-			loot: "ITEM.TypeLoot",
-			tool: "ITEM.TypeTool",
-			weapon: "ITEM.TypeWeapon",
-		});
+		this.addItemFilter(
+			"CMPBrowser.general",
+			"Item Type",
+			"type",
+			"select",
+			this._sortPackValues({
+				consumable: "ITEM.TypeConsumable",
+				backpack: "ITEM.TypeContainer",
+				equipment: "ITEM.TypeEquipment",
+				loot: "ITEM.TypeLoot",
+				tool: "ITEM.TypeTool",
+				weapon: "ITEM.TypeWeapon",
+			})
+		);
 
 		this.addItemFilter(
 			"CMPBrowser.general",
@@ -1842,12 +1853,8 @@ Hooks.once("init", async () => {
 });
 
 Hooks.on("ready", () => {
-	if (game.compendiumBrowser === undefined) {
-		game.compendiumBrowser = new CompendiumBrowser();
-		// 0.4.0 Defer loading content until we actually use the Compendium Browser
-		// A compromise approach would be better (periodic loading) except would still create the memory use problem
-		game.compendiumBrowser.initialize();
-	}
+	game.compendiumBrowser = new CompendiumBrowser();
+	game.compendiumBrowser.initialize();
 
 	game.compendiumBrowser.addSpellFilters();
 	game.compendiumBrowser.addFeatFilters();
