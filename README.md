@@ -2,8 +2,6 @@
 
 Tired of scrolling compendia? Easily browse and filter for spells, feats, items, and NPCs using Compendium Browser.
 
-Compendium Browser is faster and better-behaved; **it no longer loads all the compendia into memory on start-up** (which sometimes hung servers because of memory or CPU requirements). Instead, it filters and loads on-demand, as well as giving you a Module Setting to control how many rows are loaded at a time.
-
 ## Installation
 
 1. Go to the Add-on Modules tab in Foundry Setup
