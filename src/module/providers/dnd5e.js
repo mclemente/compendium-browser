@@ -629,7 +629,7 @@ export class dnd5eProvider {
 			"Trickery",
 			"War Domain"
 		],
-		druid: ["Dreams", "Land", "Moon", "Sheapherd", "Spores"],
+		druid: ["Dreams", "Land", "Moon", "Shepherd", "Spores"],
 		fighter: [
 			"Arcane Archer",
 			"Battle Master",
