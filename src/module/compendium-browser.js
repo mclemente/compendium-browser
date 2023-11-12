@@ -1003,7 +1003,7 @@ class CompendiumBrowser extends Application {
 
 	getNPCType(type) {
 		if (type instanceof Object) {
-			return game.i18n.localize(CompendiumBrowser.CREATURE_TYPES[type.value]) ?? type.value;
+			return game.i18n.localize(CONFIG.DND5E.creatureTypes[type.value]) ?? type.value;
 		}
 
 		return type;
@@ -1463,23 +1463,6 @@ class CompendiumBrowser extends Application {
 		}, {});
 	}
 
-	static CREATURE_TYPES = {
-		aberration: "DND5E.CreatureAberration",
-		beast: "DND5E.CreatureBeast",
-		celestial: "DND5E.CreatureCelestial",
-		construct: "DND5E.CreatureConstruct",
-		dragon: "DND5E.CreatureDragon",
-		elemental: "DND5E.CreatureElemental",
-		fey: "DND5E.CreatureFey",
-		fiend: "DND5E.CreatureFiend",
-		giant: "DND5E.CreatureGiant",
-		humanoid: "DND5E.CreatureHumanoid",
-		monstrosity: "DND5E.CreatureMonstrosity",
-		ooze: "DND5E.CreatureOoze",
-		plant: "DND5E.CreaturePlant",
-		undead: "DND5E.CreatureUndead",
-	};
-
 	async addNpcFilters() {
 		// NPC Filters
 
@@ -1497,7 +1480,7 @@ class CompendiumBrowser extends Application {
 			"DND5E.CreatureType",
 			npcDetailsPath,
 			"select",
-			this._sortPackValues(CompendiumBrowser.CREATURE_TYPES)
+			this._sortPackValues(CONFIG.DND5E.creatureTypes)
 		);
 		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityStr", "system.abilities.str.value", "numberCompare");
 		this.addNpcFilter("DND5E.Abilities", "DND5E.AbilityDex", "system.abilities.dex.value", "numberCompare");
