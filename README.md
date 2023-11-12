@@ -1,20 +1,15 @@
 # Compendium Browser
 
-Tired of scrolling compendia? Easily browse and filter for spells, feats, items, and NPCs using Compendium Browser.
-
-## Installation
-
-1. Go to the Add-on Modules tab in Foundry Setup
-2. Click Install Module and search for **Compendium Browser** OR paste this link: `https://github.com/League-of-Foundry-Developers/compendium-browser/releases/latest/download/module.json`
-3. Open your world and go to Settings>Manage Modules and enable Compendium Browser
+Tired of scrolling compendia? Easily browse and filter for spells, feats, items, and actors using Compendium Browser.
 
 ![example](preview.jpg)
 
 ## Details
 
-Only the Gamemaster has access to the Settings, where they can enable or disable player access to the spell or npc-browser. It is **highly** recommended to disable any compendia that do not contain spell or should not be used in the NPC Browser. .
+Only the Gamemaster has access to the Settings, where they can enable or disable player access to specific tabs.
 
-This application enables anyone to add their own custom spell or npc filters via the api. After initialization the app can be found under game.compendiumBrowser where either addSpellFilter or addNpcFilter can be used to add a filter. This does support any data that the spell or npc has, including flags.
+### Adding your own filters
+You can add your own filter to by calling `game.compendiumBrowser.addSpellFilter`, `game.compendiumBrowser.addNpcFilter`, `game.compendiumBrowser.addFeatFilter`, and `game.compendiumBrowser.addItemFilter`. This does support any data that the spell or npc has, including flags.
 
 ## License
 
