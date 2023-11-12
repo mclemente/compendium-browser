@@ -674,7 +674,7 @@ export class dnd5eProvider {
 			"Swashbuckler",
 			"Thief"
 		],
-		sorcerer: ["Devine Soul", "Draconic", "Shadow", "Storm", "Wild"],
+		sorcerer: ["Divine Soul", "Draconic", "Shadow", "Storm", "Wild"],
 		warlock: [
 			"Archfey",
 			"Celestial",
@@ -698,5 +698,4 @@ export class dnd5eProvider {
 			"War Magic"
 		]
 	};
-
 }
