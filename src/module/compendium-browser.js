@@ -1380,7 +1380,13 @@ class CompendiumBrowser extends Application {
 			this._sortPackValues(CONFIG.DND5E.consumableTypes)
 		);
 
-		this.addItemFilter("CMPBrowser.MagicItems", "DND5E.Rarity", "system.rarity", "select", CONFIG.DND5E.itemRarity);
+		const rarities = Object.fromEntries(
+			Object.entries(CONFIG.DND5E.itemRarity).map(([key, value]) => [
+				value,
+				game.i18n.localize(`DND5E.ItemRarity${key.capitalize()}`).titleCase()
+			])
+		);
+		this.addItemFilter("CMPBrowser.MagicItems", "DND5E.Rarity", "system.rarity", "select", rarities);
 	}
 
 	async addFeatFilters() {
