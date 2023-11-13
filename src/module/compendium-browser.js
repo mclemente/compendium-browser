@@ -22,18 +22,9 @@ class CompendiumBrowser extends Application {
 		return game.settings.get("compendium-browser", "maxload");
 	}
 
-	async initialize() {
+	async setup() {
 		// load settings
 		this.initSettings();
-
-		Hooks.on("changeSidebarTab", (app) => {
-			if (app.tabName !== "compendium") return;
-			this.hookCompendiumList(app.element);
-		});
-		Hooks.on("renderSidebarTab", (app, html, data) => {
-			if (app.tabName !== "compendium") return;
-			this.hookCompendiumList(html);
-		});
 
 		// Reset the filters used in the dialog
 		this.spellFilters = {
@@ -52,6 +43,10 @@ class CompendiumBrowser extends Application {
 			registeredFilterCategorys: {},
 			activeFilters: {},
 		};
+		this.addSpellFilters();
+		this.addFeatFilters();
+		this.addItemFilters();
+		this.addNpcFilters();
 	}
 
 	/** @override */
@@ -221,29 +216,25 @@ class CompendiumBrowser extends Application {
 
 		// settings
 		html.find(".settings input").on("change", (ev) => {
-			let setting = ev.target.dataset.setting;
-			let value = ev.target.checked;
+			const setting = ev.target.dataset.setting;
+			const value = ev.target.checked;
 			if (setting === "spell-compendium-setting") {
-				let key = ev.target.dataset.key;
+				const key = ev.target.dataset.key;
 				this.settings.loadedSpellCompendium[key].load = value;
 				this.render();
 				ui.notifications.info("Settings Saved. Item Compendiums are being reloaded.");
 			} else if (setting === "npc-compendium-setting") {
-				let key = ev.target.dataset.key;
+				const key = ev.target.dataset.key;
 				this.settings.loadedNpcCompendium[key].load = value;
 				this.render();
 				ui.notifications.info("Settings Saved. NPC Compendiums are being reloaded.");
-			}
-			if (setting === "allow-spell-browser") {
+			} else if (setting === "allow-spell-browser") {
 				this.settings.allowSpellBrowser = value;
-			}
-			if (setting === "allow-feat-browser") {
+			} else if (setting === "allow-feat-browser") {
 				this.settings.allowFeatBrowser = value;
-			}
-			if (setting === "allow-item-browser") {
+			} else if (setting === "allow-item-browser") {
 				this.settings.allowItemBrowser = value;
-			}
-			if (setting === "allow-npc-browser") {
+			} else if (setting === "allow-npc-browser") {
 				this.settings.allowNpcBrowser = value;
 			}
 			game.settings.set("compendium-browser", "settings", this.settings);
@@ -1858,14 +1849,18 @@ Hooks.once("init", async () => {
 	await preloadTemplates();
 });
 
-Hooks.on("ready", () => {
+Hooks.once("setup", () => {
 	game.compendiumBrowser = new CompendiumBrowser();
-	game.compendiumBrowser.initialize();
+	game.compendiumBrowser.setup();
+});
 
-	game.compendiumBrowser.addSpellFilters();
-	game.compendiumBrowser.addFeatFilters();
-	game.compendiumBrowser.addItemFilters();
-	game.compendiumBrowser.addNpcFilters();
+Hooks.on("changeSidebarTab", (app) => {
+	if (app.tabName !== "compendium") return;
+	game.compendiumBrowser.hookCompendiumList(app.element);
+});
+Hooks.on("renderSidebarTab", (app, html, data) => {
+	if (app.tabName !== "compendium") return;
+	game.compendiumBrowser.hookCompendiumList(html);
 });
 
 function stripSpecialCharacters(str) {
