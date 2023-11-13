@@ -14,7 +14,7 @@
 			<dt>{{filter.label}}</dt>
 			<dd>
 				{{#if filter.possibleValues}}
-				<select class="null">
+				<select>
 					<option value="" selected></option>
 					{{#each filter.possibleValues as |label val|}}
 					<option value="{{val}}">{{label}}</option>
@@ -28,7 +28,7 @@
 			<dl>
 				<dt>{{filter.label}}</dt>
 				<dd>
-					<select class="null">
+					<select>
 						<option value="null" selected></option>
 						<option value="true">{{localize "Yes"}}</option>
 						<option value="false">{{localize "No"}}</option>
@@ -39,7 +39,7 @@
 			<dl>
 				<dt>{{filter.label}}</dt>
 				<dd>
-					<select class="null">
+					<select>
 						<option value="null" selected></option>
 						{{#each filter.possibleValues as |label val|}}
 						<option value="{{val}}">{{label}}</option>
