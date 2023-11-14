@@ -58,12 +58,7 @@ class CompendiumBrowser extends Application {
 
 	/** @override */
 	async getData() {
-		// 0.4.1 Filter as we load to support new way of filtering
-		// Previously loaded all data and filtered in place; now loads minimal (preload) amount, filtered as we go
-		// First time (when you press Compendium Browser button) is called with filters unset
-
-		// 0.4.1k: Don't do any item/npc loading until tab is visible
-		let data = {
+		return {
 			items: [],
 			npcs: [],
 			spellFilters: this.spellFilters,
@@ -77,8 +72,6 @@ class CompendiumBrowser extends Application {
 			settings: this.settings,
 			isGM: game.user.isGM,
 		};
-
-		return data;
 	}
 
 	activateItemListListeners(html) {
