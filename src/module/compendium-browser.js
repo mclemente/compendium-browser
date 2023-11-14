@@ -1177,9 +1177,6 @@ class CompendiumBrowser extends Application {
 		defaultSettings.allowItemBrowser = !!settings.allowItemBrowser;
 		defaultSettings.allowNpcBrowser = !!settings.allowNpcBrowser;
 
-		// if (game.user.isGM) {
-		// 	game.settings.set("compendium-browser", "settings", defaultSettings);
-		// }
 		this.settings = defaultSettings;
 	}
 
