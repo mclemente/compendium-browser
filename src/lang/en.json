@@ -70,6 +70,10 @@
 			},
 			"MaxLoaded": "(maximum displayed; to see more, use the filters)"
 		},
+		"ToolTip": {
+			"Feats": "Open Compendium Browser to feats",
+			"Spells": "Open Compendium Browser to relevant spells"
+		},
 		"Filters.ResetFilters": "Reset Filters"
 	}
 }

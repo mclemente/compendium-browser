@@ -1625,12 +1625,12 @@ class CompendiumBrowser extends Application {
 
 				if (filter.type in typeMap) {
 					let component = html.element.find(
-						`div.tab.active #${input.section}-${input.label} ${typeMap[filter.type]}`
+						`${this.getHtmlStringFromInput(input)} ${typeMap[filter.type]}`
 					);
 
 					component[0].value = input.value;
 				} else if (filter.type === "multiSelect") {
-					let components = html.element.find(`div.tab.active #${input.section}-${input.label}`);
+					let components = html.element.find(this.getHtmlStringFromInput(input));
 
 					for (let v of input.values) {
 						let c = components.find(`input[data-value=${v}]`);
@@ -1647,6 +1647,10 @@ class CompendiumBrowser extends Application {
 		return this;
 	}
 
+	getHtmlStringFromInput(input) {
+		return `div.tab.active #${input.section}-${stripDotCharacters(input.label)}`;
+	}
+
 	findFilter(type, category, label) {
 		let target = `${type}Filters`;
 		let catId = stripSpecialCharacters(category);
@@ -1655,7 +1659,9 @@ class CompendiumBrowser extends Application {
 			return;
 		}
 
-		let filter = this[target].registeredFilterCategorys[catId].filters.find((x) => x.labelId === label);
+		const labelStripped = stripDotCharacters(label);
+
+		let filter = this[target].registeredFilterCategorys[catId].filters.find((x) => x.labelId === labelStripped);
 
 		if (!filter) {
 			return;
@@ -1720,9 +1726,10 @@ class CompendiumBrowser extends Application {
 		await html.find(".spell-browser-btn").remove();
 
 		let tabBar = html.find("div.tab.spellbook .spellcasting-ability");
+        const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Spells") ?? "CMPBrowser.ToolTip.Spells";
 		const cbButton = $(
 			`<div style="flex: 0 0 22px; align-self: center; text-align: center;">
-				<a class="compendium-browser spell-browser-btn">
+				<a title="${tooltip}" class="compendium-browser spell-browser-btn">
 					<i class="fa-duotone fa-book"></i>
 				</a>
 			</div>`
@@ -1737,9 +1744,10 @@ class CompendiumBrowser extends Application {
 		await html.find(".spell-browser-btn").remove();
 
 		let tabBar = html.find("div.spellbook-filters");
+        const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Spells") ?? "CMPBrowser.ToolTip.Spells";
 		const cbButton = $(
 			`<div style="flex: 0 0 22px; align-self: center; text-align: center;">
-				<a class="compendium-browser spell-browser-btn">
+				<a title="${tooltip}" class="compendium-browser spell-browser-btn">
 					<i class="fa-duotone fa-book"></i>
 				</a>
 			</div>`
@@ -1767,9 +1775,10 @@ class CompendiumBrowser extends Application {
 		await html.find(".feat-browser-btn").remove();
 
 		let dropArea = html.find("h3:nth-child(3)");
+		const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Feats") ?? "CMPBrowser.ToolTip.Feats";
 		const cbButton = $(
 			`<span style="font-size: 16px;">
-				<a class="compendium-browser feat-browser-btn">
+				<a title="${tooltip}" class="compendium-browser feat-browser-btn">
 					<i class="fa-duotone fa-book"></i>
 				</a>
 			</span>`
