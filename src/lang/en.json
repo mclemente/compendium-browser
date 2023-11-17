@@ -71,8 +71,9 @@
 			"MaxLoaded": "(maximum displayed; to see more, use the filters)"
 		},
 		"ToolTip": {
-			"Feats": "Open Compendium Browser to feats",
-			"Spells": "Open Compendium Browser to relevant spells"
+			"Feats": "Find Feats",
+			"Spells": "Find Spells",
+			"Features": "Find Features"
 		},
 		"Filters.ResetFilters": "Reset Filters"
 	}

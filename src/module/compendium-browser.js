@@ -1726,9 +1726,15 @@ class CompendiumBrowser extends Application {
 	}
 
 	static async addTidySheetButton(cb, html, actor) {
+
+		await CompendiumBrowser.addTidyFeatureButton(html, "race");
+		await CompendiumBrowser.addTidyFeatureButton(html, "background");
+		await CompendiumBrowser.addTidyFeatureButton(html, "class");
+
 		await html.find(".spell-browser-btn").remove();
 
 		let tabBar = html.find("div.tab.spellbook .spellcasting-ability");
+
         const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Spells");
 		const cbButton = $(
 			`<div style="flex: 0 0 22px; align-self: center; text-align: center;">
@@ -1744,13 +1750,22 @@ class CompendiumBrowser extends Application {
 	}
 
 	static async addDefaultSheetButton(cb, html, actor) {
+		if (cb.options.classes.includes("tidy5e")) {
+			// no need as tidy sheet render will handle it
+			return;
+		}
+
+		await CompendiumBrowser.addDefaultFeatureButton(html, "race");
+		await CompendiumBrowser.addDefaultFeatureButton(html, "background");
+		await CompendiumBrowser.addDefaultFeatureButton(html, "class");
+
+		// handle spell browser button
 		await html.find(".spell-browser-btn").remove();
 
 		let tabBar = html.find("div.spellbook-filters");
-        const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Spells");
 		const cbButton = $(
 			`<div style="flex: 0 0 22px; align-self: center; text-align: center;">
-				<a title="${tooltip}" class="compendium-browser spell-browser-btn">
+				<a data-tooltip="CMPBrowser.ToolTip.Spells" class="compendium-browser spell-browser-btn">
 					<i class="fa-duotone fa-book"></i>
 				</a>
 			</div>`
@@ -1774,14 +1789,57 @@ class CompendiumBrowser extends Application {
 		});
 	}
 
+	static async addTidyFeatureButton(html, type) {
+		const featBars = html.find(`div.features a.item-create[data-type="${type}"]`);
+
+		const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Features");
+		const cbButton = $(
+			`<a style="flex: 0 0 15px; align-self: center; text-align: center; class="compendium-browser ${type}-browser-btn" title="${tooltip}">
+				<i class="fa-duotone fa-book"></i>
+			</a>`
+		);
+
+		$(featBars[0].parentNode).append(cbButton);
+		cbButton.click(async (ev) => {
+			ev.preventDefault();
+
+			game.compendiumBrowser.renderWith("feat", [{ section: "CMPBrowsergeneral", label: "CMPBrowser.overall", value: type }]);
+		});
+	}
+
+	static async addDefaultFeatureButton(html, type) {
+		await html.find(`.${type}-browser-btn`).remove();
+
+		const featBars = html.find(`div.features li.items-header a.item-control[data-type="${type}"]`);
+
+		// Other sheets (like tidysheet) may cause this problem
+		if (!featBars.length) {
+			return;
+		}
+
+		const cbButton = $(
+			`<a style="flex: 0 0 15px; align-self: center; text-align: center; class="compendium-browser ${type}-browser-btn" data-tooltip="CMPBrowser.ToolTip.Features">
+				<i class="fa-duotone fa-book"></i>
+			</a>`
+		);
+
+		$(featBars[0].parentNode).append(cbButton);
+		$(featBars[0].parentNode).css({"flex-basis": "60px"});
+
+		cbButton.click(async (ev) => {
+			ev.preventDefault();
+
+			game.compendiumBrowser.renderWith("feat", [{ section: "CMPBrowsergeneral", label: "CMPBrowser.overall", value: type }]);
+		});
+	}
+
 	static async addASISheetButton(cb, html) {
 		await html.find(".feat-browser-btn").remove();
 
 		let dropArea = html.find("h3:nth-child(3)");
-		const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Feats");
 		const cbButton = $(
 			`<span style="font-size: 16px;">
-				<a title="${tooltip}" class="compendium-browser feat-browser-btn">
+				<a data-tooltip="CMPBrowser.ToolTip.Feats" class="compendium-browser feat-browser-btn">
 					<i class="fa-duotone fa-book"></i>
 				</a>
 			</span>`
