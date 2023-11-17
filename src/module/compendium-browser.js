@@ -384,6 +384,8 @@ class CompendiumBrowser extends Application {
 		// 0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
 		let numItemsLoaded = 0;
 		let compactItems = {};
+		const FeatureList = ["feat", "class", "subclass", "background", "race"];
+		const NotItemList = ["spell", "feat", "class", "subclass", "background", "race"];
 
 		try {
 			// Filter the full list, but only save the core compendium information + displayed info
@@ -452,7 +454,7 @@ class CompendiumBrowser extends Application {
 
 									if (
 										decoratedItem
-										&& ["feat", "class", "subclass", "background"].includes(decoratedItem.type)
+										&& FeatureList.includes(decoratedItem.type)
 										&& this.passesFilter(decoratedItem, this.featFilters.activeFilters)
 									) {
 										itemsList[item5e.id] = {
@@ -485,7 +487,7 @@ class CompendiumBrowser extends Application {
 
 									if (
 										decoratedItem
-										&& !["spell", "feat", "class", "subclass", "background"].includes(
+										&& !NotItemList.includes(
 											decoratedItem.type
 										)
 										&& this.passesFilter(decoratedItem, this.itemFilters.activeFilters)
@@ -1407,6 +1409,7 @@ class CompendiumBrowser extends Application {
 				feat: "ITEM.TypeFeat",
 				subclass: "ITEM.TypeSubclass",
 				background: "DND5E.Background",
+				race: "DND5E.Race",
 			}),
 			false
 		);
@@ -1726,7 +1729,7 @@ class CompendiumBrowser extends Application {
 		await html.find(".spell-browser-btn").remove();
 
 		let tabBar = html.find("div.tab.spellbook .spellcasting-ability");
-        const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Spells") ?? "CMPBrowser.ToolTip.Spells";
+        const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Spells");
 		const cbButton = $(
 			`<div style="flex: 0 0 22px; align-self: center; text-align: center;">
 				<a title="${tooltip}" class="compendium-browser spell-browser-btn">
@@ -1744,7 +1747,7 @@ class CompendiumBrowser extends Application {
 		await html.find(".spell-browser-btn").remove();
 
 		let tabBar = html.find("div.spellbook-filters");
-        const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Spells") ?? "CMPBrowser.ToolTip.Spells";
+        const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Spells");
 		const cbButton = $(
 			`<div style="flex: 0 0 22px; align-self: center; text-align: center;">
 				<a title="${tooltip}" class="compendium-browser spell-browser-btn">
@@ -1775,7 +1778,7 @@ class CompendiumBrowser extends Application {
 		await html.find(".feat-browser-btn").remove();
 
 		let dropArea = html.find("h3:nth-child(3)");
-		const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Feats") ?? "CMPBrowser.ToolTip.Feats";
+		const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Feats");
 		const cbButton = $(
 			`<span style="font-size: 16px;">
 				<a title="${tooltip}" class="compendium-browser feat-browser-btn">
