@@ -4,13 +4,14 @@ import { registerSettings } from "./settings.js";
 
 const STOP_SEARCH = "StopSearchException";
 const NOT_MIGRATED = "NotMigratedException";
+const COMPENDIUM_BROWSER = "compendium-browser";
 
 class CompendiumBrowser extends Application {
 	static get defaultOptions() {
 		return mergeObject(super.defaultOptions, {
 			title: "CMPBrowser.compendiumBrowser",
 			tabs: [{ navSelector: ".tabs", contentSelector: ".content", initial: "spell" }],
-			classes: ["compendium-browser"],
+			classes: [COMPENDIUM_BROWSER],
 			template: "modules/compendium-browser/templates/template.html",
 			width: 800,
 			height: 730,
@@ -19,7 +20,19 @@ class CompendiumBrowser extends Application {
 	}
 
 	get maxLoad() {
-		return game.settings.get("compendium-browser", "maxload");
+		return game.settings.get(COMPENDIUM_BROWSER, "maxload");
+	}
+
+	static get extraButtonsGlobal() {
+		return game.settings.get(COMPENDIUM_BROWSER, "extraButtonsGlobal");
+	}
+
+	static get extraSheetButtons() {
+		return game.settings.get(COMPENDIUM_BROWSER, "extraSheetButtons");
+	}
+
+	static get extraAdvancementButtons() {
+		return game.settings.get(COMPENDIUM_BROWSER, "extraAdvancementButtons");
 	}
 
 	async setup() {
@@ -230,7 +243,7 @@ class CompendiumBrowser extends Application {
 			} else if (setting === "allow-npc-browser") {
 				this.settings.allowNpcBrowser = value;
 			}
-			game.settings.set("compendium-browser", "settings", this.settings);
+			game.settings.set(COMPENDIUM_BROWSER, "settings", this.settings);
 		});
 
 		// activating or deactivating filters
@@ -1135,7 +1148,7 @@ class CompendiumBrowser extends Application {
 			}
 		}
 		// creating game setting container
-		game.settings.register("compendium-browser", "settings", {
+		game.settings.register(COMPENDIUM_BROWSER, "settings", {
 			name: "Compendium Browser Settings",
 			hint: "Settings to exclude packs from loading and visibility of the browser",
 			default: defaultSettings,
@@ -1145,7 +1158,7 @@ class CompendiumBrowser extends Application {
 				this.settings = settings;
 			},
 		});
-		game.settings.register("compendium-browser", "maxload", {
+		game.settings.register(COMPENDIUM_BROWSER, "maxload", {
 			name: game.i18n.localize("CMPBrowser.SETTING.Maxload.NAME"),
 			hint: game.i18n.localize("CMPBrowser.SETTING.Maxload.HINT"),
 			scope: "world",
@@ -1159,9 +1172,33 @@ class CompendiumBrowser extends Application {
 				step: 100,
 			},
 		});
+		game.settings.register(COMPENDIUM_BROWSER, "extraButtonsGlobal", {
+			name: game.i18n.localize("CMPBrowser.SETTING.extraButtonsGlobal.NAME"),
+			hint: game.i18n.localize("CMPBrowser.SETTING.extraButtonsGlobal.HINT"),
+			scope: "world",
+			config: true,
+			default: true,
+			type: Boolean,
+		});
+		game.settings.register(COMPENDIUM_BROWSER, "extraSheetButtons", {
+			name: game.i18n.localize("CMPBrowser.SETTING.extraSheetButtons.NAME"),
+			hint: game.i18n.localize("CMPBrowser.SETTING.extraSheetButtons.HINT"),
+			scope: "client",
+			config: true,
+			default: true,
+			type: Boolean,
+		});
+		game.settings.register(COMPENDIUM_BROWSER, "extraAdvancementButtons", {
+			name: game.i18n.localize("CMPBrowser.SETTING.extraAdvancementButtons.NAME"),
+			hint: game.i18n.localize("CMPBrowser.SETTING.extraAdvancementButtons.HINT"),
+			scope: "client",
+			config: true,
+			default: true,
+			type: Boolean,
+		});
 
 		// load settings from container and apply to default settings (available compendie might have changed)
-		let settings = game.settings.get("compendium-browser", "settings");
+		let settings = game.settings.get(COMPENDIUM_BROWSER, "settings");
 		for (let compKey in defaultSettings.loadedSpellCompendium) {
 			// v0.7.1 Check for settings.loadedSpellCompendium
 			if (settings.loadedSpellCompendium && settings.loadedSpellCompendium[compKey] !== undefined) {
@@ -1726,6 +1763,10 @@ class CompendiumBrowser extends Application {
 	}
 
 	static async addTidySheetButton(cb, html, actor) {
+		// exit out because we dont want these
+		if (!CompendiumBrowser.extraButtonsGlobal || !CompendiumBrowser.extraSheetButtons) {
+			return;
+		}
 
 		await CompendiumBrowser.addTidyFeatureButton(html, "race");
 		await CompendiumBrowser.addTidyFeatureButton(html, "background");
@@ -1750,6 +1791,11 @@ class CompendiumBrowser extends Application {
 	}
 
 	static async addDefaultSheetButton(cb, html, actor) {
+		// exit out because we dont want these
+		if (!CompendiumBrowser.extraButtonsGlobal || !CompendiumBrowser.extraSheetButtons) {
+			return;
+		}
+
 		if (cb.options.classes.includes("tidy5e")) {
 			// no need as tidy sheet render will handle it
 			return;
@@ -1834,6 +1880,11 @@ class CompendiumBrowser extends Application {
 	}
 
 	static async addASISheetButton(cb, html) {
+		// exit out because we dont want these
+		if (!CompendiumBrowser.extraButtonsGlobal || !CompendiumBrowser.extraAdvancementButtons) {
+			return;
+		}
+
 		await html.find(".feat-browser-btn").remove();
 
 		let dropArea = html.find("h3:nth-child(3)");

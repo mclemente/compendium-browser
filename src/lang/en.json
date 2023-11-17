@@ -56,7 +56,13 @@
 		},
 		"SETTING": {
 			"Maxload.NAME": "Maximum load",
-			"Maxload.HINT": "Maximum number of spells, feats, items, or NPCs to display; to see more use the filters. This setting is to allow manageing memory and server load."
+			"Maxload.HINT": "Maximum number of spells, feats, items, or NPCs to display; to see more use the filters. This setting is to allow manageing memory and server load.",
+			"extraButtonsGlobal.NAME": "Globally Enable Buttons",
+			"extraButtonsGlobal.HINT": "Globally enable shortcut buttons to the browser that are added to sheets (Must re-open window for it to apply)",
+			"extraSheetButtons.NAME": "Enable Extra Sheet Buttons",
+			"extraSheetButtons.HINT": "Enable extra shortcut buttons that appear on PC sheets (Must re-open window for it to apply)",
+			"extraAdvancementButtons.NAME": "Enable Extra Advancement Buttons",
+			"extraAdvancementButtons.HINT": "Enable extra shortcut buttons that appear on advancement windows (Must re-open window for it to apply)"
 		},
 		"LOADING": {
 			"Message": "Loading..."
