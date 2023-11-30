@@ -1768,6 +1768,40 @@ class CompendiumBrowser extends Application {
 			return;
 		}
 
+		let MAP_THING = {};
+		MAP_THING[game.i18n.localize("DND5E.Race")] = "race";
+		MAP_THING[game.i18n.localize("DND5E.Background")] = "background";
+		MAP_THING[game.i18n.localize("DND5E.Class")] = "class";
+
+		function isSearchable(name){
+			return name == game.i18n.localize("DND5E.Race") || 
+				name == game.i18n.localize("DND5E.Background") || 
+				name == game.i18n.localize("DND5E.Class");
+		}
+
+		console.log(html.find(".inventory-list.features-list .item-list").filter(function (){
+			return isSearchable($(this.previousElementSibling).find("h3.item-name")[0].innerText) &&
+				$(this).find("li.item").length == 0;
+		}));
+
+		html.find(".inventory-list.features-list .item-list").filter(function (){
+			//find any section that is searchable
+			return isSearchable($(this.previousElementSibling).find("h3.item-name")[0].innerText) &&
+				//find any section that is empty
+				$(this).find("li.item").length == 0;
+		}).each( function(){
+			let type = MAP_THING[$(this.previousElementSibling).find("h3.item-name")[0].innerText]
+			let banner = $(`<span class="notice">${game.i18n.localize(`CMPBrowser.FindA.${type}`)}</span>`)
+
+			banner.insertAfter(this);
+
+			banner.click(async (ev) => {
+				ev.preventDefault();
+
+				game.compendiumBrowser.renderWith("feat", [{ section: "CMPBrowsergeneral", label: "CMPBrowser.overall", value: type }]);
+			});
+		});
+
 		await CompendiumBrowser.addTidyFeatureButton(html, "race");
 		await CompendiumBrowser.addTidyFeatureButton(html, "background");
 		await CompendiumBrowser.addTidyFeatureButton(html, "class");
