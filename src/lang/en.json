@@ -62,7 +62,11 @@
 			"extraSheetButtons.NAME": "Enable Extra Sheet Buttons",
 			"extraSheetButtons.HINT": "Enable extra shortcut buttons that appear on PC sheets (Must re-open window for it to apply)",
 			"extraAdvancementButtons.NAME": "Enable Extra Advancement Buttons",
-			"extraAdvancementButtons.HINT": "Enable extra shortcut buttons that appear on advancement windows (Must re-open window for it to apply)"
+			"extraAdvancementButtons.HINT": "Enable extra shortcut buttons that appear on advancement windows (Must re-open window for it to apply)",
+			"bannersGlobal.NAME": "Enable Banners - Global",
+			"bannersGlobal.HINT": "Enable Banners for missing key features on PC sheets for all players",
+			"bannersLocal.NAME": "Enable Banners - Local",
+			"bannersLocal.HINT": "Enable Banners for missing key features on PC sheets for self"
 		},
 		"LOADING": {
 			"Message": "Loading..."
@@ -80,6 +84,11 @@
 			"Feats": "Find Feats",
 			"Spells": "Find Spells",
 			"Features": "Find Features"
+		},
+		"FindA": {
+			"race": "Missing a Race, click to open list",
+			"background": "Missing a Background, click to open list",
+			"class": "Missing a Class, click to open list"
 		},
 		"Filters.ResetFilters": "Reset Filters"
 	}

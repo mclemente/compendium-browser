@@ -35,6 +35,14 @@ class CompendiumBrowser extends Application {
 		return game.settings.get(COMPENDIUM_BROWSER, "extraAdvancementButtons");
 	}
 
+	static get bannersGlobal() {
+		return game.settings.get(COMPENDIUM_BROWSER, "bannersGlobal");
+	}
+
+	static get bannersLocal() {
+		return game.settings.get(COMPENDIUM_BROWSER, "bannersLocal");
+	}
+
 	async setup() {
 		// load settings
 		this.initSettings();
@@ -1196,6 +1204,22 @@ class CompendiumBrowser extends Application {
 			default: true,
 			type: Boolean,
 		});
+		game.settings.register(COMPENDIUM_BROWSER, "bannersGlobal", {
+			name: game.i18n.localize("CMPBrowser.SETTING.bannersGlobal.NAME"),
+			hint: game.i18n.localize("CMPBrowser.SETTING.bannersGlobal.HINT"),
+			scope: "world",
+			config: true,
+			default: true,
+			type: Boolean,
+		});
+		game.settings.register(COMPENDIUM_BROWSER, "bannersLocal", {
+			name: game.i18n.localize("CMPBrowser.SETTING.bannersLocal.NAME"),
+			hint: game.i18n.localize("CMPBrowser.SETTING.bannersLocal.HINT"),
+			scope: "client",
+			config: true,
+			default: true,
+			type: Boolean,
+		});
 
 		// load settings from container and apply to default settings (available compendie might have changed)
 		let settings = game.settings.get(COMPENDIUM_BROWSER, "settings");
@@ -1763,44 +1787,16 @@ class CompendiumBrowser extends Application {
 	}
 
 	static async addTidySheetButton(cb, html, actor) {
+		await CompendiumBrowser.createBanners(html);
+		await CompendiumBrowser.addButtons(html, actor);
+	}
+
+	static async addButtons(html, actor) {
+
 		// exit out because we dont want these
 		if (!CompendiumBrowser.extraButtonsGlobal || !CompendiumBrowser.extraSheetButtons) {
 			return;
 		}
-
-		let MAP_THING = {};
-		MAP_THING[game.i18n.localize("DND5E.Race")] = "race";
-		MAP_THING[game.i18n.localize("DND5E.Background")] = "background";
-		MAP_THING[game.i18n.localize("DND5E.Class")] = "class";
-
-		function isSearchable(name){
-			return name == game.i18n.localize("DND5E.Race") || 
-				name == game.i18n.localize("DND5E.Background") || 
-				name == game.i18n.localize("DND5E.Class");
-		}
-
-		console.log(html.find(".inventory-list.features-list .item-list").filter(function (){
-			return isSearchable($(this.previousElementSibling).find("h3.item-name")[0].innerText) &&
-				$(this).find("li.item").length == 0;
-		}));
-
-		html.find(".inventory-list.features-list .item-list").filter(function (){
-			//find any section that is searchable
-			return isSearchable($(this.previousElementSibling).find("h3.item-name")[0].innerText) &&
-				//find any section that is empty
-				$(this).find("li.item").length == 0;
-		}).each( function(){
-			let type = MAP_THING[$(this.previousElementSibling).find("h3.item-name")[0].innerText]
-			let banner = $(`<span class="notice">${game.i18n.localize(`CMPBrowser.FindA.${type}`)}</span>`)
-
-			banner.insertAfter(this);
-
-			banner.click(async (ev) => {
-				ev.preventDefault();
-
-				game.compendiumBrowser.renderWith("feat", [{ section: "CMPBrowsergeneral", label: "CMPBrowser.overall", value: type }]);
-			});
-		});
 
 		await CompendiumBrowser.addTidyFeatureButton(html, "race");
 		await CompendiumBrowser.addTidyFeatureButton(html, "background");
@@ -1822,6 +1818,43 @@ class CompendiumBrowser extends Application {
 		tabBar.append(cbButton);
 
 		CompendiumBrowser.addSpellsButton(cbButton, actor.actor);
+	}
+
+	static async createBanners(html) {
+		// Don't build the banners if configuration is turned off
+		if (!CompendiumBrowser.bannersGlobal() || CompendiumBrowser.bannersLocal()) {
+			return;
+		}
+
+		let MAP_THING = {};
+		MAP_THING[game.i18n.localize("DND5E.Race")] = "race";
+		MAP_THING[game.i18n.localize("DND5E.Background")] = "background";
+		MAP_THING[game.i18n.localize("ITEM.TypeClassPl")] = "class";
+
+		let isSearchable = (name) => {
+			return Object.keys(MAP_THING).includes(name);
+		};
+
+		//searches in a similar way to how tidy sheets does it.
+		//probably should just use actor data instead of going through the html
+		html.find(".inventory-list.features-list .item-list").filter(function () {
+			// find any section that is searchable
+			return isSearchable($(this.previousElementSibling).find("h3.item-name")[0].innerText)
+				// find any section that is empty
+				&& $(this).find("li.item").length === 0;
+		}).each( function () {
+			let type = MAP_THING[$(this.previousElementSibling).find("h3.item-name")[0].innerText];
+			let banner = $(`<span class="notice" style="background:rgba(30, 30, 30, 1)">${game.i18n.localize(`CMPBrowser.FindA.${type}`)}</span>`);
+
+			banner.insertAfter(this);
+
+			banner.click(async (ev) => {
+				ev.preventDefault();
+
+				game.compendiumBrowser.renderWith("feat", [{ section: "CMPBrowsergeneral", label: "CMPBrowser.overall", value: type }]);
+			});
+		});
+
 	}
 
 	static async addDefaultSheetButton(cb, html, actor) {
