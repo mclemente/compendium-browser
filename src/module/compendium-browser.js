@@ -1822,7 +1822,7 @@ class CompendiumBrowser extends Application {
 
 	static async createBanners(html) {
 		// Don't build the banners if configuration is turned off
-		if (!CompendiumBrowser.bannersGlobal || CompendiumBrowser.bannersLocal) {
+		if (!CompendiumBrowser.bannersGlobal || !CompendiumBrowser.bannersLocal) {
 			return;
 		}
 
