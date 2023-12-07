@@ -1835,8 +1835,8 @@ class CompendiumBrowser extends Application {
 			return Object.keys(MAP_THING).includes(name);
 		};
 
-		//searches in a similar way to how tidy sheets does it.
-		//probably should just use actor data instead of going through the html
+		// searches in a similar way to how tidy sheets does it.
+		// probably should just use actor data instead of going through the html
 		html.find(".inventory-list.features-list .item-list").filter(function () {
 			// find any section that is searchable
 			return isSearchable($(this.previousElementSibling).find("h3.item-name")[0].innerText)
