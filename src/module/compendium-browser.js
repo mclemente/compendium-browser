@@ -447,7 +447,8 @@ class CompendiumBrowser extends Application {
 											img: decoratedItem.img,
 											data: {
 												level: decoratedItem.level,
-												components: decoratedItem.components,
+												properties: [...decoratedItem.properties]
+													.reduce((obj, prop) => ({ ...obj, [prop]: true }), {}),
 											},
 											id: item5e.id,
 										};
@@ -881,7 +882,7 @@ class CompendiumBrowser extends Application {
 		const item = { ...item5e };
 
 		item.level = item5e.system?.level;
-		item.components = item5e.system?.components;
+		item.properties = item5e.system?.properties;
 		item.damage = item5e.system?.damage;
 		item.classes = item5e.system?.classes;
 		item.requirements = item5e.system?.requirements;
@@ -1260,12 +1261,11 @@ class CompendiumBrowser extends Application {
 		if (possibleValues !== null) {
 			filter.possibleValueIds = possibleValues;
 
-			filter.possibleValues = Object.keys(possibleValues).reduce(
-				function (acc, current) {
-					acc[current] = game.i18n.localize(possibleValues[current]) ?? possibleValues[current];
-					return acc;
-				}.bind(this),
-				{}
+			filter.possibleValues = Object.fromEntries(
+				Object.entries(possibleValues).map(([key, data]) => {
+					if (typeof data === "string") return [key, game.i18n.localize(data) ?? data];
+					return [key, data.label];
+				})
 			);
 		}
 		filter.valIsArray = valIsArray;
@@ -1343,11 +1343,11 @@ class CompendiumBrowser extends Application {
 			}),
 			true
 		);
-		this.addSpellFilter("DND5E.SpellComponents", "DND5E.Ritual", "system.components.ritual", "bool");
-		this.addSpellFilter("DND5E.SpellComponents", "DND5E.Concentration", "system.components.concentration", "bool");
-		this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentVerbal", "system.components.vocal", "bool");
-		this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentSomatic", "system.components.somatic", "bool");
-		this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentMaterial", "system.components.material", "bool");
+		this.addSpellFilter("DND5E.SpellComponents", "DND5E.Ritual", "system.properties.ritual", "bool");
+		this.addSpellFilter("DND5E.SpellComponents", "DND5E.Concentration", "system.properties.concentration", "bool");
+		this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentVerbal", "system.properties.vocal", "bool");
+		this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentSomatic", "system.properties.somatic", "bool");
+		this.addSpellFilter("DND5E.SpellComponents", "DND5E.ComponentMaterial", "system.properties.material", "bool");
 	}
 
 	async addItemFilters() {
@@ -1515,8 +1515,11 @@ class CompendiumBrowser extends Application {
 	}
 
 	_sortPackValues(packValue) {
-		const sortable = Object.keys(packValue)
-			.map((pack) => [pack, game.i18n.localize(packValue[pack])])
+		const sortable = Object.entries(packValue)
+			.map(([key, data]) => {
+				if (typeof data === "string") return [key, game.i18n.localize(data)];
+				return [key, data.label];
+			})
 			.sort((a, b) => a[1].localeCompare(b[1]));
 
 		return sortable.reduce((acc, item) => {

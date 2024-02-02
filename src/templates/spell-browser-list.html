@@ -21,32 +21,32 @@
 		>
 		<div class="spacer-large"></div>
 		<span
-			class="{{#unless spell.data.components.ritual}}negative{{/unless}}"
+			class="{{#unless spell.data.properties.ritual}}negative{{/unless}}"
 			data-tooltip="{{localize 'DND5E.Ritual'}}"
 			data-tooltip-direction="UP"
 			>R</span
 		>
 		<span
-			class="{{#unless spell.data.components.concentration}}negative{{/unless}}"
+			class="{{#unless spell.data.properties.concentration}}negative{{/unless}}"
 			data-tooltip="{{localize 'DND5E.Concentration'}}"
 			data-tooltip-direction="UP"
 			>C</span
 		>
 		<div class="spacer"></div>
 		<span
-			class="{{#unless spell.data.components.vocal}}negative{{/unless}}"
+			class="{{#unless spell.data.properties.vocal}}negative{{/unless}}"
 			data-tooltip="{{localize 'DND5E.ComponentVerbal'}}"
 			data-tooltip-direction="UP"
 			>V</span
 		>
 		<span
-			class="{{#unless spell.data.components.somatic}}negative{{/unless}}"
+			class="{{#unless spell.data.properties.somatic}}negative{{/unless}}"
 			data-tooltip="{{localize 'DND5E.ComponentSomatic'}}"
 			data-tooltip-direction="UP"
 			>S</span
 		>
 		<span
-			class="{{#unless spell.data.components.material}}negative{{/unless}}"
+			class="{{#unless spell.data.properties.material}}negative{{/unless}}"
 			data-tooltip="{{localize 'DND5E.ComponentMaterial'}}"
 			data-tooltip-direction="UP"
 			>M</span
