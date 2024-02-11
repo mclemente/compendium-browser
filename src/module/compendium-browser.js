@@ -1016,7 +1016,7 @@ class CompendiumBrowser extends Application {
 
 	getNPCType(type) {
 		if (type instanceof Object) {
-			return game.i18n.localize(CONFIG.DND5E.creatureTypes[type.value]) ?? type.value;
+			return CONFIG.DND5E.creatureTypes?.[type.value]?.label ?? game.i18n.localize(type.value);
 		}
 
 		return type;
