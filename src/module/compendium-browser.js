@@ -411,11 +411,19 @@ class CompendiumBrowser extends Application {
 		try {
 			// Filter the full list, but only save the core compendium information + displayed info
 			for (let pack of game.packs) {
-				if (pack.documentName === "Item" && this.settings.loadedSpellCompendium[pack.collection].load) {
+				if (pack.documentName === "Item" && this.settings.loadedSpellCompendium[pack?.collection]?.load) {
 					// can query just for spells since there is only 1 type
 					let query = {};
-					if (browserTab === "spell") {
-						query = { type: "spell" };
+					switch (browserTab) {
+						case "spell":
+							query = { type: "spell" };
+							break;
+						case "feat":
+							query = { type: "feat" };
+							break;
+						case "item":
+							query = { type__in: ["consumable", "backpack", "equipment", "loot", "tool", "weapon"] };
+							break;
 					}
 
 					// FIXME: How much could we do with the loaded index rather than all content?
