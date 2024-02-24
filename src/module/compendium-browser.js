@@ -995,7 +995,7 @@ class CompendiumBrowser extends Application {
 		}
 
 		if (CONFIG.DND5E.actorSizes[npcData.traits.size] !== undefined) {
-			decoratedNpc.displaySize = CONFIG.DND5E.actorSizes[npcData.traits.size];
+			decoratedNpc.displaySize = CONFIG.DND5E.actorSizes[npcData.traits.size].label;
 		}
 		let npcSize = npc.system.traits.size;
 		switch (npcSize) {
