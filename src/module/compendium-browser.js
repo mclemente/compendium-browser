@@ -927,18 +927,10 @@ class CompendiumBrowser extends Application {
 		}
 
 		if (item.type === "spell") {
-			// determining classes that can use the spell
-			let cleanSpellName = item.name
-				.toLowerCase()
-				.replace(/[^一-龠ぁ-ゔァ-ヴーa-zA-Z0-9ａ-ｚＡ-Ｚ０-９々〆〤]/g, "")
-				.replace("'", "")
-				.replace(/ /g, "");
-			// let cleanSpellName = spell.name.toLowerCase().replace(/[^a-zA-Z0-9\s:]/g, '').replace("'", '').replace(/ /g, '');
+			const cleanSpellName = item.name.slugify({replacement: "", strict: true});
 			if (this.classList[cleanSpellName]) {
 				let classes = this.classList[cleanSpellName];
 				item.classes = classes.split(",");
-			} else {
-				// FIXME: unfoundSpells += cleanSpellName + ',';
 			}
 		} else if (item.type === "feat" || item.type === "class") {
 			// getting class
