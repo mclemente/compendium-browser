@@ -14,19 +14,19 @@ class CompendiumBrowser extends Application {
 
 		// Reset the filters used in the dialog
 		this.spellFilters = {
-			registeredFilterCategorys: {},
+			registeredFilterCategories: {},
 			activeFilters: {},
 		};
 		this.npcFilters = {
-			registeredFilterCategorys: {},
+			registeredFilterCategories: {},
 			activeFilters: {},
 		};
 		this.featFilters = {
-			registeredFilterCategorys: {},
+			registeredFilterCategories: {},
 			activeFilters: {},
 		};
 		this.itemFilters = {
-			registeredFilterCategorys: {},
+			registeredFilterCategories: {},
 			activeFilters: {},
 		};
 		this.changeTabs = null;
@@ -1193,14 +1193,14 @@ class CompendiumBrowser extends Application {
 		filter.valIsArray = valIsArray;
 
 		let catId = stripSpecialCharacters(category);
-		if (this[target].registeredFilterCategorys[catId] === undefined) {
-			this[target].registeredFilterCategorys[catId] = {
+		if (this[target].registeredFilterCategories[catId] === undefined) {
+			this[target].registeredFilterCategories[catId] = {
 				label: game.i18n.localize(category) ?? category,
 				labelId: catId,
 				filters: [],
 			};
 		}
-		this[target].registeredFilterCategorys[catId].filters.push(filter);
+		this[target].registeredFilterCategories[catId].filters.push(filter);
 	}
 
 	async addSpellFilters() {
@@ -1629,13 +1629,13 @@ class CompendiumBrowser extends Application {
 		let target = `${type}Filters`;
 		let catId = stripSpecialCharacters(category);
 
-		if (!this[target].registeredFilterCategorys[catId]) {
+		if (!this[target].registeredFilterCategories[catId]) {
 			return;
 		}
 
 		const labelStripped = stripDotCharacters(label);
 
-		let filter = this[target].registeredFilterCategorys[catId].filters.find((x) => x.labelId === labelStripped);
+		let filter = this[target].registeredFilterCategories[catId].filters.find((x) => x.labelId === labelStripped);
 
 		if (!filter) {
 			return;
@@ -1683,8 +1683,8 @@ class CompendiumBrowser extends Application {
 	}
 
 	findFilterR(target, filterTarget) {
-		for (let cat of Object.keys(this[target].registeredFilterCategorys)) {
-			for (let filter of this[target].registeredFilterCategorys[cat].filters) {
+		for (let cat of Object.keys(this[target].registeredFilterCategories)) {
+			for (let filter of this[target].registeredFilterCategories[cat].filters) {
 				if (filterTarget.path === filter.path) {
 					return { section: `${cat}`, label: `${filter.labelId}` };
 				}
