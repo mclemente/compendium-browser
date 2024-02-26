@@ -1,4 +1,50 @@
 export class dnd5eProvider {
+	classes = {};
+
+	async getClasses() {
+		const subclasses = {};
+		for (let pack of game.packs) {
+			if (pack.documentName === "Item") {
+				const indexes = await pack.getIndex({ fields: ["system.identifier", "system.classIdentifier"] });
+				const classes = indexes.filter((entry) => entry.type === "class");
+				if (classes.length) {
+					classes.map((entry) => {
+						return {
+							label: entry.name,
+							identifier: entry.system.identifier
+						};
+					})
+						.forEach((c) => {
+							this.classes[c.identifier] = {
+								label: c.label,
+								subclasses: []
+							};
+						});
+				}
+				const _subclasses = indexes.filter((entry) => entry.type === "subclass");
+				if (_subclasses.length) {
+					_subclasses.map((entry) => {
+							return {
+								identifier: entry.system.identifier,
+								classId: entry.system.classIdentifier
+							};
+						})
+						.forEach((subclass) => {
+							if (subclasses[subclass.classId]) {
+								subclasses[subclass.classId].subclasses.push(subclass.identifier);
+							} else {
+								subclasses[subclass.classId] = {
+									// TODO change to object with {label, id} pair
+									subclasses: [subclass.identifier]
+								};
+							}
+						});
+				}
+			}
+		}
+		this.classes = foundry.utils.mergeObject(this.classes, subclasses);
+	}
+
 	static classList = {
 		abidalzimshorridwilting: "sorcerer,wizard",
 		absorbelements: "artificer,druid,ranger,sorcerer,wizard",

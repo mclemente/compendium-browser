@@ -7,6 +7,39 @@ const NOT_MIGRATED = "NotMigratedException";
 const COMPENDIUM_BROWSER = "compendium-browser";
 
 class CompendiumBrowser extends Application {
+	constructor(options={}) {
+		super(options);
+
+		this.provider = new dnd5eProvider();
+
+		// Reset the filters used in the dialog
+		this.spellFilters = {
+			registeredFilterCategorys: {},
+			activeFilters: {},
+		};
+		this.npcFilters = {
+			registeredFilterCategorys: {},
+			activeFilters: {},
+		};
+		this.featFilters = {
+			registeredFilterCategorys: {},
+			activeFilters: {},
+		};
+		this.itemFilters = {
+			registeredFilterCategorys: {},
+			activeFilters: {},
+		};
+		this.changeTabs = null;
+	}
+
+	async setup() {
+		await this.provider.getClasses();
+		this.addSpellFilters();
+		this.addFeatFilters();
+		this.addItemFilters();
+		this.addNpcFilters();
+	}
+
 	static get defaultOptions() {
 		return mergeObject(super.defaultOptions, {
 			title: "CMPBrowser.compendiumBrowser",
@@ -21,6 +54,10 @@ class CompendiumBrowser extends Application {
 
 	get maxLoad() {
 		return game.settings.get(COMPENDIUM_BROWSER, "maxload");
+	}
+
+	get settings() {
+		return game.settings.get(COMPENDIUM_BROWSER, "settings");
 	}
 
 	static get extraButtonsGlobal() {
@@ -41,33 +78,6 @@ class CompendiumBrowser extends Application {
 
 	static get bannersLocal() {
 		return game.settings.get(COMPENDIUM_BROWSER, "bannersLocal");
-	}
-
-	async setup() {
-		// load settings
-		this.initSettings();
-
-		// Reset the filters used in the dialog
-		this.spellFilters = {
-			registeredFilterCategorys: {},
-			activeFilters: {},
-		};
-		this.npcFilters = {
-			registeredFilterCategorys: {},
-			activeFilters: {},
-		};
-		this.featFilters = {
-			registeredFilterCategorys: {},
-			activeFilters: {},
-		};
-		this.itemFilters = {
-			registeredFilterCategorys: {},
-			activeFilters: {},
-		};
-		this.addSpellFilters();
-		this.addFeatFilters();
-		this.addItemFilters();
-		this.addNpcFilters();
 	}
 
 	/** @override */
@@ -93,6 +103,15 @@ class CompendiumBrowser extends Application {
 			settings: this.settings,
 			isGM: game.user.isGM,
 		};
+	}
+
+	_activateCoreListeners(html) {
+		super._activateCoreListeners(html);
+		if (this.changeTabs !== null) {
+			const tabName = this.changeTabs.toString();
+			if (tabName !== this._tabs[0].active) this._tabs[0].activate(tabName);
+			this.changeTabs = null;
+		}
 	}
 
 	activateItemListListeners(html) {
@@ -646,57 +665,58 @@ class CompendiumBrowser extends Application {
 		return npcs;
 	}
 
-	hookCompendiumList(html) {
-		if (game.user.isGM
-			|| this.settings.allowSpellBrowser
-			|| this.settings.allowNpcBrowser
-			|| this.settings.allowFeatBrowser
-			|| this.settings.allowItemBrowser) {
-
-			const cbButton = $(
-				`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize(
-					"CMPBrowser.compendiumBrowser"
-				)}</button>`
-			);
-			html.find(".compendium-browser-btn").remove();
-
-			// adding to directory-list since the footer doesn't exist if the user is not gm
-			html.find(".directory-footer").append(cbButton);
-
-			// Handle button clicks
-			cbButton.click((ev) => {
-				ev.preventDefault();
-				// 0.4.1: Reset filters when you click button
-				this.resetFilters();
-				// 0.4.3: Reset everything (including data) when you press the button - calls afterRender() hook
-
-				if (!this.refreshList) {
-					if (game.user.isGM || this.settings.allowSpellBrowser) {
-						this.refreshList = "spell";
-					} else if (this.settings.allowFeatBrowser) {
-						this.refreshList = "feat";
-					} else if (this.settings.allowItemBrowser) {
-						this.refreshList = "item";
-					} else if (this.settings.allowNPCBrowser) {
-						this.refreshList = "npc";
-					}
-				}
-				this.render(true);
-			});
+	hookCompendiumList(html, sidebarName) {
+		if (!game.user.isGM) {
+			if (!this.settings.allowNpcBrowser && sidebarName === "actors") return;
+			if (!this.settings.allowItemBrowser && sidebarName === "items") return;
+			if (!(this.settings.allowSpellBrowser
+				|| this.settings.allowNpcBrowser
+				|| this.settings.allowFeatBrowser
+				|| this.settings.allowItemBrowser)) return;
 		}
+		const cbButton = $(
+			`<button class="compendium-browser-btn"><i class="fas fa-fire"></i> ${game.i18n.localize(
+				"CMPBrowser.compendiumBrowser"
+			)}</button>`
+		);
+		html.find(".compendium-browser-btn").remove();
+
+		// adding to directory-list since the footer doesn't exist if the user is not gm
+		html.find(".directory-footer").append(cbButton);
+
+		if (sidebarName === "compendium") sidebarName = null;
+
+		// Handle button clicks
+		cbButton.click((ev) => {
+			ev.preventDefault();
+			this.resetFilters();
+
+			if (sidebarName === "actors") {
+				this.refreshList = "npc";
+				this.changeTabs = "npc";
+			} else if (sidebarName === "items") {
+				this.refreshList = "item";
+				this.changeTabs = "item";
+			} else if (!this.refreshList) {
+				if (game.user.isGM || this.settings.allowSpellBrowser) {
+					this.refreshList = "spell";
+				} else if (this.settings.allowFeatBrowser) {
+					this.refreshList = "feat";
+				} else if (this.settings.allowItemBrowser) {
+					this.refreshList = "item";
+				} else if (this.settings.allowNPCBrowser) {
+					this.refreshList = "npc";
+				}
+			}
+			this.render(true);
+		});
 	}
 
 	/* Hook to load the first data */
 	static afterRender(cb, html) {
-		// 0.4.3: Because a render always resets ALL the displayed filters (on all tabs) to unselected , we have to blank all the lists as well
-		// (because the current HTML template doesn't set the selected filter values)
-		if (!cb?.refreshList) {
-			return;
-		}
+		if (!cb?.refreshList) return;
 
 		cb.replaceList(html, cb.refreshList);
-
-		// cb.refreshList = null;
 
 		if (CompendiumBrowser.postRender) {
 			CompendiumBrowser.postRender();
@@ -922,17 +942,19 @@ class CompendiumBrowser extends Application {
 			}
 		} else if (item.type === "feat" || item.type === "class") {
 			// getting class
-			let reqString = item.requirements?.replace(/[0-9]/g, "").trim();
-			let matchedClass = [];
-			for (let c in this.subClasses) {
-				if (reqString && reqString.toLowerCase().indexOf(c) !== -1) {
-					matchedClass.push(c);
-				} else {
-					for (let subClass of this.subClasses[c]) {
-						if (reqString && reqString.indexOf(subClass) !== -1) {
-							matchedClass.push(c);
-							break;
-						}
+			const matchedClass = [];
+			const reqString = item.requirements?.replace(/\d/g, "").trim();
+			if (reqString) {
+				const reqStringLower = reqString.toLowerCase();
+				for (const [className, classInfo] of Object.entries(this.provider.classes)) {
+					const isClassMatch = reqStringLower && className.toLowerCase().includes(reqStringLower);
+					const isSubclassMatch = classInfo.subclasses.some(
+						// TODO compare with id and label
+						(subClass) => reqString.includes(subClass)
+					);
+
+					if (isClassMatch || isSubclassMatch) {
+						matchedClass.push(className);
 					}
 				}
 			}
@@ -942,7 +964,6 @@ class CompendiumBrowser extends Application {
 			// getting uses/ressources status
 			item.usesRessources = item5e.hasLimitedUses;
 		} else if (item.type === "subclass") {
-			// subclasses dont exist lower then version 10
 			item.classRequirement = [item.system.classIdentifier];
 			item.classRequirementString = item.system.classIdentifier;
 		} else {
@@ -1145,113 +1166,6 @@ class CompendiumBrowser extends Application {
 		return newObj;
 	}
 
-	initSettings() {
-		let defaultSettings = {
-			loadedSpellCompendium: {},
-			loadedNpcCompendium: {},
-		};
-		for (let compendium of game.packs) {
-			if (compendium.documentName === "Item") {
-				defaultSettings.loadedSpellCompendium[compendium.collection] = {
-					load: true,
-					name: `${compendium.metadata.label} (${compendium.collection})`,
-				};
-			}
-			if (compendium.documentName === "Actor") {
-				defaultSettings.loadedNpcCompendium[compendium.collection] = {
-					load: true,
-					name: `${compendium.metadata.label} (${compendium.collection})`,
-				};
-			}
-		}
-		// creating game setting container
-		game.settings.register(COMPENDIUM_BROWSER, "settings", {
-			name: "Compendium Browser Settings",
-			hint: "Settings to exclude packs from loading and visibility of the browser",
-			default: defaultSettings,
-			type: Object,
-			scope: "world",
-			onChange: (settings) => {
-				this.settings = settings;
-			},
-		});
-		game.settings.register(COMPENDIUM_BROWSER, "maxload", {
-			name: game.i18n.localize("CMPBrowser.SETTING.Maxload.NAME"),
-			hint: game.i18n.localize("CMPBrowser.SETTING.Maxload.HINT"),
-			scope: "world",
-			config: true,
-			default: 600,
-			type: Number,
-			range: {
-				// If range is specified, the resulting setting will be a range slider
-				min: 200,
-				max: 2000,
-				step: 100,
-			},
-		});
-		game.settings.register(COMPENDIUM_BROWSER, "extraButtonsGlobal", {
-			name: game.i18n.localize("CMPBrowser.SETTING.extraButtonsGlobal.NAME"),
-			hint: game.i18n.localize("CMPBrowser.SETTING.extraButtonsGlobal.HINT"),
-			scope: "world",
-			config: true,
-			default: true,
-			type: Boolean,
-		});
-		game.settings.register(COMPENDIUM_BROWSER, "extraSheetButtons", {
-			name: game.i18n.localize("CMPBrowser.SETTING.extraSheetButtons.NAME"),
-			hint: game.i18n.localize("CMPBrowser.SETTING.extraSheetButtons.HINT"),
-			scope: "client",
-			config: true,
-			default: true,
-			type: Boolean,
-		});
-		game.settings.register(COMPENDIUM_BROWSER, "extraAdvancementButtons", {
-			name: game.i18n.localize("CMPBrowser.SETTING.extraAdvancementButtons.NAME"),
-			hint: game.i18n.localize("CMPBrowser.SETTING.extraAdvancementButtons.HINT"),
-			scope: "client",
-			config: true,
-			default: true,
-			type: Boolean,
-		});
-		game.settings.register(COMPENDIUM_BROWSER, "bannersGlobal", {
-			name: game.i18n.localize("CMPBrowser.SETTING.bannersGlobal.NAME"),
-			hint: game.i18n.localize("CMPBrowser.SETTING.bannersGlobal.HINT"),
-			scope: "world",
-			config: true,
-			default: true,
-			type: Boolean,
-		});
-		game.settings.register(COMPENDIUM_BROWSER, "bannersLocal", {
-			name: game.i18n.localize("CMPBrowser.SETTING.bannersLocal.NAME"),
-			hint: game.i18n.localize("CMPBrowser.SETTING.bannersLocal.HINT"),
-			scope: "client",
-			config: true,
-			default: true,
-			type: Boolean,
-		});
-
-		// load settings from container and apply to default settings (available compendie might have changed)
-		let settings = game.settings.get(COMPENDIUM_BROWSER, "settings");
-		for (let compKey in defaultSettings.loadedSpellCompendium) {
-			// v0.7.1 Check for settings.loadedSpellCompendium
-			if (settings.loadedSpellCompendium && settings.loadedSpellCompendium[compKey] !== undefined) {
-				defaultSettings.loadedSpellCompendium[compKey].load = settings.loadedSpellCompendium[compKey].load;
-			}
-		}
-		for (let compKey in defaultSettings.loadedNpcCompendium) {
-			// v0.7.1 Check for settings.loadedNpcCompendium
-			if (settings.loadedNpcCompendium && settings.loadedNpcCompendium[compKey] !== undefined) {
-				defaultSettings.loadedNpcCompendium[compKey].load = settings.loadedNpcCompendium[compKey].load;
-			}
-		}
-		defaultSettings.allowSpellBrowser = !!settings.allowSpellBrowser;
-		defaultSettings.allowFeatBrowser = !!settings.allowFeatBrowser;
-		defaultSettings.allowItemBrowser = !!settings.allowItemBrowser;
-		defaultSettings.allowNpcBrowser = !!settings.allowNpcBrowser;
-
-		this.settings = defaultSettings;
-	}
-
 	// FILTERS - Added on the Ready hook
 	// 0.4.0 Make this async so filters can be added all at once
 	async addFilter(entityType, category, label, path, type, possibleValues = null, valIsArray = false) {
@@ -1290,7 +1204,7 @@ class CompendiumBrowser extends Application {
 	}
 
 	async addSpellFilters() {
-		this.addSpellFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
+		this.addSpellFilter("CMPBrowser.general", "DND5E.Source", "system.source.book", "text");
 		this.addSpellFilter("CMPBrowser.general", "DND5E.Level", "system.level", "multiSelect", {
 			0: "DND5E.SpellCantrip",
 			1: "1",
@@ -1332,23 +1246,17 @@ class CompendiumBrowser extends Application {
 			"select",
 			this._sortPackValues(CONFIG.DND5E.damageTypes)
 		);
-		// JV-082: Fix for missing "Class" search feature
+		const classes = Object.fromEntries(
+			Object.entries(this.provider.classes).map(([k, v]) => {
+				return [k, v.label];
+			})
+		);
 		this.addSpellFilter(
 			"CMPBrowser.general",
 			"ITEM.TypeClass",
 			"classes",
 			"select",
-			this._sortPackValues({
-				artificer: "CMPBrowser.artificer",
-				bard: "CMPBrowser.bard",
-				cleric: "CMPBrowser.cleric",
-				druid: "CMPBrowser.druid",
-				paladin: "CMPBrowser.paladin",
-				ranger: "CMPBrowser.ranger",
-				sorcerer: "CMPBrowser.sorcerer",
-				warlock: "CMPBrowser.warlock",
-				wizard: "CMPBrowser.wizard",
-			}),
+			this._sortPackValues(classes),
 			true
 		);
 		this.addSpellFilter("DND5E.SpellComponents", "DND5E.Ritual", "system.properties.ritual", "bool");
@@ -1359,7 +1267,7 @@ class CompendiumBrowser extends Application {
 	}
 
 	async addItemFilters() {
-		this.addItemFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
+		this.addItemFilter("CMPBrowser.general", "DND5E.Source", "system.source.book", "text");
 
 		this.addItemFilter(
 			"CMPBrowser.general",
@@ -1444,27 +1352,18 @@ class CompendiumBrowser extends Application {
 	async addFeatFilters() {
 		// Feature Filters
 		// Foundry v10+ Item#data is now Item#system
-		this.addFeatFilter("CMPBrowser.general", "DND5E.Source", "system.source", "text");
+		this.addFeatFilter("CMPBrowser.general", "DND5E.Source", "system.source.book", "text");
+		const classes = Object.fromEntries(
+			Object.entries(this.provider.classes).map(([k, v]) => {
+				return [k, v.label];
+			})
+		);
 		this.addFeatFilter(
 			"CMPBrowser.general",
 			"ITEM.TypeClass",
 			"classRequirement",
 			"select",
-			this._sortPackValues({
-				artificer: "CMPBrowser.artificer",
-				barbarian: "CMPBrowser.barbarian",
-				bard: "CMPBrowser.bard",
-				cleric: "CMPBrowser.cleric",
-				druid: "CMPBrowser.druid",
-				fighter: "CMPBrowser.fighter",
-				monk: "CMPBrowser.monk",
-				paladin: "CMPBrowser.paladin",
-				ranger: "CMPBrowser.ranger",
-				rogue: "CMPBrowser.rogue",
-				sorcerer: "CMPBrowser.sorcerer",
-				warlock: "CMPBrowser.warlock",
-				wizard: "CMPBrowser.wizard",
-			}),
+			this._sortPackValues(classes),
 			true
 		);
 
@@ -1539,7 +1438,7 @@ class CompendiumBrowser extends Application {
 	async addNpcFilters() {
 		// NPC Filters
 
-		this.addNpcFilter("CMPBrowser.general", "DND5E.Source", "system.details.source", "text");
+		this.addNpcFilter("CMPBrowser.general", "DND5E.Source", "system.details.source.book", "text");
 		this.addNpcFilter("CMPBrowser.general", "DND5E.Size", "system.traits.size", "select", CONFIG.DND5E.actorSizes);
 
 		this.addNpcFilter("CMPBrowser.general", "CMPBrowser.hasLegAct", "system.resources.legact.max", "bool");
@@ -1796,260 +1695,27 @@ class CompendiumBrowser extends Application {
 		console.warn(filterTarget);
 
 	}
-
-	static async addTidySheetButton(cb, html, actor) {
-		await CompendiumBrowser.createBanners(html);
-		await CompendiumBrowser.addButtons(html, actor);
-	}
-
-	static async addButtons(html, actor) {
-
-		// exit out because we dont want these
-		if (!CompendiumBrowser.extraButtonsGlobal || !CompendiumBrowser.extraSheetButtons) {
-			return;
-		}
-
-		await CompendiumBrowser.addTidyFeatureButton(html, "race");
-		await CompendiumBrowser.addTidyFeatureButton(html, "background");
-		await CompendiumBrowser.addTidyFeatureButton(html, "class");
-
-		await html.find(".spell-browser-btn").remove();
-
-		let tabBar = html.find("div.tab.spellbook .spellcasting-ability");
-
-        const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Spells");
-		const cbButton = $(
-			`<div style="flex: 0 0 22px; align-self: center; text-align: center;">
-				<a title="${tooltip}" class="compendium-browser spell-browser-btn">
-					<i class="fa-duotone fa-book"></i>
-				</a>
-			</div>`
-		);
-
-		tabBar.append(cbButton);
-
-		CompendiumBrowser.addSpellsButton(cbButton, actor.actor);
-	}
-
-	static async createBanners(html) {
-		// Don't build the banners if configuration is turned off
-		if (!CompendiumBrowser.bannersGlobal || !CompendiumBrowser.bannersLocal) {
-			return;
-		}
-
-		let MAP_THING = {};
-		MAP_THING[game.i18n.localize("DND5E.Race")] = "race";
-		MAP_THING[game.i18n.localize("DND5E.Background")] = "background";
-		MAP_THING[game.i18n.localize("ITEM.TypeClassPl")] = "class";
-
-		let isSearchable = (name) => {
-			return Object.keys(MAP_THING).includes(name);
-		};
-
-		// searches in a similar way to how tidy sheets does it.
-		// probably should just use actor data instead of going through the html
-		html.find(".inventory-list.features-list .item-list").filter(function () {
-			// find any section that is searchable
-			return isSearchable($(this.previousElementSibling).find("h3.item-name")[0].innerText)
-				// find any section that is empty
-				&& $(this).find("li.item").length === 0;
-		}).each( function () {
-			let type = MAP_THING[$(this.previousElementSibling).find("h3.item-name")[0].innerText];
-			let banner = $(`<span class="notice" style="background:rgba(30, 30, 30, 1)">${game.i18n.localize(`CMPBrowser.FindA.${type}`)}</span>`);
-
-			banner.insertAfter(this);
-
-			banner.click(async (ev) => {
-				ev.preventDefault();
-
-				game.compendiumBrowser.renderWith("feat", [{ section: "CMPBrowsergeneral", label: "CMPBrowser.overall", value: type }]);
-			});
-		});
-
-	}
-
-	static async addDefaultSheetButton(cb, html, actor) {
-		// exit out because we dont want these
-		if (!CompendiumBrowser.extraButtonsGlobal || !CompendiumBrowser.extraSheetButtons) {
-			return;
-		}
-
-		if (cb.options.classes.includes("tidy5e")) {
-			// no need as tidy sheet render will handle it
-			return;
-		}
-
-		await CompendiumBrowser.addDefaultFeatureButton(html, "race");
-		await CompendiumBrowser.addDefaultFeatureButton(html, "background");
-		await CompendiumBrowser.addDefaultFeatureButton(html, "class");
-
-		// handle spell browser button
-		await html.find(".spell-browser-btn").remove();
-
-		let tabBar = html.find("div.spellbook-filters");
-		const cbButton = $(
-			`<div style="flex: 0 0 22px; align-self: center; text-align: center;">
-				<a data-tooltip="CMPBrowser.ToolTip.Spells" class="compendium-browser spell-browser-btn">
-					<i class="fa-duotone fa-book"></i>
-				</a>
-			</div>`
-		);
-
-		tabBar.append(cbButton);
-
-		CompendiumBrowser.addSpellsButton(cbButton, actor.actor);
-	}
-
-	static addSpellsButton(cbButton, character) {
-		cbButton.click(async (ev) => {
-			ev.preventDefault();
-
-			let target = [];
-
-			target = target.concat(CompendiumBrowser.findCasterClass(character));
-			target = target.concat(CompendiumBrowser.findMaxCasterLevel(character));
-
-			game.compendiumBrowser.renderWith("spell", target);
-		});
-	}
-
-	static async addTidyFeatureButton(html, type) {
-		const featBars = html.find(`div.features a.item-create[data-type="${type}"]`);
-
-		const tooltip = game.i18n.localize("CMPBrowser.ToolTip.Features");
-		const cbButton = $(
-			`<a style="flex: 0 0 15px; align-self: center; text-align: center; class="compendium-browser ${type}-browser-btn" title="${tooltip}">
-				<i class="fa-duotone fa-book"></i>
-			</a>`
-		);
-
-		$(featBars[0].parentNode).append(cbButton);
-		cbButton.click(async (ev) => {
-			ev.preventDefault();
-
-			game.compendiumBrowser.renderWith("feat", [{ section: "CMPBrowsergeneral", label: "CMPBrowser.overall", value: type }]);
-		});
-	}
-
-	static async addDefaultFeatureButton(html, type) {
-		await html.find(`.${type}-browser-btn`).remove();
-
-		const featBars = html.find(`div.features li.items-header a.item-control[data-type="${type}"]`);
-
-		// Other sheets (like tidysheet) may cause this problem
-		if (!featBars.length) {
-			return;
-		}
-
-		const cbButton = $(
-			`<a style="flex: 0 0 15px; align-self: center; text-align: center; class="compendium-browser ${type}-browser-btn" data-tooltip="CMPBrowser.ToolTip.Features">
-				<i class="fa-duotone fa-book"></i>
-			</a>`
-		);
-
-		$(featBars[0].parentNode).append(cbButton);
-		$(featBars[0].parentNode).css({"flex-basis": "60px"});
-
-		cbButton.click(async (ev) => {
-			ev.preventDefault();
-
-			game.compendiumBrowser.renderWith("feat", [{ section: "CMPBrowsergeneral", label: "CMPBrowser.overall", value: type }]);
-		});
-	}
-
-	static async addASISheetButton(cb, html) {
-		// exit out because we dont want these
-		if (!CompendiumBrowser.extraButtonsGlobal || !CompendiumBrowser.extraAdvancementButtons) {
-			return;
-		}
-
-		await html.find(".feat-browser-btn").remove();
-
-		let dropArea = html.find("h3:nth-child(3)");
-		const cbButton = $(
-			`<span style="font-size: 16px;">
-				<a data-tooltip="CMPBrowser.ToolTip.Feats" class="compendium-browser feat-browser-btn">
-					<i class="fa-duotone fa-book"></i>
-				</a>
-			</span>`
-		);
-
-		dropArea.append(cbButton);
-
-		cbButton.click(async (ev) => {
-			ev.preventDefault();
-
-			game.compendiumBrowser.renderWith("feat", [
-				{
-					section: "CMPBrowsergeneral",
-					label: "DND5EItemFeatureType",
-					value: "feat",
-				},
-			]);
-		});
-	}
-
-	// find the first caster class of the character
-	static findCasterClass(character) {
-		const options = ["artificer", "bard", "cleric", "druid", "paladin", "ranger", "sorcerer", "warlock", "wizard"];
-
-		for (let cls of Object.keys(character.classes)) {
-			if (options.includes(cls)) {
-				return [{ section: "CMPBrowsergeneral", label: "ITEM.TypeClass", value: cls }];
-			}
-		}
-
-		return [];
-	}
-
-	static findMaxCasterLevel(character) {
-		// find max spell level
-		let maxLevel = Object.keys(character.system.spells).reduce((acc, spell) => {
-			// special case for pact magic
-			if (spell === "pact") {
-				return Math.max(character.system.spells[spell].level, acc);
-			} else {
-				let spellObject = character.system.spells[spell];
-				if ((spellObject.override ?? spellObject.max) > 0) {
-					let match = spell.match(/spell(?<lvl>\d+)/);
-					return Math.max(parseInt(match.groups.lvl), acc);
-				}
-			}
-
-			return acc;
-		}, 0);
-
-		if (maxLevel > 0) {
-			return [
-				{
-					section: "CMPBrowsergeneral",
-					label: "DND5ELevel",
-					values: [...Array(maxLevel + 1).keys()],
-				},
-			];
-		}
-
-		return [];
-	}
 }
 
 Hooks.once("init", async () => {
-	registerSettings();
 	await preloadTemplates();
+	game.compendiumBrowser = new CompendiumBrowser();
 });
 
-Hooks.once("setup", () => {
-	game.compendiumBrowser = new CompendiumBrowser();
-	game.compendiumBrowser.setup();
+Hooks.once("setup", async () => {
+	registerSettings();
+	await game.compendiumBrowser.setup();
 });
 
 Hooks.on("changeSidebarTab", (app) => {
-	if (app.tabName !== "compendium") return;
-	game.compendiumBrowser.hookCompendiumList(app.element);
+	if (["actors", "items", "compendium"].includes(app.tabName)) {
+		game.compendiumBrowser.hookCompendiumList(app.element, app.tabName);
+	}
 });
 Hooks.on("renderSidebarTab", (app, html, data) => {
-	if (app.tabName !== "compendium") return;
-	game.compendiumBrowser.hookCompendiumList(html);
+	if (["actors", "items", "compendium"].includes(app.tabName)) {
+		game.compendiumBrowser.hookCompendiumList(html, app.tabName);
+	}
 });
 
 function stripSpecialCharacters(str) {
@@ -2088,9 +1754,5 @@ function getPropByString(obj, propString) {
 	}
 	return result;
 }
-
-Hooks.on("renderActorSheet5eCharacter", CompendiumBrowser.addDefaultSheetButton);
-Hooks.on("renderTidy5eSheet", CompendiumBrowser.addTidySheetButton);
-Hooks.on("renderAbilityScoreImprovementFlow", CompendiumBrowser.addASISheetButton);
 
 Hooks.on("renderCompendiumBrowser", CompendiumBrowser.afterRender);
