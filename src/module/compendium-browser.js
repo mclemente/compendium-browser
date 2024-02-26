@@ -438,7 +438,7 @@ class CompendiumBrowser extends Application {
 							query = { type: "spell" };
 							break;
 						case "feat":
-							query = { type: "feat" };
+							query = { type__in: ["feat", "subclass"] };
 							break;
 						case "item":
 							query = { type__in: ["consumable", "backpack", "equipment", "loot", "tool", "weapon"] };
