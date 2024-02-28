@@ -3,7 +3,6 @@ import { dnd5eProvider } from "./providers/dnd5e.js";
 import { registerSettings } from "./settings.js";
 
 const STOP_SEARCH = "StopSearchException";
-const NOT_MIGRATED = "NotMigratedException";
 const COMPENDIUM_BROWSER = "compendium-browser";
 
 class CompendiumBrowser extends Application {
@@ -591,7 +590,6 @@ class CompendiumBrowser extends Application {
 				)
 			),
 		];
-		let collectionName = "unknown";
 		try {
 			for (let pack of game.packs) {
 				if (pack.documentName === "Actor" && this.settings.loadedNpcCompendium[pack.collection].load) {
@@ -604,11 +602,6 @@ class CompendiumBrowser extends Application {
 
 								if (!npc5e.img) {
 									npc5e.img = game.dnd5e.moduleArt.map.get(npc5e.uuid.replace(".Actor", ""))?.actor;
-								}
-
-								if (npc5e.system === undefined) {
-									collectionName = pack.collection;
-									throw NOT_MIGRATED;
 								}
 
 								numNpcsLoaded = Object.keys(npcs).length;
@@ -653,8 +646,6 @@ class CompendiumBrowser extends Application {
 		} catch(e) {
 			if (e === STOP_SEARCH) {
 				// breaking out
-			} else if (e === NOT_MIGRATED) {
-				console.log("Cannot browse compendium %s as it is not migrated to v10 format", collectionName);
 			} else {
 				throw e;
 			}
@@ -1125,37 +1116,6 @@ class CompendiumBrowser extends Application {
 		}
 
 		return true;
-	}
-
-	// incomplete removal of duplicate items
-	removeDuplicates(spellList) {
-		// sort at n log n
-		let sortedList = Object.values(spellList).sort((a, b) => a.name.localeCompare(b.name));
-
-		// search through sorted list for duplicates
-		for (let index = 0; index < sortedList.length - 1; ) {
-			// all duplicates will be next to eachother
-			if (sortedList[index].name === sortedList[index + 1].name) {
-				// duplicate something is getting removed
-				// TODO choose what to remove rather then the second
-				let remove = index + 1;
-
-				delete spellList[sortedList[remove].id];
-				sortedList.splice(remove, 1);
-			} else {
-				index++;
-			}
-		}
-	}
-
-	clearObject(obj) {
-		let newObj = {};
-		for (let key in obj) {
-			if (obj[key] === true) {
-				newObj[key] = true;
-			}
-		}
-		return newObj;
 	}
 
 	// FILTERS - Added on the Ready hook
