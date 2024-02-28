@@ -32,7 +32,7 @@ class CompendiumBrowser extends Application {
 	}
 
 	async setup() {
-		await this.provider.getClasses();
+		await this.provider.getFilters();
 		this.addSpellFilters();
 		this.addFeatFilters();
 		this.addItemFilters();
@@ -169,7 +169,6 @@ class CompendiumBrowser extends Application {
 				ol[0].append(element);
 			}
 		});
-		this.triggerSort(html, "spell");
 
 		// sort feat list in place
 		html.find(".feat-browser select[name=sortorder]").on("change", (ev) => {
@@ -182,7 +181,6 @@ class CompendiumBrowser extends Application {
 				ol[0].append(element);
 			}
 		});
-		this.triggerSort(html, "feat");
 
 		// sort item list in place
 		html.find(".item-browser select[name=sortorder]").on("change", (ev) => {
@@ -195,7 +193,6 @@ class CompendiumBrowser extends Application {
 				ol[0].append(element);
 			}
 		});
-		this.triggerSort(html, "item");
 
 		// sort npc list in place
 		html.find(".npc-browser select[name=sortorder]").on("change", (ev) => {
@@ -208,9 +205,9 @@ class CompendiumBrowser extends Application {
 				ol[0].append(element);
 			}
 		});
-		this.triggerSort(html, "npc");
 
 		for (let tab of ["spell", "feat", "item", "npc"]) {
+			this.triggerSort(html, tab);
 			// reset filters and re-render
 			// 0.4.3: Reset ALL filters because when we do a re-render it affects all tabs
 			html.find(`#reset-${tab}-filter`).click((ev) => {
@@ -778,15 +775,7 @@ class CompendiumBrowser extends Application {
 
 	// SORTING
 	triggerSort(html, browserTab) {
-		if (browserTab === "spell") {
-			html.find(".spell-browser select[name=sortorder]").trigger("change");
-		} else if (browserTab === "feat") {
-			html.find(".feat-browser select[name=sortorder]").trigger("change");
-		} else if (browserTab === "npc") {
-			html.find(".npc-browser select[name=sortorder]").trigger("change");
-		} else if (browserTab === "item") {
-			html.find(".item-browser select[name=sortorder]").trigger("change");
-		}
+		html.find(`.${browserTab}-browser select[name=sortorder]`).trigger("change");
 	}
 
 	sortSpells(list, byName) {

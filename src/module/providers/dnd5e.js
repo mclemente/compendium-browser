@@ -1,6 +1,10 @@
 export class dnd5eProvider {
 	classes = {};
 
+	async getFilters() {
+		await this.getClasses();
+	}
+
 	async getClasses() {
 		const subclasses = {};
 		for (let pack of game.packs) {
