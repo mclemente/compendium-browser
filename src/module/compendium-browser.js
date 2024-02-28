@@ -1303,7 +1303,6 @@ class CompendiumBrowser extends Application {
 
 	async addFeatFilters() {
 		// Feature Filters
-		// Foundry v10+ Item#data is now Item#system
 		this.addFeatFilter("CMPBrowser.general", "DND5E.Source", "system.source.book", "text");
 		const classes = Object.fromEntries(
 			Object.entries(this.provider.classes).map(([k, v]) => {
