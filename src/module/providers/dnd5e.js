@@ -21,7 +21,7 @@ export class dnd5eProvider {
 						.forEach((c) => {
 							this.classes[c.identifier] = {
 								label: c.label,
-								subclasses: []
+								subclasses: {}
 							};
 						});
 				}
@@ -29,17 +29,19 @@ export class dnd5eProvider {
 				if (_subclasses.length) {
 					_subclasses.map((entry) => {
 							return {
+								name: entry.name,
 								identifier: entry.system.identifier,
 								classId: entry.system.classIdentifier
 							};
 						})
 						.forEach((subclass) => {
 							if (subclasses[subclass.classId]) {
-								subclasses[subclass.classId].subclasses.push(subclass.identifier);
+								subclasses[subclass.classId].subclasses[subclass.identifier] = subclass.name;
 							} else {
 								subclasses[subclass.classId] = {
-									// TODO change to object with {label, id} pair
-									subclasses: [subclass.identifier]
+									subclasses: {
+										[subclass.identifier]: subclass.name
+									}
 								};
 							}
 						});

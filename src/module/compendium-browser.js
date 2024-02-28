@@ -31,7 +31,7 @@ class CompendiumBrowser extends Application {
 		this.changeTabs = null;
 	}
 
-	async setup() {
+	async ready() {
 		await this.provider.getFilters();
 		this.addSpellFilters();
 		this.addFeatFilters();
@@ -395,8 +395,6 @@ class CompendiumBrowser extends Application {
 		// 0.4.1: Load and filter just one of spells, feats, and items (specified by browserTab)
 		let numItemsLoaded = 0;
 		let compactItems = {};
-		const FeatureList = ["feat", "class", "subclass", "background", "race"];
-		const NotItemList = ["spell", "feat", "class", "subclass", "background", "race"];
 
 		try {
 			// Filter the full list, but only save the core compendium information + displayed info
@@ -409,7 +407,7 @@ class CompendiumBrowser extends Application {
 							query = { type: "spell" };
 							break;
 						case "feat":
-							query = { type__in: ["feat", "subclass"] };
+							query = { type__in: ["feat", "class", "subclass", "background", "race"] };
 							break;
 						case "item":
 							query = { type__in: ["consumable", "backpack", "equipment", "loot", "tool", "weapon"] };
@@ -474,7 +472,6 @@ class CompendiumBrowser extends Application {
 
 									if (
 										decoratedItem
-										&& FeatureList.includes(decoratedItem.type)
 										&& this.passesFilter(decoratedItem, this.featFilters.activeFilters)
 									) {
 										itemsList[item5e.id] = {
@@ -507,9 +504,6 @@ class CompendiumBrowser extends Application {
 
 									if (
 										decoratedItem
-										&& !NotItemList.includes(
-											decoratedItem.type
-										)
 										&& this.passesFilter(decoratedItem, this.itemFilters.activeFilters)
 									) {
 										itemsList[item5e.id] = {
@@ -892,16 +886,14 @@ class CompendiumBrowser extends Application {
 			const matchedClass = [];
 			const reqString = item.requirements?.replace(/\d/g, "").trim();
 			if (reqString) {
-				const reqStringLower = reqString.toLowerCase();
-				for (const [className, classInfo] of Object.entries(this.provider.classes)) {
-					const isClassMatch = reqStringLower && className.toLowerCase().includes(reqStringLower);
-					const isSubclassMatch = classInfo.subclasses.some(
-						// TODO compare with id and label
-						(subClass) => reqString.includes(subClass)
+				for (const [classId, classData] of Object.entries(this.provider.classes)) {
+					const isClassMatch = classData.label.includes(reqString);
+					const isSubclassMatch = !isClassMatch && Object.values(classData.subclasses).some(
+						(label) => reqString.includes(label)
 					);
 
 					if (isClassMatch || isSubclassMatch) {
-						matchedClass.push(className);
+						matchedClass.push(classId);
 					}
 				}
 			}
@@ -1550,14 +1542,20 @@ class CompendiumBrowser extends Application {
 	}
 }
 
-Hooks.once("init", async () => {
-	await preloadTemplates();
+Hooks.once("init", () => {
 	game.compendiumBrowser = new CompendiumBrowser();
 });
 
-Hooks.once("setup", async () => {
+Hooks.once("init", async () => {
+	await preloadTemplates();
+});
+
+Hooks.once("setup", () => {
 	registerSettings();
-	await game.compendiumBrowser.setup();
+});
+
+Hooks.once("ready", async () => {
+	await game.compendiumBrowser.ready();
 });
 
 Hooks.on("changeSidebarTab", (app) => {
