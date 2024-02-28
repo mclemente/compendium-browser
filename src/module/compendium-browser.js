@@ -239,11 +239,6 @@ class CompendiumBrowser extends Application {
 				this.refreshList = tab;
 				this.render();
 			});
-
-			// copy Javascript seach to clipboard
-			html.find(`#copy-search-${tab}`).click(async (ev) => {
-				this.copySearchToClipboard(tab);
-			});
 		}
 
 		// settings
@@ -1597,18 +1592,6 @@ class CompendiumBrowser extends Application {
 			type: filter.type,
 			valIsArray: filter.valIsArray,
 		};
-	}
-
-	async copySearchToClipboard(tab) {
-		const text = this.getSearchText(tab);
-
-		try {
-			await navigator.clipboard.writeText(text);
-			ui.notifications.info("Javascript Copied to clipboard");
-		} catch(err) {
-			ui.notifications.warn("failed to copy javascript to clipboard, check logs for string");
-			console.error("Failed to copy: ", err);
-		}
 	}
 
 	getSearchText(tab) {
