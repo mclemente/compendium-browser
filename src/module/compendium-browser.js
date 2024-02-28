@@ -1009,17 +1009,6 @@ class CompendiumBrowser extends Application {
 		return type;
 	}
 
-	filterElements(list, subjects, filters) {
-		for (let element of list) {
-			let subject = subjects[element.dataset.entryId];
-			if (this.passesFilter(subject, filters) === false) {
-				$(element).hide();
-			} else {
-				$(element).show();
-			}
-		}
-	}
-
 	passesFilter(subject, filters) {
 		for (let filter of Object.values(filters)) {
 			let prop = getProperty(subject, filter.path);
@@ -1523,14 +1512,15 @@ class CompendiumBrowser extends Application {
 					text: "input",
 				};
 
+				const stringFromInput = `div.tab.active #${input.section}-${stripDotCharacters(input.label)}`;
 				if (filter.type in typeMap) {
 					let component = html.element.find(
-						`${this.getHtmlStringFromInput(input)} ${typeMap[filter.type]}`
+						`${stringFromInput} ${typeMap[filter.type]}`
 					);
 
 					component[0].value = input.value;
 				} else if (filter.type === "multiSelect") {
-					let components = html.element.find(this.getHtmlStringFromInput(input));
+					let components = html.element.find(stringFromInput);
 
 					for (let v of input.values) {
 						let c = components.find(`input[data-value=${v}]`);
@@ -1545,10 +1535,6 @@ class CompendiumBrowser extends Application {
 		this.render(true);
 
 		return this;
-	}
-
-	getHtmlStringFromInput(input) {
-		return `div.tab.active #${input.section}-${stripDotCharacters(input.label)}`;
 	}
 
 	findFilter(type, category, label) {
@@ -1572,42 +1558,6 @@ class CompendiumBrowser extends Application {
 			type: filter.type,
 			valIsArray: filter.valIsArray,
 		};
-	}
-
-	getSearchText(tab) {
-		const target = `${tab}Filters`;
-
-		// map active filters to their labels
-		let output = Object.values(this[target].activeFilters).map((filter) => {
-			// find Filters from paths
-			let out = this.findFilterR(target, filter);
-
-			if (filter.value) {
-				out.value = filter.value;
-			} else if (filter.values) {
-				out.values = filter.values;
-			}
-
-			return out;
-		});
-
-		const strOut = `game.compendiumBrowser.renderWith("${tab}", ${JSON.stringify(output)})`;
-
-		return strOut;
-	}
-
-	findFilterR(target, filterTarget) {
-		for (let cat of Object.keys(this[target].registeredFilterCategories)) {
-			for (let filter of this[target].registeredFilterCategories[cat].filters) {
-				if (filterTarget.path === filter.path) {
-					return { section: `${cat}`, label: `${filter.labelId}` };
-				}
-			}
-		}
-
-		ui.notifications.warn("Could not find the filter!!");
-		console.warn(filterTarget);
-
 	}
 }
 
