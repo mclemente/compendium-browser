@@ -59,26 +59,6 @@ class CompendiumBrowser extends Application {
 		return game.settings.get(COMPENDIUM_BROWSER, "settings");
 	}
 
-	static get extraButtonsGlobal() {
-		return game.settings.get(COMPENDIUM_BROWSER, "extraButtonsGlobal");
-	}
-
-	static get extraSheetButtons() {
-		return game.settings.get(COMPENDIUM_BROWSER, "extraSheetButtons");
-	}
-
-	static get extraAdvancementButtons() {
-		return game.settings.get(COMPENDIUM_BROWSER, "extraAdvancementButtons");
-	}
-
-	static get bannersGlobal() {
-		return game.settings.get(COMPENDIUM_BROWSER, "bannersGlobal");
-	}
-
-	static get bannersLocal() {
-		return game.settings.get(COMPENDIUM_BROWSER, "bannersLocal");
-	}
-
 	/** @override */
 	_onChangeTab(event, tabs, active) {
 		super._onChangeTab(event, tabs, active);
