@@ -1321,6 +1321,10 @@ class CompendiumBrowser extends Application {
 		const sortable = Object.entries(packValue)
 			.map(([key, data]) => {
 				if (typeof data === "string") return [key, game.i18n.localize(data)];
+				if (!data) {
+					console.error(`Compendium Browser | Pack Value "${key}" has no data.`);
+					return [key, ""];
+				}
 				return [key, data.label];
 			})
 			.sort((a, b) => a[1].localeCompare(b[1]));
