@@ -18,12 +18,12 @@ export class dnd5eProvider {
 							identifier: entry.system.identifier
 						};
 					})
-						.forEach((c) => {
-							this.classes[c.identifier] = {
-								label: c.label,
-								subclasses: {}
-							};
-						});
+					.forEach((c) => {
+						this.classes[c.identifier] = {
+							label: c.label,
+							subclasses: {}
+						};
+					});
 				}
 				const _subclasses = indexes.filter((entry) => entry.type === "subclass");
 				if (_subclasses.length) {
