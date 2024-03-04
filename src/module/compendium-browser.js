@@ -31,7 +31,7 @@ class CompendiumBrowser extends Application {
 		this.changeTabs = null;
 	}
 
-	async ready() {
+	async setup() {
 		await this.provider.getFilters();
 		this.addSpellFilters();
 		this.addFeatFilters();
@@ -57,6 +57,14 @@ class CompendiumBrowser extends Application {
 
 	get settings() {
 		const settings = game.settings.get(COMPENDIUM_BROWSER, "settings");
+		settings.loadedSpellCompendium = Object.fromEntries(
+			Object.entries(settings.loadedSpellCompendium)
+				.filter(([key, data]) => game.compendiumBrowser.readCompendiums.loadedSpellCompendium[key])
+		);
+		settings.loadedNpcCompendium = Object.fromEntries(
+			Object.entries(settings.loadedNpcCompendium)
+				.filter(([key, data]) => game.compendiumBrowser.readCompendiums.loadedNpcCompendium[key])
+		);
 		return foundry.utils.mergeObject(game.compendiumBrowser.readCompendiums, settings);
 	}
 
@@ -1571,8 +1579,8 @@ Hooks.once("setup", () => {
 	registerSettings();
 });
 
-Hooks.once("ready", async () => {
-	await game.compendiumBrowser.ready();
+Hooks.once("setup", async () => {
+	await game.compendiumBrowser.setup();
 });
 
 Hooks.on("changeSidebarTab", (app) => {
