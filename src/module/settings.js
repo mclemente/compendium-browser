@@ -4,19 +4,19 @@
 
 export function registerSettings() {
 	// Register any custom module settings here
-	const defaultSettings = {
+	game.compendiumBrowser.readCompendiums = {
 		loadedSpellCompendium: {},
 		loadedNpcCompendium: {},
 	};
 	for (const compendium of game.packs) {
 		if (compendium.documentName === "Item") {
-			defaultSettings.loadedSpellCompendium[compendium.collection] = {
+			game.compendiumBrowser.readCompendiums.loadedSpellCompendium[compendium.collection] = {
 				load: true,
 				name: `${compendium.metadata.label} (${compendium.collection})`,
 			};
 		}
 		if (compendium.documentName === "Actor") {
-			defaultSettings.loadedNpcCompendium[compendium.collection] = {
+			game.compendiumBrowser.readCompendiums.loadedNpcCompendium[compendium.collection] = {
 				load: true,
 				name: `${compendium.metadata.label} (${compendium.collection})`,
 			};
@@ -26,7 +26,7 @@ export function registerSettings() {
 	game.settings.register("compendium-browser", "settings", {
 		name: "Compendium Browser Settings",
 		hint: "Settings to exclude packs from loading and visibility of the browser",
-		default: defaultSettings,
+		default: game.compendiumBrowser.readCompendiums,
 		type: Object,
 		scope: "world"
 	});

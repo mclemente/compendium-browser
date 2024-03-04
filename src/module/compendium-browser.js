@@ -56,7 +56,8 @@ class CompendiumBrowser extends Application {
 	}
 
 	get settings() {
-		return game.settings.get(COMPENDIUM_BROWSER, "settings");
+		const settings = game.settings.get(COMPENDIUM_BROWSER, "settings");
+		return foundry.utils.mergeObject(game.compendiumBrowser.readCompendiums, settings);
 	}
 
 	/** @override */
@@ -219,17 +220,32 @@ class CompendiumBrowser extends Application {
 		}
 
 		// settings
-		html.find(".settings input").on("change", (ev) => {
+		html.find(".settings input").on("change", async (ev) => {
 			const setting = ev.target.dataset.setting;
 			const value = ev.target.checked;
 			if (setting === "spell-compendium-setting") {
 				const key = ev.target.dataset.key;
-				this.settings.loadedSpellCompendium[key].load = value;
+				const settings = foundry.utils.mergeObject(this.settings, {
+					loadedSpellCompendium: {
+						[key]: {
+							load: value
+						}
+					}
+				});
+				await game.settings.set("compendium-browser", "settings", settings);
+				// this.settings.loadedSpellCompendium[key].load = value;
 				this.render();
 				ui.notifications.info("Settings Saved. Item Compendiums are being reloaded.");
 			} else if (setting === "npc-compendium-setting") {
 				const key = ev.target.dataset.key;
-				this.settings.loadedNpcCompendium[key].load = value;
+				const settings = foundry.utils.mergeObject(this.settings, {
+					loadedNpcCompendium: {
+						[key]: {
+							load: value
+						}
+					}
+				});
+				await game.settings.set("compendium-browser", "settings", settings);
 				this.render();
 				ui.notifications.info("Settings Saved. NPC Compendiums are being reloaded.");
 			} else if (setting === "allow-spell-browser") {
