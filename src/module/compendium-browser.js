@@ -917,7 +917,7 @@ class CompendiumBrowser extends Application {
 			item.classRequirementString = matchedClass.join(", ");
 
 			// getting uses/ressources status
-			item.usesRessources = item5e.hasLimitedUses;
+			item.usesResources = item5e.hasLimitedUses;
 		} else if (item.type === "subclass") {
 			item.classRequirement = [item.system.classIdentifier];
 			item.classRequirementString = item.system.classIdentifier;
@@ -936,7 +936,7 @@ class CompendiumBrowser extends Application {
 			item.matchedPacksString = matchedPacks.join(", ");
 
 			// getting uses/ressources status
-			item.usesRessources = item5e.hasLimitedUses;
+			item.usesResources = item5e.hasLimitedUses;
 		}
 		return item;
 	}
@@ -1229,7 +1229,7 @@ class CompendiumBrowser extends Application {
 			"select",
 			this._sortPackValues(CONFIG.DND5E.damageTypes)
 		);
-		this.addItemFilter("CMPBrowser.GameMechanics", "CMPBrowser.UsesResources", "usesRessources", "bool");
+		this.addItemFilter("CMPBrowser.GameMechanics", "CMPBrowser.UsesResources", "usesResources", "bool");
 
 		this.addItemFilter(
 			"CMPBrowser.ItemSubtype",
@@ -1330,7 +1330,7 @@ class CompendiumBrowser extends Application {
 			"select",
 			this._sortPackValues(CONFIG.DND5E.damageTypes)
 		);
-		this.addFeatFilter("CMPBrowser.GameMechanics", "CMPBrowser.UsesResources", "usesRessources", "bool");
+		this.addFeatFilter("CMPBrowser.GameMechanics", "CMPBrowser.UsesResources", "usesResources", "bool");
 	}
 
 	_sortPackValues(packValue) {
