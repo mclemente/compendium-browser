@@ -10,7 +10,7 @@ export class dnd5eProvider {
 		for (let pack of game.packs) {
 			if (pack.documentName === "Item") {
 				const indexes = await pack.getIndex({ fields: ["system.identifier", "system.classIdentifier"] });
-				const classes = indexes.filter((entry) => entry.type === "class");
+				const classes = indexes.filter((entry) => entry.type === "class" && entry.system.identifier);
 				if (classes.length) {
 					classes.map((entry) => {
 						return {
@@ -25,7 +25,7 @@ export class dnd5eProvider {
 						};
 					});
 				}
-				const _subclasses = indexes.filter((entry) => entry.type === "subclass");
+				const _subclasses = indexes.filter((entry) => entry.type === "subclass" && entry.system.classIdentifier);
 				if (_subclasses.length) {
 					_subclasses.map((entry) => {
 							return {
@@ -49,6 +49,9 @@ export class dnd5eProvider {
 			}
 		}
 		this.classes = foundry.utils.mergeObject(this.classes, subclasses);
+		this.classes = Object.fromEntries(
+			Object.entries(this.classes).filter(([classId, classData]) => classData.label)
+		);
 	}
 
 	static classList = {

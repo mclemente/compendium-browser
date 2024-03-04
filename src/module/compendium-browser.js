@@ -902,14 +902,14 @@ class CompendiumBrowser extends Application {
 			const matchedClass = [];
 			const reqString = item.requirements?.replace(/\d/g, "").trim();
 			if (reqString) {
-				for (const [classId, classData] of Object.entries(this.provider.classes)) {
+				for (const classData of Object.values(this.provider.classes)) {
 					const isClassMatch = classData.label.includes(reqString);
 					const isSubclassMatch = !isClassMatch && Object.values(classData.subclasses).some(
 						(label) => reqString.includes(label)
 					);
 
 					if (isClassMatch || isSubclassMatch) {
-						matchedClass.push(classId);
+						matchedClass.push(classData.label);
 					}
 				}
 			}
@@ -1335,12 +1335,9 @@ class CompendiumBrowser extends Application {
 
 	_sortPackValues(packValue) {
 		const sortable = Object.entries(packValue)
+			.filter(([key, data]) => key !== undefined && data !== undefined)
 			.map(([key, data]) => {
 				if (typeof data === "string") return [key, game.i18n.localize(data)];
-				if (!data) {
-					console.error(`Compendium Browser | Pack Value "${key}" has no data.`);
-					return [key, ""];
-				}
 				return [key, data.label];
 			})
 			.sort((a, b) => a[1].localeCompare(b[1]));
