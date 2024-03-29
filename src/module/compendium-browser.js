@@ -1,6 +1,7 @@
 import { preloadTemplates } from "./preloadTemplates.js";
 import { dnd5eProvider } from "./providers/dnd5e.js";
 import { registerSettings } from "./settings.js";
+import { CompendiumBrowserVueApplication } from './applications/compendium-browser.js';
 
 const STOP_SEARCH = "StopSearchException";
 const COMPENDIUM_BROWSER = "compendium-browser";
@@ -1571,6 +1572,7 @@ Hooks.once("init", () => {
 	game.compendiumBrowser = new CompendiumBrowser();
 });
 
+// @todo hooks are never async.
 Hooks.once("init", async () => {
 	await preloadTemplates();
 });
@@ -1579,9 +1581,52 @@ Hooks.once("setup", () => {
 	registerSettings();
 });
 
+// @todo hooks are never async.
 Hooks.once("setup", async () => {
 	await game.compendiumBrowser.setup();
 });
+
+/* ---------------------------------------------- */
+
+Hooks.once('ready', () => {
+	// Handle click events for the compendium browser.
+	document.addEventListener("click", (event) => {
+		if (event?.target?.classList && event.target.classList.contains("open-compendium-browser")) {
+			// Retrieve the existing compendium browser, if any.
+			let compendiumBrowser = Object.values(ui.windows).find(app => app.constructor.name == 'CompendiumBrowserVueApplication');
+			// Otherwise, build a new one.
+			if (!compendiumBrowser) {
+				compendiumBrowser = new CompendiumBrowserVueApplication({ defaultTab: event.target.dataset.tab ?? 'creatures' });
+			}
+			// Render the browser.
+			compendiumBrowser.render(true);
+		}
+	});
+});
+
+/* ---------------------------------------------- */
+
+Hooks.on("renderDocumentDirectory", (app, html, options) => {
+	if (["actors", "items"].includes(options.tabName) && !options.cssId.toLowerCase().includes('compendium')) {
+		const htmlElement = html[0];
+		let compendiumButton = '';
+
+		if (options.tabName == "items") {
+			compendiumButton = `
+      <div class="flexrow">
+        <button type="button" class="open-compendium-browser" data-tab="powers"><i class="fas fa-book"></i>${game.i18n.localize('CMPBrowser.Tab.SpellBrowser')}</button>
+        <button type="button" class="open-compendium-browser" data-tab="items"><i class="fas fa-book"></i>${game.i18n.localize('CMPBrowser.Tab.ItemBrowser')}</button>
+      </div>`;
+		}
+		else {
+			compendiumButton = `<button type="button" class="open-compendium-browser" data-tab="creatures"><i class="fas fa-book"></i>${game.i18n.localize('CMPBrowser.Tab.NPCBrowser')}</button>`;
+		}
+		// Append button. Click handler added in 'ready' hook.
+		htmlElement.querySelector(".directory-footer").insertAdjacentHTML("beforeend", compendiumButton);
+	}
+});
+
+/* ---------------------------------------------- */
 
 Hooks.on("changeSidebarTab", (app) => {
 	if (["actors", "items", "compendium"].includes(app.tabName)) {
