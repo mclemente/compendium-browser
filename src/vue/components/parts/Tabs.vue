@@ -46,10 +46,10 @@ export default {
     }
   },
   async mounted() {
-    this.currentTab = this.tabs.defaultTab ?? 'creatures';
-    if (this.tabs?.[this.currentTab].hidden) {
-      this.currentTab = 'creatures';
-    }
+    const activeTab = Object.values(this.tabs)?.find((tab) => tab.active);
+    Object.values(this.tabs).forEach((tab) => console.log(tab));
+    console.log('Active', activeTab);
+    this.currentTab = activeTab?.key ?? 'creatures';
     this.changeTab(false);
   }
 }

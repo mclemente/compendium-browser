@@ -1,17 +1,17 @@
-import { openBlock as s, createElementBlock as r, createElementVNode as f, normalizeClass as l, Fragment as h, renderList as g, createCommentVNode as m, toDisplayString as T, renderSlot as k, resolveComponent as _, createVNode as p, withCtx as w } from "../lib/vue.esm-browser.js";
-function y(...e) {
-  return e.reduce((a, t) => a + t, "");
+import { openBlock as r, createElementBlock as o, createElementVNode as g, normalizeClass as m, Fragment as y, renderList as w, createCommentVNode as _, toDisplayString as v, renderSlot as T, resolveComponent as f, createVNode as i, withCtx as b, createTextVNode as h } from "../lib/vue.esm-browser.js";
+function k(...t) {
+  return t.reduce((a, e) => a + e, "");
 }
-const b = (e, a) => {
-  const t = e.__vccOpts || e;
-  for (const [c, o] of a)
-    t[c] = o;
-  return t;
-}, C = {
+const p = (t, a) => {
+  const e = t.__vccOpts || t;
+  for (const [l, s] of a)
+    e[l] = s;
+  return e;
+}, x = {
   name: "Tabs",
   props: ["context", "actor", "group", "tabs", "flags"],
   setup() {
-    return { concat: y };
+    return { concat: k };
   },
   data() {
     return {
@@ -19,73 +19,76 @@ const b = (e, a) => {
     };
   },
   methods: {
-    changeTab(e) {
-      e && e.currentTarget && (this.currentTab = e.currentTarget.dataset.tab);
-      for (let [a, t] of Object.entries(this.tabs))
+    changeTab(t) {
+      t && t.currentTarget && (this.currentTab = t.currentTarget.dataset.tab);
+      for (let [a, e] of Object.entries(this.tabs))
         this.tabs[a].active = !1;
       this.tabs[this.currentTab] && (this.tabs[this.currentTab].active = !0);
     },
-    getTabClass(e, a) {
-      return `tab-link tab-link--${a}${e.active ? " active" : ""}`;
+    getTabClass(t, a) {
+      return `tab-link tab-link--${a}${t.active ? " active" : ""}`;
     }
   },
   async mounted() {
-    var e;
-    this.currentTab = this.tabs.defaultTab ?? "creatures", (e = this.tabs) != null && e[this.currentTab].hidden && (this.currentTab = "creatures"), this.changeTab(!1);
+    var a;
+    const t = (a = Object.values(this.tabs)) == null ? void 0 : a.find((e) => e.active);
+    Object.values(this.tabs).forEach((e) => console.log(e)), console.log("Active", t), this.currentTab = (t == null ? void 0 : t.key) ?? "creatures", this.changeTab(!1);
   }
-}, v = { class: "section section--tabs flexshrink" }, $ = ["data-group"], x = ["data-tab"], B = { key: 1 };
-function S(e, a, t, c, o, i) {
-  return s(), r("section", v, [
-    f("nav", {
-      class: l("sheet-tabs tabs tabs--" + t.group),
-      "data-group": t.group
+}, C = { class: "section section--tabs flexshrink" }, $ = ["data-group"], B = ["data-tab"], S = { key: 1 };
+function N(t, a, e, l, s, u) {
+  return r(), o("section", C, [
+    g("nav", {
+      class: m("sheet-tabs tabs tabs--" + e.group),
+      "data-group": e.group
     }, [
-      (s(!0), r(h, null, g(t.tabs, (n, u) => (s(), r("span", {
-        key: "tab-" + t.group + "-" + u
+      (r(!0), o(y, null, w(e.tabs, (n, c) => (r(), o("span", {
+        key: "tab-" + e.group + "-" + c
       }, [
-        n.hidden ? m("", !0) : (s(), r("a", {
+        n.hidden ? _("", !0) : (r(), o("a", {
           key: 0,
-          onClick: a[0] || (a[0] = (...d) => i.changeTab && i.changeTab(...d)),
-          class: l(i.getTabClass(n, u)),
-          "data-tab": u
+          onClick: a[0] || (a[0] = (...d) => u.changeTab && u.changeTab(...d)),
+          class: m(u.getTabClass(n, c)),
+          "data-tab": c
         }, [
-          n.icon ? (s(), r("i", {
+          n.icon ? (r(), o("i", {
             key: 0,
-            class: l(c.concat("fas ", n.icon))
-          }, null, 2)) : m("", !0),
-          n.hideLabel ? m("", !0) : (s(), r("span", B, T(n.label), 1))
-        ], 10, x))
+            class: m(l.concat("fas ", n.icon))
+          }, null, 2)) : _("", !0),
+          n.hideLabel ? _("", !0) : (r(), o("span", S, v(n.label), 1))
+        ], 10, B))
       ]))), 128))
     ], 10, $)
   ]);
 }
-const N = /* @__PURE__ */ b(C, [["render", S]]), z = {
+const O = /* @__PURE__ */ p(x, [["render", N]]), V = {
   name: "Tab",
   props: ["context", "actor", "tab", "group", "classes"]
-}, P = ["data-group", "data-tab"];
-function V(e, a, t, c, o, i) {
-  return s(), r("div", {
-    class: l("tab " + t.tab.key + (t.tab.active ? " active" : "") + (t.classes ? " " + t.classes : "")),
-    "data-group": t.group,
-    "data-tab": t.tab.key
+}, z = ["data-group", "data-tab"];
+function I(t, a, e, l, s, u) {
+  return r(), o("div", {
+    class: m("tab " + e.tab.key + (e.tab.active ? " active" : "") + (e.classes ? " " + e.classes : "")),
+    "data-group": e.group,
+    "data-tab": e.tab.key
   }, [
-    k(e.$slots, "default")
-  ], 10, P);
+    T(t.$slots, "default")
+  ], 10, z);
 }
-const F = /* @__PURE__ */ b(z, [["render", V]]), I = {
+const P = /* @__PURE__ */ p(V, [["render", I]]), j = {
   name: "Stub",
   props: ["context"]
 };
-function M(e, a, t, c, o, i) {
-  return s(), r("h1", null, "Foobar");
+function E(t, a, e, l, s, u) {
+  return r(), o("h1", null, [
+    T(t.$slots, "default", {}, void 0, !0)
+  ]);
 }
-const O = /* @__PURE__ */ b(I, [["render", M], ["__scopeId", "data-v-59ae215c"]]), E = {
+const M = /* @__PURE__ */ p(j, [["render", E], ["__scopeId", "data-v-ceecbcd3"]]), A = {
   name: "ArchmageCompendiumBrowser",
   props: ["context"],
   components: {
-    Tabs: N,
-    Tab: F,
-    Stub: O
+    Tabs: O,
+    Tab: P,
+    Stub: M
     // CompendiumBrowserCreatures,
     // CompendiumBrowserPowers,
     // CompendiumBrowserItems
@@ -97,28 +100,28 @@ const O = /* @__PURE__ */ b(I, [["render", M], ["__scopeId", "data-v-59ae215c"]]
     };
   },
   data() {
+    var t, a, e;
     return {
       // The only variable we actually need to track is the active tab.
       tabs: {
-        defaultTab: "creatures",
         primary: {
           // Default tab is assigned in the flags() computed property.
           creatures: {
             key: "creatures",
             label: game.i18n.localize("CMPBrowser.Tab.NPCBrowser"),
-            active: !1,
+            active: ((t = this.context) == null ? void 0 : t.defaultTab) === "creatures",
             opened: !1
           },
           powers: {
             key: "powers",
             label: game.i18n.localize("CMPBrowser.Tab.SpellBrowser"),
-            active: !1,
+            active: ((a = this.context) == null ? void 0 : a.defaultTab) === "powers",
             opened: !1
           },
           items: {
             key: "items",
             label: game.i18n.localize("CMPBrowser.Tab.ItemBrowser"),
-            active: !1,
+            active: ((e = this.context) == null ? void 0 : e.defaultTab) === "items",
             opened: !1
           }
         }
@@ -134,33 +137,67 @@ const O = /* @__PURE__ */ b(I, [["render", M], ["__scopeId", "data-v-59ae215c"]]
   async mounted() {
     console.log("Compendium browser mounted.");
   }
-}, L = { class: "compendium-browser-vue flexcol" }, j = { class: "container container--top" }, A = { class: "container container--bottom" };
-function D(e, a, t, c, o, i) {
-  const n = _("Tabs"), u = _("Stub"), d = _("Tab");
-  return s(), r("div", L, [
-    f("section", j, [
-      p(n, {
+}, F = { class: "compendium-browser-vue flexcol" }, L = { class: "container container--top" }, D = { class: "container container--bottom" };
+function G(t, a, e, l, s, u) {
+  const n = f("Tabs"), c = f("Stub"), d = f("Tab");
+  return r(), o("div", F, [
+    g("section", L, [
+      i(n, {
         group: "primary",
-        tabs: o.tabs.primary,
-        flags: e.flags
-      }, null, 8, ["tabs", "flags"])
+        tabs: s.tabs.primary
+      }, null, 8, ["tabs"])
     ]),
-    f("section", A, [
-      p(d, {
+    g("section", D, [
+      i(d, {
         group: "primary",
-        tab: o.tabs.primary.creatures,
+        tab: s.tabs.primary.creatures,
         classes: "container container--bottom flexrow"
       }, {
-        default: w(() => [
-          p(u)
+        default: b(() => [
+          i(c, null, {
+            default: b(() => [
+              h("Creatures")
+            ]),
+            _: 1
+          })
+        ]),
+        _: 1
+      }, 8, ["tab"]),
+      i(d, {
+        group: "primary",
+        tab: s.tabs.primary.powers,
+        classes: "container container--bottom flexrow"
+      }, {
+        default: b(() => [
+          i(c, null, {
+            default: b(() => [
+              h("Spells")
+            ]),
+            _: 1
+          })
+        ]),
+        _: 1
+      }, 8, ["tab"]),
+      i(d, {
+        group: "primary",
+        tab: s.tabs.primary.items,
+        classes: "container container--bottom flexrow"
+      }, {
+        default: b(() => [
+          i(c, null, {
+            default: b(() => [
+              h("Items")
+            ]),
+            _: 1
+          })
         ]),
         _: 1
       }, 8, ["tab"])
     ])
   ]);
 }
-const q = /* @__PURE__ */ b(E, [["render", D]]);
+const H = /* @__PURE__ */ p(A, [["render", G]]);
 export {
-  q as VueCompendiumBrowser
+  H as VueCompendiumBrowser
 };
 //# sourceMappingURL=components.vue.es.js.map

@@ -1,5 +1,5 @@
 <template>
-  <h1>Foobar</h1>
+  <h1><slot></slot></h1>
 </template>
 
 <script>
