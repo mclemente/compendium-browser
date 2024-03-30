@@ -90,13 +90,18 @@
 					<div class="npc-line">
 						<!-- First row is the title. -->
 						<div class="npc-name">
-							<a>{{ entry.name }}</a>
+							<a>[{{ game.dnd5e.utils.formatCR(entry.system.details.cr) }}] {{ entry.name }}</a>
 						</div>
 						<!-- Second row is supplemental info. -->
-						<div class="npc-tags">
-							<span class="cr" :data-tooltip="game.i18n.localize('Challenge rating')">{{ game.dnd5e.utils.formatCR(entry.system.details.cr) }}</span>
-							<span class="size">{{ CONFIG.DND5E.actorSizes?.[entry.system.traits.size].label ?? entry.system.traits.size }}</span>
-							<span class="type">{{ CONFIG.DND5E.creatureTypes?.[entry.system.details.type.value]?.label ?? entry.system.details.type.value }}</span>
+						<div class="npc-tags flexrow">
+							<div class="numbers flexrow">
+								<!-- <span class="cr" :data-tooltip="game.i18n.localize('Challenge rating')">CR {{ game.dnd5e.utils.formatCR(entry.system.details.cr) }}</span> -->
+								<span class="hp"><span class="bold">HP:</span> {{ entry.system.attributes.hp.max }}</span>
+								<span class="ac"><span class="bold">AC:</span> {{ entry.system.attributes.ac.flat }}</span>
+							</div>
+							<div class="details flexrow">
+								<span>{{ CONFIG.DND5E.actorSizes?.[entry.system.traits.size].label ?? entry.system.traits.size }} {{ CONFIG.DND5E.creatureTypes?.[entry.system.details.type.value]?.label ?? entry.system.details.type.value }}</span>
+							</div>
 						</div>
 					</div>
 				</li>

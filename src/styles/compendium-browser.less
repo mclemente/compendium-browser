@@ -16,7 +16,7 @@
 	overflow-y: hidden !important;
 	max-width: 1100px;
 	max-height: 90vh;
-	min-width: 630px;
+	min-width: 600px;
 	min-height: 500px;
 	.window-content {
 		overflow-y: hidden !important;
@@ -61,12 +61,7 @@
 	}
 	.control-area {
 		position: sticky;
-		display: block;
-		min-width: 250px;
-		max-width: 45%;
-		width: 350px;
 		height: 100%;
-		padding-right: 5px;
 		overflow: auto;
 		button {
 			background: rgba(0, 0, 0, 0.05);
@@ -132,12 +127,8 @@
 	}
 	.list-area {
 		position: sticky;
-		display: flex;
-		min-width: 250px;
-		max-width: 55%;
-		width: 400px;
 		height: 100%;
-		padding-right: 5px;
+		flex: 2;
 		.loading {
 			flex: 0;
 			text-align: center;
@@ -322,21 +313,19 @@
 			.npc-line {
 				line-height: 25px;
 				padding: 9px 0 5px 5px;
-			}
-			.npc-name {
-				font-weight: bold;
-				font-size: 16px;
-			}
-			.cr {
-				display: inline-block;
-				width: 55px;
-			}
-			.size {
-				display: inline-block;
-				width: 75px;
-			}
-			.type {
-				display: inline-block;
+
+				.npc-name {
+					font-weight: bold;
+					font-size: 16px;
+				}
+				.npc-tags {
+					.bold {
+						font-weight: bold;
+					}
+					.details {
+						flex: 2;
+					}
+				}
 			}
 		}
 	}

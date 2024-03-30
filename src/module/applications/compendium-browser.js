@@ -38,7 +38,7 @@ export class CompendiumBrowserVueApplication extends Application {
 			template: "modules/compendium-browser/templates/vue-compendium-browser.html",
 			id: "compendium-browser",
 			title: game.i18n.localize("CMPBrowser.compendiumBrowser"),
-			width: 800,
+			width: 600,
 			height: 730,
 			resizable: true,
 		};

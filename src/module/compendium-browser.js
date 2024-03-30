@@ -1570,20 +1570,12 @@ class CompendiumBrowser extends Application {
 
 Hooks.once("init", () => {
 	game.compendiumBrowser = new CompendiumBrowser();
-});
-
-// @todo hooks are never async.
-Hooks.once("init", async () => {
-	await preloadTemplates();
+	preloadTemplates();
 });
 
 Hooks.once("setup", () => {
 	registerSettings();
-});
-
-// @todo hooks are never async.
-Hooks.once("setup", async () => {
-	await game.compendiumBrowser.setup();
+	game.compendiumBrowser.setup();
 });
 
 /* ---------------------------------------------- */
