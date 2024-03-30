@@ -22,56 +22,35 @@
         <button type="reset" @click="resetFilters()">{{ game.i18n.localize('Reset Filters') }}</button>
       </div>
 
-  
-      <!-- Level range slider. -->
-      <!-- <div class="unit unit--input">
-        <label class="unit-title" for="compendiumBrowser.level">{{ game.i18n.localize('ARCHMAGE.level') }}</label>
-        <div class="level-range flexrow">
-          <div class="level-label"><span>{{ levelRange[0] }}</span><span v-if="levelRange[0] !== levelRange[1]"> - {{ levelRange[1] }}</span></div>
-          <div class="level-input slider-wrapper flexrow">
-            <Slider v-model="levelRange" :min="1" :max="15" :tooltips="false"/>
+      <div class="filtercontainer">
+        <h3>{{ game.i18n.localize('General') }}</h3>
+        <!-- Level range slider. -->
+        <div class="filter">
+          <dt class="unit-title" for="compendiumBrowser.level">{{ game.i18n.localize('Challenge Rating') }}</dt>
+          <div class="level-range flexrow">
+            <div class="level-label"><span>{{ crRange[0] }}</span><span v-if="crRange[0] !== crRange[1]"> - {{ crRange[1] }}</span></div>
+            <div class="level-input slider-wrapper flexrow">
+              <Slider v-model="crRange" :min="1" :max="30" :tooltips="false"/>
+            </div>
           </div>
         </div>
-      </div> -->
-  
-      <!-- Type filter. -->
-      <!-- <div class="unit unit--input">
-        <label class="unit-title" for="compendiumBrowser.type">{{ game.i18n.localize('ARCHMAGE.type') }}</label>
-        <Multiselect
-          v-model="type"
-          mode="tags"
-          :searchable="false"
-          :create-option="false"
-          :options="CONFIG.ARCHMAGE.creatureTypes"
-        />
-      </div> -->
-  
-      <!-- Role filter. -->
-      <!-- <div class="unit unit--input">
-        <label class="unit-title" for="compendiumBrowser.role">{{ game.i18n.localize('ARCHMAGE.role') }}</label>
-        <Multiselect
-          v-model="role"
-          mode="tags"
-          :searchable="false"
-          :create-option="false"
-          :options="CONFIG.ARCHMAGE.creatureRoles"
-        />
-      </div> -->
-  
-      <!-- Size filter. -->
-      <!-- <div class="unit unit--input">
-        <label class="unit-title" for="compendiumBrowser.size">{{ game.i18n.localize('ARCHMAGE.size') }}</label>
-        <Multiselect
-          v-model="size"
-          mode="tags"
-          :searchable="false"
-          :create-option="false"
-          :options="CONFIG.ARCHMAGE.creatureSizes"
-        />
-      </div> -->
-  
+        <!-- Size filter. -->
+        <div class="filter">
+          <dt class="unit-title" for="compendiumBrowser.size">{{ game.i18n.localize('Size') }}</dt>
+          <dd>
+            <Multiselect
+              v-model="size"
+              mode="tags"
+              :searchable="false"
+              :create-option="false"
+              :options="getOptions(CONFIG.DND5E.actorSizes)"
+            />
+          </dd>
+        </div>
+      </div>
+
     </section>
-  
+
     <div class="list-area flexcol">
       <!-- Creatures results. -->
       <!-- <section class="section section--npcs section--main flexcol"> -->
@@ -196,6 +175,16 @@ export default {
       this.crRange = [1, 30];
       this.size = [];
     },
+    /**
+     * Get multiselect options.
+     */
+    getOptions(config) {
+      const options = {};
+      for (let [key, value] of Object.entries(config)) {
+        options[key] = value.label;
+      }
+      return options;
+    }
   },
   computed: {
     entries() {
@@ -309,8 +298,7 @@ export default {
 }
 </script>
 
-<style lang="less">
-  // Import our component styles.
+<style>
   @import "@vueform/slider/themes/default.css";
   @import "@vueform/multiselect/themes/default.css";
 </style>

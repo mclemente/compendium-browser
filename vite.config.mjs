@@ -13,9 +13,7 @@ export default defineConfig({
   },
   css: {
     preprocessorOptions: {
-      less: {
-        additionalData: '@import "src/styles/compendium-browser.less";'
-      }
+      less: {}
     },
   },
   build: {

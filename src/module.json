@@ -18,7 +18,10 @@
 		"verified": "11"
 	},
 	"esmodules": ["module/compendium-browser.js"],
-	"styles": ["styles/compendium-browser.css"],
+	"styles": [
+		"styles/compendium-browser.css",
+		"components/styles.vue.css"
+	],
 	"languages": [
 		{
 			"lang": "en",
