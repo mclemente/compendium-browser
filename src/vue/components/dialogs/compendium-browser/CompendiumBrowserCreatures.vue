@@ -202,17 +202,17 @@ export default {
       }
 
       // // Filter by level range.
-      // if (this.crRange.length == 2) {
-      //   result = result.filter(entry =>
-      //     entry.system.attributes.level.value >= this.crRange[0] &&
-      //     entry.system.attributes.level.value <= this.crRange[1]
-      //   );
-      // }
+      if (this.crRange.length == 2) {
+        result = result.filter(entry =>
+          Number(entry.system.details.cr) >= this.crRange[0] &&
+          Number(entry.system.details.cr) <= this.crRange[1]
+        );
+      }
 
       // Handle multiselect filters, which use arrays as their values.
-      // if (Array.isArray(this.size) && this.size.length > 0) {
-      //   result = result.filter(entry => this.size.includes(entry.system.details.size.value));
-      // }
+      if (Array.isArray(this.size) && this.size.length > 0) {
+        result = result.filter(entry => this.size.includes(entry.system.traits.size));
+      }
 
       // Reflow pager.
       if (result.length > this.pager.perPage) {
