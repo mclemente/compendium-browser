@@ -1613,13 +1613,13 @@ Hooks.on("renderDocumentDirectory", (app, html, options) => {
 
 		if (options.tabName == "items") {
 			compendiumButton = `
-      <div class="flexrow">
-        <button type="button" class="open-compendium-browser" data-tab="powers"><i class="fas fa-book"></i>${game.i18n.localize('CMPBrowser.Tab.SpellBrowser')}</button>
-        <button type="button" class="open-compendium-browser" data-tab="items"><i class="fas fa-book"></i>${game.i18n.localize('CMPBrowser.Tab.ItemBrowser')}</button>
-      </div>`;
+			<div class="flexrow">
+				<button type="button" class="open-compendium-browser" data-tab="powers"><i class="fas fa-atlas"></i>${game.i18n.localize('CMPBrowser.Tab.SpellBrowser')}</button>
+				<button type="button" class="open-compendium-browser" data-tab="items"><i class="fas fa-suitcase"></i>${game.i18n.localize('CMPBrowser.Tab.ItemBrowser')}</button>
+			</div>`;
 		}
 		else {
-			compendiumButton = `<button type="button" class="open-compendium-browser" data-tab="creatures"><i class="fas fa-book"></i>${game.i18n.localize('CMPBrowser.Tab.NPCBrowser')}</button>`;
+			compendiumButton = `<button type="button" class="open-compendium-browser" data-tab="creatures"><i class="fas fa-user"></i>${game.i18n.localize('CMPBrowser.Tab.NPCBrowser')}</button>`;
 		}
 		// Append button. Click handler added in 'ready' hook.
 		htmlElement.querySelector(".directory-footer").insertAdjacentHTML("beforeend", compendiumButton);
