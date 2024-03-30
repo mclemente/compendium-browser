@@ -1,2 +1,2 @@
 // Main app.
-export { default as VueCompendiumBrowser } from './CompendiumBrowser.vue';
+export { default as VueCompendiumBrowser } from "./CompendiumBrowser.vue";

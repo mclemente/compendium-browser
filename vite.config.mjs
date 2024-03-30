@@ -1,14 +1,14 @@
-import path from 'path'
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import path from "path";
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      '@/': `${path.resolve(__dirname, 'src/vue')}/`,
-      '@src/': `${path.resolve(__dirname, 'src')}/`,
+      "@/": `${path.resolve(__dirname, "src/vue")}/`,
+      "@src/": `${path.resolve(__dirname, "src")}/`,
     }
   },
   css: {
@@ -18,30 +18,29 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
-    outDir: './src/components',
+    outDir: "./src/components",
     lib: {
-      entry: path.resolve(__dirname, 'src/vue/index.js'),
-      name: 'v3ArchmageVueComponents',
-      formats: ['es'], // also supports 'umd'
+      entry: path.resolve(__dirname, "src/vue/index.js"),
+      name: "v3ArchmageVueComponents",
+      formats: ["es"], // also supports 'umd'
       fileName: (format) => `components.vue.${format}.js`,
     },
     rollupOptions: {
       external: [
-        'vue',
+        "vue",
       ],
       output: {
         // Provide global variables to use in the UMD build
         // Add external deps here
         globals: {
-          vue: 'Vue',
+          vue: "Vue",
         },
         // Map the external dependency to a local copy of Vue 3 esm.
         paths: {
-          vue: `../lib/vue.esm-browser.js`
+          vue: "../lib/vue.esm-browser.js"
         },
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name == 'style.css')
-            return `styles.vue.css`;
+          if (assetInfo.name == "style.css") return "styles.vue.css";
           return assetInfo.name;
         }
       },

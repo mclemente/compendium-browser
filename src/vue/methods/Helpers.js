@@ -6,7 +6,7 @@ export function getSafeValue(property, defaultValue) {
 export function cssClass(string) {
   return encodeURIComponent(
     string.trim().toLowerCase()
-  ).replace(/%[0-9A-F]{2}/gi, '-');
+  ).replace(/%[0-9A-F]{2}/gi, "-");
 }
 
 export function numberFormat(value, dec = 0, sign = false) {
@@ -18,7 +18,7 @@ export function numberFormat(value, dec = 0, sign = false) {
 export function concat(...args) {
   return args.reduce((acc, cur) => {
     return acc + cur;
-  }, '');
+  }, "");
 }
 
 export async function getActor(actorData) {
@@ -40,7 +40,7 @@ export async function getActor(actorData) {
  */
 export function getActorModuleArt(actor) {
   // UUID doesn't exactly match the format used in the map currently.
-  const actorMapId = actor.uuid.replace('.Actor', '');
+  const actorMapId = actor.uuid.replace(".Actor", "");
   // Retrieve the art from the map, or fallback to the actor image.
   const art = game.dnd5e.moduleArt.map.get(actorMapId);
   return art?.actor ?? actor.img;
@@ -74,11 +74,11 @@ export async function getPackIndex(packNames = [], fields = []) {
  * @param {string} uuid Document UUID to open.
  * @param {string} type Document type to open. Defaults to 'Actor'.
  */
-export function openDocument(uuid, type = 'Actor') {
+export function openDocument(uuid, type = "Actor") {
   getDocumentClass(type).fromDropData({
     type: type,
     uuid: uuid
-  }).then(document => {
+  }).then((document) => {
     if (document?.sheet) {
       document.sheet.render(true);
     }
@@ -94,8 +94,8 @@ export function openDocument(uuid, type = 'Actor') {
  * @param {Event} event Drag event.
  * @param {Object} entry Pack index entry object.
  */
-export function startDrag(event, entry, type = 'Actor') {
-  event.dataTransfer.setData('text/plain', JSON.stringify({
+export function startDrag(event, entry, type = "Actor") {
+  event.dataTransfer.setData("text/plain", JSON.stringify({
     type: type,
     uuid: entry.uuid
   }));

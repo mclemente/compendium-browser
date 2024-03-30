@@ -1,7 +1,7 @@
+import { CompendiumBrowserVueApplication } from "./applications/compendium-browser.js";
 import { preloadTemplates } from "./preloadTemplates.js";
 import { dnd5eProvider } from "./providers/dnd5e.js";
 import { registerSettings } from "./settings.js";
-import { CompendiumBrowserVueApplication } from './applications/compendium-browser.js';
 
 const STOP_SEARCH = "StopSearchException";
 const COMPENDIUM_BROWSER = "compendium-browser";
@@ -1588,15 +1588,15 @@ Hooks.once("setup", async () => {
 
 /* ---------------------------------------------- */
 
-Hooks.once('ready', () => {
+Hooks.once("ready", () => {
 	// Handle click events for the compendium browser.
 	document.addEventListener("click", (event) => {
 		if (event?.target?.classList && event.target.classList.contains("open-compendium-browser")) {
 			// Retrieve the existing compendium browser, if any.
-			let compendiumBrowser = Object.values(ui.windows).find(app => app.constructor.name == 'CompendiumBrowserVueApplication');
+			let compendiumBrowser = Object.values(ui.windows).find((app) => app.constructor.name == "CompendiumBrowserVueApplication");
 			// Otherwise, build a new one.
 			if (!compendiumBrowser) {
-				compendiumBrowser = new CompendiumBrowserVueApplication({ defaultTab: event.target.dataset.tab ?? 'creatures' });
+				compendiumBrowser = new CompendiumBrowserVueApplication({ defaultTab: event.target.dataset.tab ?? "creatures" });
 			}
 			// Render the browser.
 			compendiumBrowser.render(true);
@@ -1607,19 +1607,19 @@ Hooks.once('ready', () => {
 /* ---------------------------------------------- */
 
 Hooks.on("renderDocumentDirectory", (app, html, options) => {
-	if (["actors", "items"].includes(options.tabName) && !options.cssId.toLowerCase().includes('compendium')) {
+	if (["actors", "items"].includes(options.tabName) && !options.cssId.toLowerCase().includes("compendium")) {
 		const htmlElement = html[0];
-		let compendiumButton = '';
+		let compendiumButton = "";
 
 		if (options.tabName == "items") {
 			compendiumButton = `
 			<div class="flexrow">
-				<button type="button" class="open-compendium-browser" data-tab="powers"><i class="fas fa-atlas"></i>${game.i18n.localize('CMPBrowser.Tab.SpellBrowser')}</button>
-				<button type="button" class="open-compendium-browser" data-tab="items"><i class="fas fa-suitcase"></i>${game.i18n.localize('CMPBrowser.Tab.ItemBrowser')}</button>
+				<button type="button" class="open-compendium-browser" data-tab="powers"><i class="fas fa-atlas"></i>${game.i18n.localize("CMPBrowser.Tab.SpellBrowser")}</button>
+				<button type="button" class="open-compendium-browser" data-tab="items"><i class="fas fa-suitcase"></i>${game.i18n.localize("CMPBrowser.Tab.ItemBrowser")}</button>
 			</div>`;
 		}
 		else {
-			compendiumButton = `<button type="button" class="open-compendium-browser" data-tab="creatures"><i class="fas fa-user"></i>${game.i18n.localize('CMPBrowser.Tab.NPCBrowser')}</button>`;
+			compendiumButton = `<button type="button" class="open-compendium-browser" data-tab="creatures"><i class="fas fa-user"></i>${game.i18n.localize("CMPBrowser.Tab.NPCBrowser")}</button>`;
 		}
 		// Append button. Click handler added in 'ready' hook.
 		htmlElement.querySelector(".directory-footer").insertAdjacentHTML("beforeend", compendiumButton);
