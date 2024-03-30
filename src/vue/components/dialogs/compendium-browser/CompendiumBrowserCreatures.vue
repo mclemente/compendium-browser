@@ -1,104 +1,105 @@
 <template>
-  <section class="section section--sidebar flexcol filters">
-    <!-- Sort -->
-    <div class="unit unit--input">
-      <label for="compendiumBrowser.sort" class="unit-title">{{ localize('ARCHMAGE.sort') }}</label>
-      <select class="sort" name="compendiumBrowser.sort" v-model="sortBy">
-        <option v-for="(option, index) in sortOptions" :key="index" :value="option.value">{{ option.label }}</option>
-      </select>
-    </div>
-
-    <!-- Level range slider. -->
-    <div class="unit unit--input">
-      <label class="unit-title" for="compendiumBrowser.level">{{ localize('ARCHMAGE.level') }}</label>
-      <div class="level-range flexrow">
-        <div class="level-label"><span>{{ levelRange[0] }}</span><span v-if="levelRange[0] !== levelRange[1]"> - {{ levelRange[1] }}</span></div>
-        <div class="level-input slider-wrapper flexrow">
-          <Slider v-model="levelRange" :min="1" :max="15" :tooltips="false"/>
+  <div class="npc-browser browser flexrow">
+    <section class="control-area">
+      <div class="filtercontainer">
+        <!-- Name filter. -->
+        <div class="filter">
+          <label class="unit-title" for="compendiumBrowser.name">{{ game.i18n.localize('Name') }}</label>
+          <input type="text" name="compendiumBrowser.name" v-model="name" placeholder="Hydra"/>
         </div>
+
+        <!-- Sort -->
+        <dl class="sorter">
+          <dt>{{ game.i18n.localize('Sort by:') }}</dt>
+          <dd>
+            <select class="sort" name="sortorder" v-model="sortBy">
+              <option v-for="(option, index) in sortOptions" :key="index" :value="option.value">{{ option.label }}</option>
+            </select>
+          </dd>
+        </dl>
+
+        <!-- Reset. -->
+        <button type="reset" @click="resetFilters()">{{ game.i18n.localize('Reset Filters') }}</button>
       </div>
-    </div>
 
-    <!-- Name filter. -->
-    <div class="unit unit--input">
-      <label class="unit-title" for="compendiumBrowser.name">{{ localize('ARCHMAGE.name') }}</label>
-      <input type="text" name="compendiumBrowser.name" v-model="name" placeholder="Hydra"/>
-    </div>
-
-    <!-- Type filter. -->
-    <div class="unit unit--input">
-      <label class="unit-title" for="compendiumBrowser.type">{{ localize('ARCHMAGE.type') }}</label>
-      <Multiselect
-        v-model="type"
-        mode="tags"
-        :searchable="false"
-        :create-option="false"
-        :options="CONFIG.ARCHMAGE.creatureTypes"
-      />
-    </div>
-
-    <!-- Role filter. -->
-    <div class="unit unit--input">
-      <label class="unit-title" for="compendiumBrowser.role">{{ localize('ARCHMAGE.role') }}</label>
-      <Multiselect
-        v-model="role"
-        mode="tags"
-        :searchable="false"
-        :create-option="false"
-        :options="CONFIG.ARCHMAGE.creatureRoles"
-      />
-    </div>
-
-    <!-- Size filter. -->
-    <div class="unit unit--input">
-      <label class="unit-title" for="compendiumBrowser.size">{{ localize('ARCHMAGE.size') }}</label>
-      <Multiselect
-        v-model="size"
-        mode="tags"
-        :searchable="false"
-        :create-option="false"
-        :options="CONFIG.ARCHMAGE.creatureSizes"
-      />
-    </div>
-
-    <!-- Reset. -->
-    <div class="unit unit--input flexrow">
-      <button type="reset" @click="resetFilters()">{{ localize('Reset') }}</button>
-    </div>
-
-  </section>
-
-  <div class="section section--no-overflow">
-    <!-- Creatures results. -->
-    <section class="section section--creatures section--main flexcol">
-      <ul v-if="loaded" class="compendium-browser-results compendium-browser-creatures">
+  
+      <!-- Level range slider. -->
+      <!-- <div class="unit unit--input">
+        <label class="unit-title" for="compendiumBrowser.level">{{ game.i18n.localize('ARCHMAGE.level') }}</label>
+        <div class="level-range flexrow">
+          <div class="level-label"><span>{{ levelRange[0] }}</span><span v-if="levelRange[0] !== levelRange[1]"> - {{ levelRange[1] }}</span></div>
+          <div class="level-input slider-wrapper flexrow">
+            <Slider v-model="levelRange" :min="1" :max="15" :tooltips="false"/>
+          </div>
+        </div>
+      </div> -->
+  
+      <!-- Type filter. -->
+      <!-- <div class="unit unit--input">
+        <label class="unit-title" for="compendiumBrowser.type">{{ game.i18n.localize('ARCHMAGE.type') }}</label>
+        <Multiselect
+          v-model="type"
+          mode="tags"
+          :searchable="false"
+          :create-option="false"
+          :options="CONFIG.ARCHMAGE.creatureTypes"
+        />
+      </div> -->
+  
+      <!-- Role filter. -->
+      <!-- <div class="unit unit--input">
+        <label class="unit-title" for="compendiumBrowser.role">{{ game.i18n.localize('ARCHMAGE.role') }}</label>
+        <Multiselect
+          v-model="role"
+          mode="tags"
+          :searchable="false"
+          :create-option="false"
+          :options="CONFIG.ARCHMAGE.creatureRoles"
+        />
+      </div> -->
+  
+      <!-- Size filter. -->
+      <!-- <div class="unit unit--input">
+        <label class="unit-title" for="compendiumBrowser.size">{{ game.i18n.localize('ARCHMAGE.size') }}</label>
+        <Multiselect
+          v-model="size"
+          mode="tags"
+          :searchable="false"
+          :create-option="false"
+          :options="CONFIG.ARCHMAGE.creatureSizes"
+        />
+      </div> -->
+  
+    </section>
+  
+    <div class="list-area flexcol">
+      <!-- Creatures results. -->
+      <!-- <section class="section section--npcs section--main flexcol"> -->
+      <ul v-if="loaded" class="compendium-browser-results compendium-browser-npcs">
         <!-- Individual creature entries. -->
-        <li v-for="(entry, entryKey) in entries" :key="entryKey" :class="`creature-summary compendium-browser-row${entryKey >= pager.lastIndex - 1 && entryKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''} flexrow document actor`" :data-document-id="entry._id" @click="openDocument(entry.uuid)">
+        <li v-for="(entry, entryKey) in entries" :key="entryKey" :class="`npc flexrow draggable compendium-browser-row${entryKey >= pager.lastIndex - 1 && entryKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''} document actor`" :data-document-id="entry._id" @click="openDocument(entry.uuid)" @dragstart="startDrag($event, entry, 'Actor')" draggable="true">
           <!-- Both the image and title have drag events. These are primarily separated so that -->
           <!-- if a user drags the token, it will only show the token as their drag preview. -->
-          <img :src="entry.img" @dragstart="startDrag($event, entry, 'Actor')" draggable="true"/>
-          <div class="flexcol creature-contents" @dragstart="startDrag($event, entry, 'Actor')" draggable="true">
+          <div class="npc-image">
+            <img :src="entry.img ?? 'icons/svg/mystery-man.svg'"/>
+          </div>
+          <div class="npc-line">
             <!-- First row is the title. -->
-            <div class="creature-title-wrapper">
-              <strong class="creature-title"><span v-if="entry.system?.attributes?.level?.value">[{{ entry.system.attributes.level.value }}]</span> {{ entry?.name }}</strong>
+            <div class="npc-name">
+              <a>{{ entry.name }}</a>
             </div>
             <!-- Second row is supplemental info. -->
-            <div class="grid creature-grid">
-              <div class="creature-defenses" :data-tooltip="localize('ARCHMAGE.defenses')">
-                <span><strong>{{ localize('ARCHMAGE.CHAT.HP') }}:</strong> {{ entry.system.attributes.hp.max }}</span>
-                <span><strong>{{ localize('ARCHMAGE.ac.key') }}:</strong> {{ entry.system.attributes.ac.value }}</span>
-                <span><strong>{{ localize('ARCHMAGE.pd.key') }}:</strong> {{ entry.system.attributes.pd.value }}</span>
-                <span><strong>{{ localize('ARCHMAGE.md.key') }}:</strong> {{ entry.system.attributes.md.value }}</span>
-              </div>
-              <div class="creature-type" :data-tooltip="localize('ARCHMAGE.type')">{{ CONFIG.ARCHMAGE.creatureTypes[entry?.system?.details?.type?.value] }}</div>
-              <div class="creature-role" :data-tooltip="localize('ARCHMAGE.role')">{{ CONFIG.ARCHMAGE.creatureRoles[entry?.system?.details?.role?.value] }}</div>
-              <div class="creature-size" :data-tooltip="localize('ARCHMAGE.size')">{{ CONFIG.ARCHMAGE.creatureSizes[entry?.system?.details?.size?.value] }}</div>
+            <div class="npc-tags">
+              <span class="cr" :data-tooltip="game.i18n.localize('Challenge rating')">{{ entry.system.details.cr }}</span>
+              <span class="size">{{ entry.system.traits.size }}</span>
+              <span class="type">{{ entry.system.details.type.value }}</span>
             </div>
           </div>
         </li>
       </ul>
       <div v-else class="compendium-browser-loading"><p><i class="fas fa-circle-notch fa-spin"></i>Please wait, loading...</p></div>
-    </section>
+      <!-- </section> -->
+    </div>
   </div>
 </template>
 
@@ -114,7 +115,6 @@ import {
   getActorModuleArt,
   openDocument,
   startDrag,
-  localize
 } from '@/methods/Helpers.js';
 
 export default {
@@ -131,7 +131,6 @@ export default {
       getActorModuleArt,
       openDocument,
       startDrag,
-      localize,
       // Foundry base props and methods.
       CONFIG,
       game,
@@ -149,21 +148,18 @@ export default {
         totalRows: 0,
       },
       // Sorting.
-      sortBy: 'level',
+      sortBy: 'name',
       sortOptions: [
-        { value: 'level', label: game.i18n.localize('ARCHMAGE.level') },
-        { value: 'name', label: game.i18n.localize('ARCHMAGE.name') },
-        { value: 'type', label: game.i18n.localize('ARCHMAGE.type') },
-        { value: 'role', label: game.i18n.localize('ARCHMAGE.role') },
-        { value: 'size', label: game.i18n.localize('ARCHMAGE.size') },
+        { value: 'name', label: game.i18n.localize('Name') },
+        { value: 'cr', label: game.i18n.localize('Challenge Rating') },
+        { value: 'size', label: game.i18n.localize('Size') },
       ],
       // Our list of pseudo documents returned from the compendium.
       packIndex: [],
       // Filters.
       name: '',
-      levelRange: [1, 15],
-      type: [],
-      role: [],
+      // @todo partial CRs like 1/4.
+      crRange: [1, 30],
       size: [],
     }
   },
@@ -195,18 +191,13 @@ export default {
      * Click event to reset our filters.
      */
      resetFilters() {
-      this.sortBy = 'level';
+      this.sortBy = 'name';
       this.name = '';
-      this.levelRange = [1, 15];
-      this.type = [];
-      this.role = [];
+      this.crRange = [1, 30];
       this.size = [];
     },
   },
   computed: {
-    nightmode() {
-      return game.settings.get("archmage", "nightmode") ? 'nightmode' : '';
-    },
     entries() {
       // Build our results array. Exit early if the length is 0.
       let result = this.packIndex;
@@ -221,24 +212,18 @@ export default {
         result = result.filter(entry => entry.name.toLocaleLowerCase().includes(name));
       }
 
-      // Filter by level range.
-      if (this.levelRange.length == 2) {
-        result = result.filter(entry =>
-          entry.system.attributes.level.value >= this.levelRange[0] &&
-          entry.system.attributes.level.value <= this.levelRange[1]
-        );
-      }
+      // // Filter by level range.
+      // if (this.crRange.length == 2) {
+      //   result = result.filter(entry =>
+      //     entry.system.attributes.level.value >= this.crRange[0] &&
+      //     entry.system.attributes.level.value <= this.crRange[1]
+      //   );
+      // }
 
       // Handle multiselect filters, which use arrays as their values.
-      if (Array.isArray(this.type) && this.type.length > 0) {
-        result = result.filter(entry => this.type.includes(entry.system.details.type.value));
-      }
-      if (Array.isArray(this.role) && this.role.length > 0) {
-        result = result.filter(entry => this.role.includes(entry.system.details.role.value));
-      }
-      if (Array.isArray(this.size) && this.size.length > 0) {
-        result = result.filter(entry => this.size.includes(entry.system.details.size.value));
-      }
+      // if (Array.isArray(this.size) && this.size.length > 0) {
+      //   result = result.filter(entry => this.size.includes(entry.system.details.size.value));
+      // }
 
       // Reflow pager.
       if (result.length > this.pager.perPage) {
@@ -256,14 +241,10 @@ export default {
         switch (this.sortBy) {
           case 'name':
             return a.name.localeCompare(b.name);
-          case 'type':
-            return a.system.details?.type?.value.localeCompare(b.system.details?.type?.value);
-          case 'role':
-            return a.system.details?.role?.value.localeCompare(b.system.details?.role?.value);
           case 'size':
-            return a.system.details?.size?.value.localeCompare(b.system.details?.size?.value);
+            return a.system.traits.size.localeCompare(b.system.traits.size);
         }
-        return a.system.attributes.level.value - b.system.attributes.level.value;
+        return a.system.details.cr - b.system.details.cr;
       });
 
       // Return results.
@@ -279,21 +260,17 @@ export default {
 
     // Load the pack index with the fields we need.
     getPackIndex([
-      'archmage.srd-Monsters',
-      'archmage.animal-companions',
-      'archmage.necromancer-summons',
+      'dnd5e.monsters',
+      // insert additional packs as needed.
     ], [
-      'system.attributes.level',
-      'system.attributes.hp.max',
-      'system.attributes.ac.value',
-      'system.attributes.pd.value',
-      'system.attributes.md.value',
-      'system.details.role.value',
-      'system.details.size.value',
-      'system.details.type.value'
+      'img',
+      'system.details.cr',
+      'system.details.type',
+      'system.traits.size'
+      // insert additional properties as needed.
     ]).then(packIndex => {
       // Restore the pack art.
-      if (game.archmage.system?.moduleArt?.map?.size > 0) {
+      if (!game.dnd5e?.moduleArt?.suppressArt && game.dnd5e?.moduleArt?.map?.size > 0) {
         for (let record of packIndex) {
           record.img = getActorModuleArt(record);
         }
@@ -318,7 +295,7 @@ export default {
     // Adjust our observers whenever the results of the compendium browser
     // are updated.
     onUpdated(() => {
-      const target = document.querySelector('.compendium-browser-creatures .compendium-browser-row-observe');
+      const target = document.querySelector('.compendium-browser-npcs .compendium-browser-row-observe');
       if (target) {
         this.observer.observe(target);
       }
@@ -332,7 +309,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="less">
   // Import our component styles.
   @import "@vueform/slider/themes/default.css";
   @import "@vueform/multiselect/themes/default.css";

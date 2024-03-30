@@ -3,10 +3,6 @@ export function getSafeValue(property, defaultValue) {
   return defaultValue;
 }
 
-export function localize(key) {
-  return game.i18n.localize(key);
-}
-
 export function cssClass(string) {
   return encodeURIComponent(
     string.trim().toLowerCase()
@@ -46,7 +42,7 @@ export function getActorModuleArt(actor) {
   // UUID doesn't exactly match the format used in the map currently.
   const actorMapId = actor.uuid.replace('.Actor', '');
   // Retrieve the art from the map, or fallback to the actor image.
-  const art = game.archmage.system.moduleArt.map.get(actorMapId);
+  const art = game.dnd5e.moduleArt.map.get(actorMapId);
   return art?.actor ?? actor.img;
 }
 

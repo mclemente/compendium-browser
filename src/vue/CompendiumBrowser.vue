@@ -14,8 +14,8 @@
         have been opened at least once.
       -->
       <Tab group="primary" :tab="tabs.primary.creatures" classes="container container--bottom flexrow">
-        <Stub>Creatures</Stub>
-        <!-- <CompendiumBrowserCreatures v-if="tabs.primary.creatures.active || tabs.primary.creatures.opened" :tab="tabs.primary.creatures"/> -->
+        <!-- <Stub>Creatures</Stub> -->
+        <CompendiumBrowserCreatures v-if="tabs.primary.creatures.active || tabs.primary.creatures.opened" :tab="tabs.primary.creatures"/>
       </Tab>
 
       <Tab group="primary" :tab="tabs.primary.powers" classes="container container--bottom flexrow">
@@ -37,7 +37,7 @@
 import Tabs from '@/components/parts/Tabs.vue';
 import Tab from '@/components/parts/Tab.vue';
 import Stub from '@/components/dialogs/compendium-browser/stub.vue';
-// import CompendiumBrowserCreatures from '@/components/dialogs/compendium-browser/CompendiumBrowserCreatures.vue';
+import CompendiumBrowserCreatures from '@/components/dialogs/compendium-browser/CompendiumBrowserCreatures.vue';
 // import CompendiumBrowserPowers from '@/components/dialogs/compendium-browser/CompendiumBrowserPowers.vue';
 // import CompendiumBrowserItems from '@/components/dialogs/compendium-browser/CompendiumBrowserItems.vue';
 
@@ -48,7 +48,7 @@ export default {
     Tabs,
     Tab,
     Stub,
-    // CompendiumBrowserCreatures,
+    CompendiumBrowserCreatures,
     // CompendiumBrowserPowers,
     // CompendiumBrowserItems
   },
