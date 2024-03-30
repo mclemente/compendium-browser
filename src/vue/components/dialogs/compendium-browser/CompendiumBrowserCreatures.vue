@@ -4,8 +4,7 @@
 			<div class="filtercontainer">
 				<!-- Name filter. -->
 				<div class="filter">
-					<label class="unit-title" for="compendiumBrowser.name">{{ game.i18n.localize('Name') }}</label>
-					<input type="text" name="compendiumBrowser.name" v-model="name" placeholder="Hydra"/>
+					<input type="text" name="compendiumBrowser.name" v-model="name" :placeholder="game.i18n.localize('Name')" />
 				</div>
 
 				<!-- Sort -->
@@ -43,6 +42,34 @@
 						:searchable="false"
 						:create-option="false"
 						:options="getOptions(CONFIG.DND5E.actorSizes)"
+					/>
+				</div>
+				<div class="filter">
+					<label class="unit-title" for="compendiumBrowser.legact">{{ game.i18n.localize('Legendary Actions') }}</label>
+					<Multiselect
+						v-model="legact"
+						:searchable="false"
+						:create-option="false"
+						:options="getOptions(yesNo)"
+					/>
+				</div>
+				<div class="filter">
+					<label class="unit-title" for="compendiumBrowser.legres">{{ game.i18n.localize('Legendary Resistances') }}</label>
+					<Multiselect
+						v-model="legres"
+						:searchable="false"
+						:create-option="false"
+						:options="getOptions(yesNo)"
+					/>
+				</div>
+				<div class="filter">
+					<label class="unit-title" for="compendiumBrowser.creatureType">{{ game.i18n.localize('Creature Type') }}</label>
+					<Multiselect
+						v-model="creatureType"
+						mode="tags"
+						:searchable="false"
+						:create-option="false"
+						:options="getOptions(CONFIG.DND5E.creatureTypes)"
 					/>
 				</div>
 			</div>
@@ -139,7 +166,10 @@ export default {
 			// Mixed decimals and ints aren't supported by the slider, so
 			// just use 0 for all CRs below 1.
 			crRange: [0, 30],
+			legact: '',
+			legres: '',
 			size: [],
+			creatureType: [],
 		}
 	},
 	methods: {
@@ -173,7 +203,10 @@ export default {
 			this.sortBy = 'name';
 			this.name = '';
 			this.crRange = [0, 30];
+			this.legact = '';
+			this.legres = '';
 			this.size = [];
+			this.creatureType = [];
 		},
 		/**
 		 * Get multiselect options.
@@ -209,9 +242,24 @@ export default {
 				);
 			}
 
+			if (this.legact === "yes") {
+				result = result.filter((entry) => entry.system.resources.legact.max);
+			} else if (this.legact === "no") {
+				result = result.filter((entry) => !entry.system.resources.legact.max);
+			}
+
+			if (this.legres === "yes") {
+				result = result.filter((entry) => entry.system.resources.legres.max);
+			} else if (this.legres === "no") {
+				result = result.filter((entry) => !entry.system.resources.legres.max);
+			}
+
 			// Handle multiselect filters, which use arrays as their values.
 			if (Array.isArray(this.size) && this.size.length > 0) {
 				result = result.filter(entry => this.size.includes(entry.system.traits.size));
+			}
+			if (Array.isArray(this.creatureType) && this.creatureType.length > 0) {
+				result = result.filter(entry => this.creatureType.includes(entry.system.details.type.value));
 			}
 
 			// Reflow pager.
@@ -243,6 +291,9 @@ export default {
 				? result.slice(this.pager.firstIndex, this.pager.lastIndex)
 				: result;
 		},
+		yesNo() {
+			return { "yes": { label: "Yes" }, "no": { label: "No" }};
+		}
 	},
 	watch: {},
 	// Handle created hook.
@@ -254,8 +305,13 @@ export default {
 			'dnd5e.monsters',
 			// insert additional packs as needed.
 		], [
+			'system.attributes.ac',
+			'system.attributes.hp',
+			'system.abilities',
 			'system.details.cr',
 			'system.details.type',
+			'system.resources.legact',
+			'system.resources.legres',
 			'system.traits.size'
 			// insert additional properties as needed.
 		]).then(packIndex => {
