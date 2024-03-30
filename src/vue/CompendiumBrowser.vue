@@ -1,12 +1,12 @@
 <template>
-  <div class="compendium-browser-vue flexcol">
+  <div class="compendium-browser-vue parent flexcol">
     <!-- Tabs. -->
-    <section class="container container--top">
-      <Tabs group="primary" :tabs="tabs.primary"/>
-    </section>
+    <!-- <section class="container container--top"> -->
+    <Tabs group="primary" :tabs="tabs.primary"/>
+    <!-- </section> -->
 
     <!-- Filters + Content. -->
-    <section class="container container--bottom">
+    <section class="content">
 
       <!--
         Render each tab wrapper and their contents. The CompendiumBrowser<Type> components

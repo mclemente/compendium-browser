@@ -1,14 +1,12 @@
 <template>
-  <section class="section section--tabs flexshrink">
-    <nav :class="'sheet-tabs tabs tabs--' + group" :data-group="group">
-      <span v-for="(tab, tabKey) in tabs" :key="'tab-' + group + '-' + tabKey">
-        <a @click="changeTab" :class="getTabClass(tab, tabKey)" :data-tab="tabKey" v-if="!tab.hidden">
-          <i v-if="tab.icon" :class="concat('fas ', tab.icon)"></i>
-          <span v-if="!tab.hideLabel">{{tab.label}}</span>
-        </a>
-      </span>
-    </nav>
-  </section>
+  <nav :class="`tabs tabs--${group}`" :data-group="group">
+    <span v-for="(tab, tabKey) in tabs" :key="'tab-' + group + '-' + tabKey">
+      <a @click="changeTab" :class="getTabClass(tab, tabKey)" :data-tab="tabKey" v-if="!tab.hidden">
+        <i v-if="tab.icon" :class="concat('fas ', tab.icon)"></i>
+        <span v-if="!tab.hideLabel">{{tab.label}}</span>
+      </a>
+    </span>
+  </nav>
 </template>
 
 <script>

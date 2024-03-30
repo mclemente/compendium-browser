@@ -33,14 +33,14 @@ export class CompendiumBrowserVueApplication extends Application {
 		return {...super.defaultOptions,
 			classes: [
 				'form',
-				'compendium-browser-dialog'
+				'compendium-browser'
 			],
 			popOut: true,
 			template: "modules/compendium-browser/templates/vue-compendium-browser.html",
 			id: 'compendium-browser',
 			title: game.i18n.localize('CMPBrowser.compendiumBrowser'),
-			width: 1024,
-			height: 775,
+			width: 800,
+			height: 730,
 			resizable: true,
 		};
 	}

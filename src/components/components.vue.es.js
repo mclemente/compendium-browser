@@ -1,17 +1,17 @@
-import { openBlock as r, createElementBlock as o, createElementVNode as g, normalizeClass as m, Fragment as y, renderList as w, createCommentVNode as _, toDisplayString as v, renderSlot as T, resolveComponent as f, createVNode as i, withCtx as b, createTextVNode as h } from "../lib/vue.esm-browser.js";
-function k(...t) {
+import { openBlock as r, createElementBlock as o, normalizeClass as m, Fragment as T, renderList as y, createCommentVNode as _, toDisplayString as w, renderSlot as h, resolveComponent as f, createVNode as l, createElementVNode as v, withCtx as b, createTextVNode as g } from "../lib/vue.esm-browser.js";
+function C(...t) {
   return t.reduce((a, e) => a + e, "");
 }
 const p = (t, a) => {
   const e = t.__vccOpts || t;
-  for (const [l, s] of a)
-    e[l] = s;
+  for (const [u, s] of a)
+    e[u] = s;
   return e;
-}, x = {
+}, k = {
   name: "Tabs",
   props: ["context", "actor", "group", "tabs", "flags"],
   setup() {
-    return { concat: k };
+    return { concat: C };
   },
   data() {
     return {
@@ -34,61 +34,59 @@ const p = (t, a) => {
     const t = (a = Object.values(this.tabs)) == null ? void 0 : a.find((e) => e.active);
     Object.values(this.tabs).forEach((e) => console.log(e)), console.log("Active", t), this.currentTab = (t == null ? void 0 : t.key) ?? "creatures", this.changeTab(!1);
   }
-}, C = { class: "section section--tabs flexshrink" }, $ = ["data-group"], B = ["data-tab"], S = { key: 1 };
-function N(t, a, e, l, s, u) {
-  return r(), o("section", C, [
-    g("nav", {
-      class: m("sheet-tabs tabs tabs--" + e.group),
-      "data-group": e.group
+}, x = ["data-group"], $ = ["data-tab"], B = { key: 1 };
+function S(t, a, e, u, s, i) {
+  return r(), o("nav", {
+    class: m(`tabs tabs--${e.group}`),
+    "data-group": e.group
+  }, [
+    (r(!0), o(T, null, y(e.tabs, (n, c) => (r(), o("span", {
+      key: "tab-" + e.group + "-" + c
     }, [
-      (r(!0), o(y, null, w(e.tabs, (n, c) => (r(), o("span", {
-        key: "tab-" + e.group + "-" + c
+      n.hidden ? _("", !0) : (r(), o("a", {
+        key: 0,
+        onClick: a[0] || (a[0] = (...d) => i.changeTab && i.changeTab(...d)),
+        class: m(i.getTabClass(n, c)),
+        "data-tab": c
       }, [
-        n.hidden ? _("", !0) : (r(), o("a", {
+        n.icon ? (r(), o("i", {
           key: 0,
-          onClick: a[0] || (a[0] = (...d) => u.changeTab && u.changeTab(...d)),
-          class: m(u.getTabClass(n, c)),
-          "data-tab": c
-        }, [
-          n.icon ? (r(), o("i", {
-            key: 0,
-            class: m(l.concat("fas ", n.icon))
-          }, null, 2)) : _("", !0),
-          n.hideLabel ? _("", !0) : (r(), o("span", S, v(n.label), 1))
-        ], 10, B))
-      ]))), 128))
-    ], 10, $)
-  ]);
+          class: m(u.concat("fas ", n.icon))
+        }, null, 2)) : _("", !0),
+        n.hideLabel ? _("", !0) : (r(), o("span", B, w(n.label), 1))
+      ], 10, $))
+    ]))), 128))
+  ], 10, x);
 }
-const O = /* @__PURE__ */ p(x, [["render", N]]), V = {
+const N = /* @__PURE__ */ p(k, [["render", S]]), O = {
   name: "Tab",
   props: ["context", "actor", "tab", "group", "classes"]
-}, z = ["data-group", "data-tab"];
-function I(t, a, e, l, s, u) {
+}, V = ["data-group", "data-tab"];
+function z(t, a, e, u, s, i) {
   return r(), o("div", {
     class: m("tab " + e.tab.key + (e.tab.active ? " active" : "") + (e.classes ? " " + e.classes : "")),
     "data-group": e.group,
     "data-tab": e.tab.key
   }, [
-    T(t.$slots, "default")
-  ], 10, z);
+    h(t.$slots, "default")
+  ], 10, V);
 }
-const P = /* @__PURE__ */ p(V, [["render", I]]), j = {
+const I = /* @__PURE__ */ p(O, [["render", z]]), P = {
   name: "Stub",
   props: ["context"]
 };
-function E(t, a, e, l, s, u) {
+function j(t, a, e, u, s, i) {
   return r(), o("h1", null, [
-    T(t.$slots, "default", {}, void 0, !0)
+    h(t.$slots, "default", {}, void 0, !0)
   ]);
 }
-const M = /* @__PURE__ */ p(j, [["render", E], ["__scopeId", "data-v-ceecbcd3"]]), A = {
+const E = /* @__PURE__ */ p(P, [["render", j], ["__scopeId", "data-v-ceecbcd3"]]), M = {
   name: "ArchmageCompendiumBrowser",
   props: ["context"],
   components: {
-    Tabs: O,
-    Tab: P,
-    Stub: M
+    Tabs: N,
+    Tab: I,
+    Stub: E
     // CompendiumBrowserCreatures,
     // CompendiumBrowserPowers,
     // CompendiumBrowserItems
@@ -137,56 +135,54 @@ const M = /* @__PURE__ */ p(j, [["render", E], ["__scopeId", "data-v-ceecbcd3"]]
   async mounted() {
     console.log("Compendium browser mounted.");
   }
-}, F = { class: "compendium-browser-vue flexcol" }, L = { class: "container container--top" }, D = { class: "container container--bottom" };
-function G(t, a, e, l, s, u) {
+}, A = { class: "compendium-browser-vue parent flexcol" }, F = { class: "content" };
+function L(t, a, e, u, s, i) {
   const n = f("Tabs"), c = f("Stub"), d = f("Tab");
-  return r(), o("div", F, [
-    g("section", L, [
-      i(n, {
-        group: "primary",
-        tabs: s.tabs.primary
-      }, null, 8, ["tabs"])
-    ]),
-    g("section", D, [
-      i(d, {
+  return r(), o("div", A, [
+    l(n, {
+      group: "primary",
+      tabs: s.tabs.primary
+    }, null, 8, ["tabs"]),
+    v("section", F, [
+      l(d, {
         group: "primary",
         tab: s.tabs.primary.creatures,
         classes: "container container--bottom flexrow"
       }, {
         default: b(() => [
-          i(c, null, {
+          l(c, null, {
             default: b(() => [
-              h("Creatures")
+              g("Creatures")
             ]),
             _: 1
           })
         ]),
         _: 1
       }, 8, ["tab"]),
-      i(d, {
+      l(d, {
         group: "primary",
         tab: s.tabs.primary.powers,
         classes: "container container--bottom flexrow"
       }, {
         default: b(() => [
-          i(c, null, {
+          l(c, null, {
             default: b(() => [
-              h("Spells")
+              g("Spells")
             ]),
             _: 1
           })
         ]),
         _: 1
       }, 8, ["tab"]),
-      i(d, {
+      l(d, {
         group: "primary",
         tab: s.tabs.primary.items,
         classes: "container container--bottom flexrow"
       }, {
         default: b(() => [
-          i(c, null, {
+          l(c, null, {
             default: b(() => [
-              h("Items")
+              g("Items")
             ]),
             _: 1
           })
@@ -196,8 +192,8 @@ function G(t, a, e, l, s, u) {
     ])
   ]);
 }
-const H = /* @__PURE__ */ p(A, [["render", G]]);
+const G = /* @__PURE__ */ p(M, [["render", L]]);
 export {
-  H as VueCompendiumBrowser
+  G as VueCompendiumBrowser
 };
 //# sourceMappingURL=components.vue.es.js.map
