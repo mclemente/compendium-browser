@@ -60,70 +60,75 @@
 		}
 	}
 	.control-area {
-		position: sticky;
 		height: 100%;
-		overflow: auto;
 		flex: 2;
+		.controls {
+			overflow: hidden auto;
+			.filtercontainer {
+				border: 1px solid #bbb;
+				border-radius: 5px;
+				margin-top: 5px;
+				padding: 2px;
+				h3 {
+					margin: 0;
+					cursor: pointer;
+				}
+				dl {
+					margin: 5px 0;
+				}
+				div {
+					margin: 5px 0;
+				}
+				dt {
+					display: inline-block;
+					width: 40%;
+					padding-left: 5px;
+				}
+				dd {
+					display: inline-block;
+					width: 58%;
+					margin-left: 0;
+					select {
+						width: 100%;
+					}
+				}
+				.multiselect {
+					border: 1px solid #bbb;
+					border-radius: 3px;
+					vertical-align: middle;
+					line-height: 32px;
+					margin: 2px 0;
+					label {
+						padding: 5px;
+					}
+					input {
+						vertical-align: middle;
+					}
+				}
+				.small-input {
+					width: calc(100% - 44px);
+					height: 27px;
+					background: rgba(0, 0, 0, 0.05);
+					border: 1px solid #444;
+					border-radius: 3px;
+					padding: 0 3px;
+					text-overflow: ellipsis;
+				}
+				.small-select {
+					width: 40px;
+				}
+			}
+		}
+		footer {
+			flex: 0;
+			padding: 1rem 0 3px;
+		}
 		button {
 			background: rgba(0, 0, 0, 0.05);
 			border: 1px solid #bbb;
 			border-radius: 5px;
 			margin-top: 5px;
 			padding: 2px;
-		}
-		.filtercontainer {
-			border: 1px solid #bbb;
-			border-radius: 5px;
-			margin-top: 5px;
-			padding: 2px;
-			h3 {
-				margin: 0;
-				cursor: pointer;
-			}
-			dl {
-				margin: 5px 0;
-			}
-			div {
-				margin: 5px 0;
-			}
-			dt {
-				display: inline-block;
-				width: 40%;
-				padding-left: 5px;
-			}
-			dd {
-				display: inline-block;
-				width: 58%;
-				margin-left: 0;
-				select {
-					width: 100%;
-				}
-			}
-			.multiselect {
-				border: 1px solid #bbb;
-				border-radius: 3px;
-				vertical-align: middle;
-				line-height: 32px;
-				margin: 2px 0;
-				label {
-					padding: 5px;
-				}
-				input {
-					vertical-align: middle;
-				}
-			}
-			.small-input {
-				width: calc(100% - 44px);
-				height: 27px;
-				background: rgba(0, 0, 0, 0.05);
-				border: 1px solid #444;
-				border-radius: 3px;
-				padding: 0 3px;
-				text-overflow: ellipsis;
-			}
-			.small-select {
-				width: 40px;
-			}
 		}
 	}
 	.list-area {
@@ -134,17 +139,11 @@
 			flex: 0;
 			text-align: center;
 		}
-	}
-	.browser {
-		height: 100%;
-		overflow-y: hidden !important;
-		.window-content {
-			overflow-y: hidden !important;
-		}
+
 		ul {
 			float: right;
 			display: block;
-			min-width: 335px;
+			// min-width: 335px;
 			margin: 0;
 			height: 100%;
 			overflow: auto;
@@ -153,6 +152,10 @@
 				display: none;
 			}
 			li {
+				&:hover {
+					cursor: pointer;
+				}
+
 				span {
 					white-space: nowrap;
 					overflow: hidden;
@@ -177,6 +180,13 @@
 					}
 				}
 			}
+		}
+	}
+	.browser {
+		height: 100%;
+		overflow-y: hidden !important;
+		.window-content {
+			overflow-y: hidden !important;
 		}
 		.spacer {
 			display: inline-block;
@@ -325,6 +335,14 @@
 					}
 					.details {
 						flex: 2;
+					}
+				}
+			}
+
+			&:hover {
+				.npc-line {
+					.npc-name {
+						text-shadow: 0 0 8px var(--color-shadow-primary);
 					}
 				}
 			}

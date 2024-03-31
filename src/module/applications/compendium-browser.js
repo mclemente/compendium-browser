@@ -92,7 +92,7 @@ export class CompendiumBrowserVueApplication extends Application {
 			// Reactivate the listeners if we need to.
 			if (!this.vueListenersActive) {
 				setTimeout(() => {
-					this.activateVueListeners($(this.form), true);
+					this.activateVueListeners(true);
 				}, 150);
 			}
 			return;
@@ -112,7 +112,7 @@ export class CompendiumBrowserVueApplication extends Application {
 			this.vueRoot = this.vueApp.mount(`[data-appid="${this.appId}"] .compendium-browser-mount`);
 			// @todo Find a better solution than a timeout.
 			setTimeout(() => {
-				this.activateVueListeners($(this.form), false);
+				this.activateVueListeners();
 			}, 150);
 		}
 
@@ -142,37 +142,14 @@ export class CompendiumBrowserVueApplication extends Application {
 
 	/**
 	 * Activate additional listeners on the rendered Vue app.
-	 * @param {jQuery} html
 	 */
-	activateVueListeners(html, repeat = false) {
-		if (!this.options.editable) {
-			html.find("input,select,textarea").attr("disabled", true);
-			return;
-		}
-
-		if (html.find(".archmage-v2-vue").length > 0) {
-			this.vueListenersActive = true;
-		}
+	activateVueListeners(repeat = false) {
+		this.vueListenersActive = true;
 
 		// Place one-time executions after this line.
 		if (repeat) return;
 
 		// Input listeners.
-		let inputs = '.section input[type="text"], .section input[type="number"]';
-		html.on("focus", inputs, (event) => this._onFocus(event));
-	}
-
-	/**
-	 * Handle focus events.
-	 *
-	 * @param {*} event
-	 */
-	_onFocus(event) {
-		let target = event.currentTarget;
-		setTimeout(function () {
-			if (target == document.activeElement) {
-				$(target).trigger("select");
-			}
-		}, 100);
+		this.element.find(".filtercontainer h3").click(async (ev) => await $(ev.target.nextElementSibling).toggle(100));
 	}
 }

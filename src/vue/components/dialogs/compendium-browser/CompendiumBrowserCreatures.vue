@@ -1,79 +1,98 @@
 <template>
 	<div class="npc-browser browser flexrow">
-		<section class="control-area">
-			<div class="filtercontainer">
-				<!-- Name filter. -->
-				<div class="filter">
-					<input type="text" name="compendiumBrowser.name" v-model="name" :placeholder="game.i18n.localize('Name')" />
+		<section class="control-area flexcol">
+			<div class="controls">
+				<div class="filtercontainer">
+					<!-- Name filter. -->
+					<div class="filter">
+						<input type="text" name="compendiumBrowser.name" v-model="name" :placeholder="game.i18n.localize('Name')" />
+					</div>
+
+					<!-- Sort -->
+					<dl class="sorter">
+						<dt>{{ game.i18n.localize('Sort by:') }}</dt>
+						<dd>
+							<select class="sort" name="sortorder" v-model="sortBy">
+								<option v-for="(option, index) in sortOptions" :key="index" :value="option.value">{{ option.label }}</option>
+							</select>
+						</dd>
+					</dl>
 				</div>
 
-				<!-- Sort -->
-				<dl class="sorter">
-					<dt>{{ game.i18n.localize('Sort by:') }}</dt>
-					<dd>
-						<select class="sort" name="sortorder" v-model="sortBy">
-							<option v-for="(option, index) in sortOptions" :key="index" :value="option.value">{{ option.label }}</option>
-						</select>
-					</dd>
-				</dl>
-
-				<!-- Reset. -->
-				<button type="reset" @click="resetFilters()">{{ game.i18n.localize('Reset Filters') }}</button>
-			</div>
-
-			<div class="filtercontainer">
-				<h3>{{ game.i18n.localize('General') }}</h3>
-				<!-- Level range slider. -->
-				<div class="filter">
-					<label class="unit-title" for="compendiumBrowser.level">{{ game.i18n.localize('Challenge Rating') }}</label>
-					<div class="level-range flexrow">
-						<div class="level-label"><span>{{ crRange[0] }}</span><span v-if="crRange[0] !== crRange[1]"> - {{ crRange[1] }}</span></div>
-						<div class="level-input slider-wrapper flexrow">
-							<Slider v-model="crRange" :min="0" :max="30" :tooltips="false"/>
+				<div class="filtercontainer">
+					<h3>{{ game.i18n.localize('General') }}</h3>
+					<div class="filters">
+						<!-- Level range slider. -->
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.level">{{ game.i18n.localize('Challenge Rating') }}</label>
+							<div class="level-range flexrow">
+								<div class="level-label"><span>{{ crRange[0] }}</span><span v-if="crRange[0] !== crRange[1]"> - {{ crRange[1] }}</span></div>
+								<div class="level-input slider-wrapper flexrow">
+									<Slider v-model="crRange" :min="0" :max="30" :tooltips="false"/>
+								</div>
+							</div>
+						</div>
+						<!-- Size filter. -->
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.size">{{ game.i18n.localize('Size') }}</label>
+							<Multiselect
+								v-model="size"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.actorSizes)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.legact">{{ game.i18n.localize('Legendary Actions') }}</label>
+							<Multiselect
+								v-model="legact"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(yesNo)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.legres">{{ game.i18n.localize('Legendary Resistances') }}</label>
+							<Multiselect
+								v-model="legres"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(yesNo)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.creatureType">{{ game.i18n.localize('Creature Type') }}</label>
+							<Multiselect
+								v-model="creatureType"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.creatureTypes)"
+							/>
 						</div>
 					</div>
 				</div>
-				<!-- Size filter. -->
-				<div class="filter">
-					<label class="unit-title" for="compendiumBrowser.size">{{ game.i18n.localize('Size') }}</label>
-					<Multiselect
-						v-model="size"
-						mode="tags"
-						:searchable="false"
-						:create-option="false"
-						:options="getOptions(CONFIG.DND5E.actorSizes)"
-					/>
-				</div>
-				<div class="filter">
-					<label class="unit-title" for="compendiumBrowser.legact">{{ game.i18n.localize('Legendary Actions') }}</label>
-					<Multiselect
-						v-model="legact"
-						:searchable="false"
-						:create-option="false"
-						:options="getOptions(yesNo)"
-					/>
-				</div>
-				<div class="filter">
-					<label class="unit-title" for="compendiumBrowser.legres">{{ game.i18n.localize('Legendary Resistances') }}</label>
-					<Multiselect
-						v-model="legres"
-						:searchable="false"
-						:create-option="false"
-						:options="getOptions(yesNo)"
-					/>
-				</div>
-				<div class="filter">
-					<label class="unit-title" for="compendiumBrowser.creatureType">{{ game.i18n.localize('Creature Type') }}</label>
-					<Multiselect
-						v-model="creatureType"
-						mode="tags"
-						:searchable="false"
-						:create-option="false"
-						:options="getOptions(CONFIG.DND5E.creatureTypes)"
-					/>
+
+				<div class="filtercontainer">
+					<h3>{{ game.i18n.localize('Ability Scores') }}</h3>
+					<div class="filters">
+						<div v-for="(ability, key) in abilities" class="filter">
+							<label class="unit-title" for="compendiumBrowser.str">{{ ability.label }}</label>
+							<div class="level-range flexrow">
+								<div class="level-label"><span>{{ ability.range[0] }}</span><span v-if="ability.range[0] !== ability.range[1]"> - {{ ability.range[1] }}</span></div>
+								<div class="level-input slider-wrapper flexrow">
+									<Slider v-model="abilities[key].range" :min="1" :max="30" :tooltips="false"/>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
-
+			<footer>
+				<!-- Reset. -->
+				<button type="reset" @click="resetFilters()">{{ game.i18n.localize('Reset Filters') }}</button>
+			</footer>
 		</section>
 
 		<div class="list-area flexcol">
@@ -89,9 +108,7 @@
 					</div>
 					<div class="npc-line">
 						<!-- First row is the title. -->
-						<div class="npc-name">
-							<a>[{{ game.dnd5e.utils.formatCR(entry.system.details.cr) }}] {{ entry.name }}</a>
-						</div>
+						<div class="npc-name">[{{ game.dnd5e.utils.formatCR(entry.system.details.cr) }}] {{ entry.name }}</div>
 						<!-- Second row is supplemental info. -->
 						<div class="npc-tags flexrow">
 							<div class="numbers flexrow">
@@ -147,6 +164,8 @@ export default {
 		}
 	},
 	data() {
+		const abilities = {};
+		Object.entries(CONFIG.DND5E.abilities).forEach(([k, v]) => abilities[k] = { label: v.label, range: [1, 30] });
 		return {
 			// Props used for infinite scroll and pagination.
 			observer: null,
@@ -171,6 +190,7 @@ export default {
 			// Mixed decimals and ints aren't supported by the slider, so
 			// just use 0 for all CRs below 1.
 			crRange: [0, 30],
+			abilities,
 			legact: '',
 			legres: '',
 			size: [],
@@ -266,6 +286,14 @@ export default {
 			if (Array.isArray(this.creatureType) && this.creatureType.length > 0) {
 				result = result.filter(entry => this.creatureType.includes(entry.system.details.type.value));
 			}
+
+			Object.entries(this.abilities)
+				.forEach(([k, v]) => {
+					result = result.filter((entry) =>
+						Number(entry.system.abilities[k].value) >= v.range[0] &&
+						Number(entry.system.abilities[k].value) <= v.range[1]
+					)
+				});
 
 			// Reflow pager.
 			if (result.length > this.pager.perPage) {
