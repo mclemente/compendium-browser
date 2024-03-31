@@ -1,6 +1,6 @@
 // Import Vue dependencies.
-import { createApp } from "../../lib/vue.esm-browser.js";
 import { VueCompendiumBrowser } from "../../components/components.vue.es.js";
+import { createApp } from "../../lib/vue.esm-browser.js";
 
 /**
  * Application class for the Compendium Browser.
@@ -38,7 +38,7 @@ export class CompendiumBrowserVueApplication extends Application {
 			template: "modules/compendium-browser/templates/vue-compendium-browser.html",
 			id: "compendium-browser",
 			title: game.i18n.localize("CMPBrowser.compendiumBrowser"),
-			width: 600,
+			width: 730,
 			height: 730,
 			resizable: true,
 		};
