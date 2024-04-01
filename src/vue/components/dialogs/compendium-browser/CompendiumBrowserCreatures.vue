@@ -76,7 +76,7 @@
 
 				<div class="filtercontainer">
 					<h3>{{ game.i18n.localize('Ability Scores') }}</h3>
-					<div class="filters">
+					<div class="filters" style="display: none;">
 						<div v-for="(ability, key) in abilities" class="filter">
 							<label class="unit-title" for="compendiumBrowser.str">{{ ability.label }}</label>
 							<div class="level-range flexrow">
@@ -85,6 +85,52 @@
 									<Slider v-model="abilities[key].range" :min="1" :max="30" :tooltips="false"/>
 								</div>
 							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="filtercontainer">
+					<h3>{{ game.i18n.localize('Damage & Conditions') }}</h3>
+					<div class="filters" style="display: none;">
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.damageImmunities">{{ game.i18n.localize('Damage Immunities') }}</label>
+							<Multiselect
+								v-model="damageImmunities"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.damageTypes)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.damageResistances">{{ game.i18n.localize('Damage Resistances') }}</label>
+							<Multiselect
+								v-model="damageResistances"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.damageTypes)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.damageVulnerabilities">{{ game.i18n.localize('Damage Vulnerabilities') }}</label>
+							<Multiselect
+								v-model="damageVulnerabilities"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.damageTypes)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.conditionImmunities">{{ game.i18n.localize('Condition Immunities') }}</label>
+							<Multiselect
+								v-model="conditionImmunities"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.conditionTypes)"
+							/>
 						</div>
 					</div>
 				</div>
@@ -165,7 +211,9 @@ export default {
 	},
 	data() {
 		const abilities = {};
-		Object.entries(CONFIG.DND5E.abilities).forEach(([k, v]) => abilities[k] = { label: v.label, range: [1, 30] });
+		for (const [key, value] of Object.entries(CONFIG.DND5E.abilities)) {
+			abilities[key] = { label: value.label, range: [1, 30] };
+		}
 		return {
 			// Props used for infinite scroll and pagination.
 			observer: null,
@@ -193,6 +241,10 @@ export default {
 			abilities,
 			legact: '',
 			legres: '',
+			damageImmunities: [],
+			damageResistances: [],
+			damageVulnerabilities: [],
+			conditionImmunities: [],
 			size: [],
 			creatureType: [],
 		}
@@ -230,6 +282,10 @@ export default {
 			this.crRange = [0, 30];
 			this.legact = '';
 			this.legres = '';
+			this.damageImmunities = [];
+			this.damageResistances= [];
+			this.damageVulnerabilities= [];
+			this.conditionImmunities= [];
 			this.size = [];
 			this.creatureType = [];
 		},
@@ -242,7 +298,15 @@ export default {
 				options[key] = value.label;
 			}
 			return options;
-		}
+		},
+		applyFilter(property, entries, result) {
+    		if (property.length) {
+				property.forEach(value => {
+					result = result.filter(entry => entry.system.traits[entries].value.includes(value));
+				});
+			}
+    		return result;
+		},
 	},
 	computed: {
 		entries() {
@@ -289,11 +353,18 @@ export default {
 
 			Object.entries(this.abilities)
 				.forEach(([k, v]) => {
+					// Don't bother filtering if filter wasn't changed.
+					if (v.range[0] === 1 && v.range[1] === 30) return;
 					result = result.filter((entry) =>
 						Number(entry.system.abilities[k].value) >= v.range[0] &&
 						Number(entry.system.abilities[k].value) <= v.range[1]
 					)
 				});
+
+			result = this.applyFilter(this.damageImmunities, 'di', result);
+			result = this.applyFilter(this.damageResistances, 'dr', result);
+			result = this.applyFilter(this.damageVulnerabilities, 'dv', result);
+			result = this.applyFilter(this.conditionImmunities, 'ci', result);
 
 			// Reflow pager.
 			if (result.length > this.pager.perPage) {
@@ -345,6 +416,10 @@ export default {
 			'system.details.type',
 			'system.resources.legact',
 			'system.resources.legres',
+			'system.traits.di.value',
+			'system.traits.dr.value',
+			'system.traits.dv.value',
+			'system.traits.ci.value',
 			'system.traits.size'
 			// insert additional properties as needed.
 		]).then(packIndex => {
