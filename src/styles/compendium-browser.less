@@ -305,45 +305,74 @@
 			}
 		}
 	}
-	.npc-browser {
-		.npc {
+	.browser {
+		li:hover {
+			.line {
+				h4 {
+					text-shadow: 0 0 8px var(--color-shadow-primary);
+				}
+			}
+		}
+
+		.image {
+			max-width: 32px;
+			height: 32px;
+			img {
+				width: 32px;
+				height: 32px;
+				border: none;
+				object-fit: contain;
+			}
+		}
+
+		.line {
+			line-height: 25px;
+			margin: auto 0 auto 8px;
+
+			.tags {
+				.bold {
+					font-weight: bold;
+				}
+				.details {
+					flex: 2;
+				}
+			}
+
+		}
+
+		.item {
+			cursor: default;
+			vertical-align: middle;
+			line-height: 16px;
+			margin: 2px 0;
+			height: 32px;
+			.feat-tags {
+				text-align: right;
+				margin-right: 3px;
+				margin-left: 3px;
+				text-transform: capitalize;
+				height: 32px;
+			}
+			.item-tags {
+				text-align: right;
+				margin-right: 3px;
+				margin-left: 3px;
+				text-transform: capitalize;
+				height: 32px;
+			}
+		}
+
+		.actor {
 			cursor: default;
 			vertical-align: middle;
 			line-height: 64px;
 			margin: 4px 0;
-			.npc-image {
+			.image {
 				max-width: 64px;
 				height: 64px;
 				img {
 					width: 64px;
 					height: 64px;
-					border: none;
-					object-fit: contain;
-				}
-			}
-			.npc-line {
-				line-height: 25px;
-				padding: 9px 0 5px 5px;
-
-				.npc-name {
-					font-weight: bold;
-					font-size: 16px;
-				}
-				.npc-tags {
-					.bold {
-						font-weight: bold;
-					}
-					.details {
-						flex: 2;
-					}
-				}
-			}
-
-			&:hover {
-				.npc-line {
-					.npc-name {
-						text-shadow: 0 0 8px var(--color-shadow-primary);
-					}
 				}
 			}
 		}

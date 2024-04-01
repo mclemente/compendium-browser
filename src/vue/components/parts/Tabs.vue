@@ -40,7 +40,7 @@ export default {
       }
     },
     getTabClass(tab, index) {
-      return `tab-link tab-link--${index}${tab.active ? ' active': ''}`;
+      return `item tab-link tab-link--${index}${tab.active ? ' active': ''}`;
     }
   },
   async mounted() {

@@ -1,107 +1,68 @@
 <template>
-	<section class="section section--sidebar flexcol filters">
+	<div class="item-browser browser flexrow">
+		<section class="control-area flexcol">
 
-		<!-- Sort. -->
-		<div class="unit unit--input">
-			<label for="compendiumBrowser.sort" class="unit-title">{{ localize('ARCHMAGE.sort') }}</label>
-			<select class="sort" name="compendiumBrowser.sort" v-model="sortBy">
-				<option v-for="(option, index) in sortOptions" :key="index" :value="option.value">{{ option.label }}</option>
-			</select>
-		</div>
+			<div class="controls">
+				<div class="filtercontainer">
+					<!-- Name filter. -->
+					<div class="filter">
+						<input type="text" name="compendiumBrowser.name" v-model="name" :placeholder="game.i18n.localize('Name')" />
+					</div>
 
-		<!-- Name filter. -->
-		<div class="unit unit--input">
-			<label class="unit-title" for="compendiumBrowser.itemName">{{ localize('ARCHMAGE.name') }}</label>
-			<input type="text" name="compendiumBrowser.itemName" v-model="name" placeholder="Sword"/>
-		</div>
+					<!-- Sort -->
+					<div class="form-group">
+						<label>{{ game.i18n.localize('Sort by:') }}</label>
+						<div class="form-fields">
+							<select class="sort" name="sortorder" v-model="sortBy">
+								<option v-for="(option, index) in sortOptions" :key="index" :value="option.value">{{ option.label }}</option>
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+			<footer>
+				<!-- Reset. -->
+				<button type="reset" @click="resetFilters()">{{ game.i18n.localize('Reset Filters') }}</button>
+			</footer>
+		</section>
 
-		<!-- Chakra filter. -->
-		<div class="unit unit--input">
-			<label class="unit-title" for="compendiumBrowser.chakra">{{ localize('ARCHMAGE.chakra') }}</label>
-			<Multiselect
-				v-model="chakra"
-				mode="tags"
-				:searchable="false"
-				:create-option="false"
-				:options="chakraSlots"
-			/>
-		</div>
-
-		<!-- Bonuses filter. -->
-		<div class="unit unit--input">
-			<h2 class="unit-title" for="compendiumBrowser.bonuses">{{ localize('ARCHMAGE.bonus') }}</h2>
-			<Multiselect
-				v-model="bonuses"
-				mode="tags"
-				:searchable="false"
-				:create-option="false"
-				:options="bonusOptions"
-			/>
-		</div>
-
-		<!-- Recharge filter. -->
-		<div class="unit unit--input">
-			<h2 class="unit-title" for="compendiumBrowser.recharge">{{ localize('ARCHMAGE.recharge') }}</h2>
-			<Multiselect
-				v-model="recharge"
-				mode="tags"
-				:searchable="false"
-				:create-option="false"
-				:options="rechargeOptions"
-			/>
-		</div>
-
-		<!-- Usage filter. -->
-		<div class="unit unit--input">
-			<label class="unit-title" for="compendiumBrowser.powerUsage">{{ localize('ARCHMAGE.GROUPS.powerUsage') }}</label>
-			<Multiselect
-				v-model="powerUsage"
-				mode="tags"
-				:searchable="false"
-				:create-option="false"
-				:options="CONFIG.ARCHMAGE.powerUsages"
-			/>
-		</div>
-
-		<!-- Reset. -->
-		<div class="unit unit--input flexrow">
-			<button type="reset" @click="resetFilters()">{{ localize('Reset') }}</button>
-		</div>
-
-	</section>
-
-	<section class="section section--no-overflow">
-		<!-- Items results. -->
-		<section class="section section--main section--inventory flexcol">
+		<section class="list-area flexcol">
+			<!-- Items results. -->
 			<ul v-if="loaded" class="compendium-browser-results compendium-browser-items">
 				<!-- Individual items entries. -->
-				<li v-for="(equipment, equipmentKey) in entries" :key="equipmentKey" :class="`equipment-summary equipment compendium-browser-row${equipmentKey >= pager.lastIndex - 1 && equipmentKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''} flexrow document item equipment-item`" :data-document-id="equipment._id" @click="openDocument(equipment.uuid, 'Item')">
+				<li v-for="(equipment, equipmentKey) in entries" :key="equipmentKey" :class="`flexrow draggable compendium-browser-row${equipmentKey >= pager.lastIndex - 1 && equipmentKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''}  document item`" :data-document-id="equipment._id" @click="openDocument(equipment.uuid, 'Item')" @dragstart="startDrag($event, entry, 'Actor')" draggable="true">
 					<!-- Both the image and title have drag events. These are primarily separated so that -->
 					<!-- if a user drags the token, it will only show the token as their drag preview. -->
-					<img :src="equipment.img" class="equipment-image" @dragstart="startDrag($event, equipment, 'Item')" draggable="true"/>
-					<div class="flexcol equipment-contents" @dragstart="startDrag($event, equipment, 'Item')" draggable="true">
+					<div class="image">
+						<img :src="equipment.img" />
+					</div>
+					<div class="line">
 						<!-- First row is the title. -->
-						<div class="equipment-title-wrapper">
-							<strong class="equipment-title unit-subtitle">{{equipment.name}}</strong>
-						</div>
+						<h4 class="name">{{ equipment.name }}</h4>
 						<!-- Second row is supplemental info. -->
 						<div class="grid equipment-grid">
-							<div class="equipment-bonus flexrow" :data-tooltip="localize('ARCHMAGE.bonuses')" data-tooltip-direction="RIGHT" v-if="equipment.system.attributes">
+							<div class="equipment-bonus flexrow" :data-tooltip="game.i18n.localize('ARCHMAGE.bonuses')" data-tooltip-direction="RIGHT" v-if="equipment.system.attributes">
 								<span class="bonus" v-for="(bonus, bonusProp) in getBonuses(equipment)" :key="bonusProp">
 									<span class="bonus-label">{{localizeEquipmentBonus(bonusProp)}} </span>
 									<span class="bonus-value">{{numberFormat(bonus, 0, true)}}</span>
 								</span>
 							</div>
-							<div class="equipment-usage" v-if="equipment.system?.powerUsage?.value" :data-tooltip="localize('ARCHMAGE.GROUPS.powerUsage')">{{ CONFIG.ARCHMAGE.powerUsages[equipment.system?.powerUsage?.value ?? ''] ?? '' }}</div>
-							<div class="equipment-chakra" :data-tooltip="localize('ARCHMAGE.chakra')" v-if="equipment.system.chackra">{{localize(`ARCHMAGE.CHAKRA.${equipment.system.chackra}Label`)}}</div>
-							<div class="equipment-recharge" :data-tooltip="localize('ARCHMAGE.recharge')">{{ `${equipment.system?.recharge?.value > 0 ? Number(equipment.system.recharge.value) + '+' : ''}`}}</div>
+							<div class="equipment-usage" v-if="equipment.system?.powerUsage?.value" :data-tooltip="game.i18n.localize('ARCHMAGE.GROUPS.powerUsage')">
+								{{ '' }}
+							</div>
+							<div class="equipment-chakra" :data-tooltip="game.i18n.localize('ARCHMAGE.chakra')" v-if="equipment.system.chackra">
+								{{localize(`ARCHMAGE.CHAKRA.${equipment.system.chackra}Label`)}}
+							</div>
+							<div class="equipment-recharge" :data-tooltip="game.i18n.localize('ARCHMAGE.recharge')">
+								{{ `${equipment.system?.recharge?.value > 0 ? Number(equipment.system.recharge.value) + '+' : ''}`}}
+							</div>
 						</div>
 					</div>
 				</li>
 			</ul>
 			<div v-else class="compendium-browser-loading"><p><i class="fas fa-circle-notch fa-spin"></i>Please wait, loading...</p></div>
 		</section>
-	</section>
+	</div>
 </template>
 
 <script>
@@ -113,8 +74,8 @@ import Multiselect from '@vueform/multiselect';
 // Helper methods.
 import {
 	getPackIndex,
-	localize,
-	localizeEquipmentBonus,
+	// localize,
+	// localizeEquipmentBonus,
 	numberFormat,
 	openDocument,
 	startDrag
@@ -131,8 +92,8 @@ export default {
 	setup() {
 		return {
 			// Imported methods that need to be available in the <template>
-			localize,
-			localizeEquipmentBonus,
+			// localize,
+			// localizeEquipmentBonus,
 			numberFormat,
 			openDocument,
 			startDrag,
@@ -157,10 +118,8 @@ export default {
 			// Sorting.
 			sortBy: 'name',
 			sortOptions: [
-				{ value: 'name', label: game.i18n.localize('ARCHMAGE.name') },
-				{ value: 'chakra', label: game.i18n.localize('ARCHMAGE.chakra') },
-				{ value: 'recharge', label: game.i18n.localize('ARCHMAGE.recharge') },
-				{ value: 'usage', label: game.i18n.localize('ARCHMAGE.GROUPS.powerUsage') },
+				{ value: 'name', label: game.i18n.localize('Name') },
+				{ value: 'type', label: game.i18n.localize('Type') },
 			],
 			// Our list of pseudo documents returned from the compendium.
 			packIndex: [],
@@ -305,9 +264,6 @@ export default {
 		},
 		chakraSlots() {
 			const result = {};
-			for (let [k,v] of Object.entries(CONFIG.ARCHMAGE.chakraSlots)) {
-				result[k] = this.game.i18n.localize(`${v}Label`);
-			}
 			return result;
 		},
 		nightmode() {
@@ -412,37 +368,14 @@ export default {
 
 		// Load the pack index with the fields we need.
 		getPackIndex([
-			'archmage.srd-magic-items-armors',
-			'archmage.srd-magic-items-arrows',
-			'archmage.srd-magic-items-belts',
-			'archmage.srd-magic-items-books',
-			'archmage.srd-magic-items-boots',
-			'archmage.srd-magic-items-chuul-symbiotes',
-			'archmage.srd-magic-items-cloaks',
-			'archmage.srd-magic-items-consumables',
-			'archmage.srd-magic-items-cursed',
-			'archmage.srd-magic-items-gloves',
-			'archmage.srd-magic-items-helmets',
-			'archmage.srd-magic-items-necklaces',
-			'archmage.srd-magic-items-rings',
-			'archmage.srd-magic-items-shields',
-			'archmage.srd-magic-items-staffs',
-			'archmage.srd-magic-items-symbols',
-			'archmage.srd-magic-items-wands',
-			'archmage.srd-magic-items-weapons',
-			'archmage.srd-magic-items-wondrous-items',
+			'dnd5e.items',
 		], [
-			'system.chackra',
-			'system.recharge.value',
-			'system.powerUsage.value',
-			'system.attributes.attack',
-			'system.attributes.ac',
-			'system.attributes.md',
-			'system.attributes.pd',
-			'system.attributes.hp',
-			'system.attributes.recoveries',
-			'system.attributes.save',
-			'system.attributes.disengage',
+			'system.activation.type',
+			'system.armor.type',
+			'system.damage',
+			'system.rarity',
+			'system.source.book',
+			'system.type'
 		]).then(packIndex => {
 			this.packIndex = packIndex;
 			this.loaded = true;

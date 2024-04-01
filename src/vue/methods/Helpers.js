@@ -54,8 +54,7 @@ export function getActorModuleArt(actor) {
  * @returns Combined entries from the queried compendiums.
  */
 export async function getPackIndex(packNames = [], fields = []) {
-  if (!packNames) return;
-  if (!fields || fields.length < 1) return;
+  if (!packNames || !fields || fields.length < 1) return [];
 
   let packs = [];
 

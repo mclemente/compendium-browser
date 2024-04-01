@@ -21,8 +21,7 @@
 			</Tab>
 
 			<Tab group="primary" :tab="tabs.primary.items" classes="container container--bottom flexrow">
-				<Stub>Items</Stub>
-				<!-- <CompendiumBrowserItems v-if="tabs.primary.items.active || tabs.primary.items.opened" :tab="tabs.primary.items"/> -->
+				<CompendiumBrowserItems v-if="tabs.primary.items.active || tabs.primary.items.opened" :tab="tabs.primary.items"/>
 			</Tab>
 
 		</section>
@@ -35,7 +34,7 @@ import Tabs from '@/components/parts/Tabs.vue';
 import Tab from '@/components/parts/Tab.vue';
 import CompendiumBrowserCreatures from '@/components/dialogs/compendium-browser/CompendiumBrowserCreatures.vue';
 // import CompendiumBrowserPowers from '@/components/dialogs/compendium-browser/CompendiumBrowserPowers.vue';
-// import CompendiumBrowserItems from '@/components/dialogs/compendium-browser/CompendiumBrowserItems.vue';
+import CompendiumBrowserItems from '@/components/dialogs/compendium-browser/CompendiumBrowserItems.vue';
 
 // Stub is an example component and should be removed once the others are all working.
 import Stub from '@/components/dialogs/compendium-browser/Stub.vue';
@@ -49,7 +48,7 @@ export default {
 		Stub,
 		CompendiumBrowserCreatures,
 		// CompendiumBrowserPowers,
-		// CompendiumBrowserItems
+		CompendiumBrowserItems
 	},
 	setup() {
 		return {

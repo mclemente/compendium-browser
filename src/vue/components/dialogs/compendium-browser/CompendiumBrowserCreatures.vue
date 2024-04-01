@@ -9,14 +9,14 @@
 					</div>
 
 					<!-- Sort -->
-					<dl class="sorter">
-						<dt>{{ game.i18n.localize('Sort by:') }}</dt>
-						<dd>
+					<div class="form-group">
+						<label>{{ game.i18n.localize('Sort by:') }}</label>
+						<div class="form-fields">
 							<select class="sort" name="sortorder" v-model="sortBy">
 								<option v-for="(option, index) in sortOptions" :key="index" :value="option.value">{{ option.label }}</option>
 							</select>
-						</dd>
-					</dl>
+						</div>
+					</div>
 				</div>
 
 				<div class="filtercontainer">
@@ -146,17 +146,17 @@
 			<!-- <section class="section section--npcs section--main flexcol"> -->
 			<ul v-if="loaded" class="compendium-browser-results compendium-browser-npcs">
 				<!-- Individual creature entries. -->
-				<li v-for="(entry, entryKey) in entries" :key="entryKey" :class="`npc flexrow draggable compendium-browser-row${entryKey >= pager.lastIndex - 1 && entryKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''} document actor`" :data-document-id="entry._id" @click="openDocument(entry.uuid)" @dragstart="startDrag($event, entry, 'Actor')" draggable="true">
+				<li v-for="(entry, entryKey) in entries" :key="entryKey" :class="`flexrow draggable compendium-browser-row${entryKey >= pager.lastIndex - 1 && entryKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''} document actor`" :data-document-id="entry._id" @click="openDocument(entry.uuid)" @dragstart="startDrag($event, entry, 'Actor')" draggable="true">
 					<!-- Both the image and title have drag events. These are primarily separated so that -->
 					<!-- if a user drags the token, it will only show the token as their drag preview. -->
-					<div class="npc-image">
+					<div class="image">
 						<img :src="entry.img ?? 'icons/svg/mystery-man.svg'"/>
 					</div>
-					<div class="npc-line">
+					<div class="line">
 						<!-- First row is the title. -->
-						<div class="npc-name">[{{ game.dnd5e.utils.formatCR(entry.system.details.cr) }}] {{ entry.name }}</div>
+						<h4 class="name">[{{ game.dnd5e.utils.formatCR(entry.system.details.cr) }}] {{ entry.name }}</h4>
 						<!-- Second row is supplemental info. -->
-						<div class="npc-tags flexrow">
+						<div class="tags flexrow">
 							<div class="numbers flexrow">
 								<!-- <span class="cr" :data-tooltip="game.i18n.localize('Challenge rating')">CR {{ game.dnd5e.utils.formatCR(entry.system.details.cr) }}</span> -->
 								<span class="hp"><span class="bold">HP:</span> {{ entry.system.attributes.hp.max }}</span>
