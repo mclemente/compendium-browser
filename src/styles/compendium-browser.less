@@ -1,4 +1,5 @@
 @color_1: #bbb;
+@line_size: 48px;
 
 #compendium {
 	.directory-footer {
@@ -117,6 +118,10 @@
 				.small-select {
 					width: 40px;
 				}
+				.direction {
+					flex: 0;
+					padding: 2px;
+				}
 			}
 		}
 		footer {
@@ -182,6 +187,107 @@
 			}
 		}
 	}
+	.item-browser {
+		li {
+			.item-image {
+				max-width: @line_size;
+				height: @line_size;
+			}
+			.item-name {
+				padding-left: 5px;
+				flex: 2;
+			}
+			.feat-tags {
+				text-align: right;
+				margin-right: 3px;
+				margin-left: 3px;
+				text-transform: capitalize;
+				height: @line_size;
+			}
+			.item-tags {
+				text-align: right;
+				margin-right: 3px;
+				margin-left: 3px;
+				text-transform: capitalize;
+				height: @line_size;
+			}
+		}
+	}
+	.feat-browser {
+		li {
+			cursor: default;
+			vertical-align: middle;
+			margin: 2px 0;
+			height: @line_size;
+			.item-image {
+				max-width: @line_size;
+				height: @line_size;
+			}
+			.item-name {
+				padding-left: 5px;
+				flex: 2;
+			}
+			.feat-tags {
+				text-align: right;
+				margin-right: 3px;
+				margin-left: 3px;
+				text-transform: capitalize;
+				height: @line_size;
+			}
+			.item-tags {
+				text-align: right;
+				margin-right: 3px;
+				margin-left: 3px;
+				text-transform: capitalize;
+				height: @line_size;
+			}
+		}
+	}
+	.spell-browser {
+		li {
+			cursor: default;
+			vertical-align: middle;
+			margin: 2px 0;
+			height: @line_size;
+			.item-image {
+				max-width: @line_size;
+				height: @line_size;
+			}
+			.item-name {
+				padding-left: 5px;
+				flex: 2;
+			}
+			.feat-tags {
+				text-align: right;
+				margin-right: 3px;
+				margin-left: 3px;
+				text-transform: capitalize;
+				height: @line_size;
+			}
+			.item-tags {
+				text-align: right;
+				margin-right: 3px;
+				margin-left: 3px;
+				text-transform: capitalize;
+				height: @line_size;
+			}
+		}
+		.spell {
+			.spell-level {
+				text-align: center;
+				font-weight: 900;
+				max-width: 18px;
+				height: @line_size;
+			}
+			.spell-tags {
+				text-align: right;
+				margin-right: 3px;
+				font-weight: 900;
+				max-width: 100px;
+				height: @line_size;
+			}
+		}
+	}
 	.browser {
 		height: 100%;
 		overflow-y: hidden !important;
@@ -196,184 +302,73 @@
 			display: inline-block;
 			min-width: 15px;
 		}
-	}
-	.item-browser {
-		li {
-			cursor: default;
-			vertical-align: middle;
-			line-height: 16px;
-			margin: 2px 0;
-			height: 32px;
-			.item-image {
-				max-width: 32px;
-				height: 32px;
-			}
-			.item-name {
-				padding-left: 5px;
-				flex: 2;
-			}
-			.feat-tags {
-				text-align: right;
-				margin-right: 3px;
-				margin-left: 3px;
-				text-transform: capitalize;
-				height: 32px;
-			}
-			.item-tags {
-				text-align: right;
-				margin-right: 3px;
-				margin-left: 3px;
-				text-transform: capitalize;
-				height: 32px;
-			}
-		}
-	}
-	.feat-browser {
-		li {
-			cursor: default;
-			vertical-align: middle;
-			line-height: 16px;
-			margin: 2px 0;
-			height: 32px;
-			.item-image {
-				max-width: 32px;
-				height: 32px;
-			}
-			.item-name {
-				padding-left: 5px;
-				flex: 2;
-			}
-			.feat-tags {
-				text-align: right;
-				margin-right: 3px;
-				margin-left: 3px;
-				text-transform: capitalize;
-				height: 32px;
-			}
-			.item-tags {
-				text-align: right;
-				margin-right: 3px;
-				margin-left: 3px;
-				text-transform: capitalize;
-				height: 32px;
-			}
-		}
-	}
-	.spell-browser {
-		li {
-			cursor: default;
-			vertical-align: middle;
-			line-height: 16px;
-			margin: 2px 0;
-			height: 32px;
-			.item-image {
-				max-width: 32px;
-				height: 32px;
-			}
-			.item-name {
-				padding-left: 5px;
-				flex: 2;
-			}
-			.feat-tags {
-				text-align: right;
-				margin-right: 3px;
-				margin-left: 3px;
-				text-transform: capitalize;
-				height: 32px;
-			}
-			.item-tags {
-				text-align: right;
-				margin-right: 3px;
-				margin-left: 3px;
-				text-transform: capitalize;
-				height: 32px;
-			}
-		}
-		.spell {
-			.spell-level {
-				text-align: center;
-				font-weight: 900;
-				max-width: 18px;
-				height: 32px;
-			}
-			.spell-tags {
-				text-align: right;
-				margin-right: 3px;
-				font-weight: 900;
-				max-width: 100px;
-				height: 32px;
-			}
-		}
-	}
-	.browser {
-		li:hover {
-			.line {
-				h4 {
-					text-shadow: 0 0 8px var(--color-shadow-primary);
+
+		.list-area {
+			li {
+				cursor: default;
+				vertical-align: middle;
+				// margin: 4px 0;
+				height: @line_size;
+				border-bottom: 1px solid var(--color-border-dark-3);
+				&:first-child {
+					border-top: none;
+				}
+
+				&:hover {
+					.line {
+						h4 {
+							text-shadow: 0 0 8px var(--color-shadow-primary);
+						}
+					}
+				}
+
+				img {
+					flex: 0 0 @line_size;
+					width: @line_size;
+					height: @line_size;
+					object-fit: cover;
+					object-position: 50% 0;
+					border: none;
+				}
+
+				.line {
+					margin: auto 0 auto 8px;
+
+					.name {
+						margin: 0;
+					}
+
+					.tags {
+						.bold {
+							font-weight: bold;
+						}
+						.details {
+							flex: 2;
+						}
+					}
+
 				}
 			}
 		}
 
-		.image {
-			max-width: 32px;
-			height: 32px;
-			img {
-				width: 32px;
-				height: 32px;
-				border: none;
-				object-fit: contain;
-			}
-		}
-
-		.line {
-			line-height: 25px;
-			margin: auto 0 auto 8px;
-
-			.tags {
-				.bold {
-					font-weight: bold;
-				}
-				.details {
-					flex: 2;
-				}
-			}
-
+		.rarity {
+			text-transform: capitalize;
 		}
 
 		.item {
-			cursor: default;
-			vertical-align: middle;
-			line-height: 16px;
-			margin: 2px 0;
-			height: 32px;
 			.feat-tags {
 				text-align: right;
 				margin-right: 3px;
 				margin-left: 3px;
 				text-transform: capitalize;
-				height: 32px;
+				height: @line_size;
 			}
 			.item-tags {
 				text-align: right;
 				margin-right: 3px;
 				margin-left: 3px;
 				text-transform: capitalize;
-				height: 32px;
-			}
-		}
-
-		.actor {
-			cursor: default;
-			vertical-align: middle;
-			line-height: 64px;
-			margin: 4px 0;
-			.image {
-				max-width: 64px;
-				height: 64px;
-				img {
-					width: 64px;
-					height: 64px;
-				}
+				height: @line_size;
 			}
 		}
 	}

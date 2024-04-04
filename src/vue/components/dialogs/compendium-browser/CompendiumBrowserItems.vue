@@ -19,6 +19,33 @@
 						</div>
 					</div>
 				</div>
+
+				<div class="filtercontainer">
+					<h3>{{ game.i18n.localize('General') }}</h3>
+					<div class="filters">
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.type">{{ game.i18n.localize('Type') }}</label>
+							<Multiselect
+								v-model="type"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(itemTypes)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.rarity">{{ game.i18n.localize('Rarity') }}</label>
+							<Multiselect
+								v-model="rarity"
+								mode="tags"
+								:class="{ 'rarity': true }"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.itemRarity)"
+							/>
+						</div>
+					</div>
+				</div>
 			</div>
 			<footer>
 				<!-- Reset. -->
@@ -33,28 +60,19 @@
 				<li v-for="(equipment, equipmentKey) in entries" :key="equipmentKey" :class="`flexrow draggable compendium-browser-row${equipmentKey >= pager.lastIndex - 1 && equipmentKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''}  document item`" :data-document-id="equipment._id" @click="openDocument(equipment.uuid, 'Item')" @dragstart="startDrag($event, entry, 'Actor')" draggable="true">
 					<!-- Both the image and title have drag events. These are primarily separated so that -->
 					<!-- if a user drags the token, it will only show the token as their drag preview. -->
-					<div class="image">
-						<img :src="equipment.img" />
-					</div>
+					<img :src="equipment.img" />
 					<div class="line">
 						<!-- First row is the title. -->
 						<h4 class="name">{{ equipment.name }}</h4>
 						<!-- Second row is supplemental info. -->
-						<div class="grid equipment-grid">
-							<div class="equipment-bonus flexrow" :data-tooltip="game.i18n.localize('ARCHMAGE.bonuses')" data-tooltip-direction="RIGHT" v-if="equipment.system.attributes">
-								<span class="bonus" v-for="(bonus, bonusProp) in getBonuses(equipment)" :key="bonusProp">
-									<span class="bonus-label">{{localizeEquipmentBonus(bonusProp)}} </span>
-									<span class="bonus-value">{{numberFormat(bonus, 0, true)}}</span>
+						<div class="tags flexrow">
+							<div v-if="equipment.system.properties.length">
+								<span v-for="(prop, index) of equipment.system.properties" :key="prop">
+									{{ prop }}<span v-if="index != Object.keys(equipment.system.properties).length - 1">, </span>
 								</span>
 							</div>
-							<div class="equipment-usage" v-if="equipment.system?.powerUsage?.value" :data-tooltip="game.i18n.localize('ARCHMAGE.GROUPS.powerUsage')">
-								{{ '' }}
-							</div>
-							<div class="equipment-chakra" :data-tooltip="game.i18n.localize('ARCHMAGE.chakra')" v-if="equipment.system.chackra">
-								{{localize(`ARCHMAGE.CHAKRA.${equipment.system.chackra}Label`)}}
-							</div>
-							<div class="equipment-recharge" :data-tooltip="game.i18n.localize('ARCHMAGE.recharge')">
-								{{ `${equipment.system?.recharge?.value > 0 ? Number(equipment.system.recharge.value) + '+' : ''}`}}
+							<div v-if="equipment.system.rarity && equipment.system.rarity !== 'common'">
+								<span class="rarity">{{ CONFIG.DND5E.itemRarity[equipment.system.rarity] }}</span>
 							</div>
 						</div>
 					</div>
@@ -125,6 +143,8 @@ export default {
 			packIndex: [],
 			// Filters.
 			name: '',
+			type: [],
+			rarity: [],
 			chakra: [],
 			recharge: [],
 			bonuses: [],
@@ -161,6 +181,8 @@ export default {
 		 resetFilters() {
 			this.sortBy = 'name';
 			this.name = '';
+			this.type = [];
+			this.rarity = [];
 			this.chakra = [];
 			this.recharge = [];
 			this.bonuses = [];
@@ -182,8 +204,25 @@ export default {
 			}
 			return bonuses;
 		},
+		getOptions(config) {
+			const options = {};
+			for (let [key, value] of Object.entries(config)) {
+				options[key] = value.label ?? value;
+			}
+			return options;
+		}
 	},
 	computed: {
+		itemTypes() {
+			return {
+				consumable: game.i18n.localize("ITEM.TypeConsumable"),
+				container: game.i18n.localize("ITEM.TypeContainer"),
+				equipment: game.i18n.localize("ITEM.TypeEquipment"),
+				loot: game.i18n.localize("ITEM.TypeLoot"),
+				tool: game.i18n.localize("ITEM.TypeTool"),
+				weapon: game.i18n.localize("ITEM.TypeWeapon"),
+			};
+		},
 		bonusOptions() {
 			return [
 				{
@@ -283,6 +322,13 @@ export default {
 				result = result.filter(entry => entry.name.toLocaleLowerCase().includes(name));
 			}
 
+			if (Array.isArray(this.type) && this.type.length > 0) {
+				result = result.filter(entry => this.type.includes(entry.type));
+			}
+			if (Array.isArray(this.rarity) && this.rarity.length > 0) {
+				result = result.filter(entry => this.rarity.includes(entry.system.rarity));
+			}
+
 			// Handle multiselect filters, which use arrays as their values.
 			if (Array.isArray(this.chakra) && this.chakra.length > 0) {
 				// @todo chakra is misspelled in our data model. We need to fix that :(
@@ -339,12 +385,10 @@ export default {
 
 			// Sort.
 			result = result.sort((a, b) => {
-				return a.name.localeCompare(b.name);
-			});
-
-			// Sort.
-			result = result.sort((a, b) => {
+				// Add sorts here.
 				switch (this.sortBy) {
+					case 'type':
+						return a.type.localeCompare(b.type);
 					case 'chakra':
 						return (a.system?.chackra ?? '').localeCompare((b.system?.chackra ?? ''));
 					case 'usage':
@@ -372,12 +416,14 @@ export default {
 		], [
 			'system.activation.type',
 			'system.armor.type',
+			'system.container',
 			'system.damage',
+			'system.properties',
 			'system.rarity',
 			'system.source.book',
 			'system.type'
 		]).then(packIndex => {
-			this.packIndex = packIndex;
+			this.packIndex = packIndex.filter((e) => !e.system.container);
 			this.loaded = true;
 		});
 

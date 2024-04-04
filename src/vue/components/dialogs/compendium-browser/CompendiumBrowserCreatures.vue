@@ -1,5 +1,5 @@
 <template>
-	<div class="npc-browser browser flexrow">
+	<div class="actor-browser browser flexrow">
 		<section class="control-area flexcol">
 			<div class="controls">
 				<div class="filtercontainer">
@@ -12,9 +12,13 @@
 					<div class="form-group">
 						<label>{{ game.i18n.localize('Sort by:') }}</label>
 						<div class="form-fields">
-							<select class="sort" name="sortorder" v-model="sortBy">
+							<select class="sort" v-model="sortBy">
 								<option v-for="(option, index) in sortOptions" :key="index" :value="option.value">{{ option.label }}</option>
 							</select>
+							<a class="direction" data-direction="asc" @click="changeDirection()">
+								<i class="fa-solid fa-sort-numeric-up" v-if="direction === 'asc'"></i>
+								<i class="fa-solid fa-sort-numeric-down-alt" v-if="direction !== 'asc'"></i>
+							</a>
 						</div>
 					</div>
 				</div>
@@ -149,16 +153,13 @@
 				<li v-for="(entry, entryKey) in entries" :key="entryKey" :class="`flexrow draggable compendium-browser-row${entryKey >= pager.lastIndex - 1 && entryKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''} document actor`" :data-document-id="entry._id" @click="openDocument(entry.uuid)" @dragstart="startDrag($event, entry, 'Actor')" draggable="true">
 					<!-- Both the image and title have drag events. These are primarily separated so that -->
 					<!-- if a user drags the token, it will only show the token as their drag preview. -->
-					<div class="image">
-						<img :src="entry.img ?? 'icons/svg/mystery-man.svg'"/>
-					</div>
+					<img :src="entry.img ?? 'icons/svg/mystery-man.svg'"/>
 					<div class="line">
 						<!-- First row is the title. -->
 						<h4 class="name">[{{ game.dnd5e.utils.formatCR(entry.system.details.cr) }}] {{ entry.name }}</h4>
 						<!-- Second row is supplemental info. -->
 						<div class="tags flexrow">
-							<div class="numbers flexrow">
-								<!-- <span class="cr" :data-tooltip="game.i18n.localize('Challenge rating')">CR {{ game.dnd5e.utils.formatCR(entry.system.details.cr) }}</span> -->
+							<div class="flexrow">
 								<span class="hp"><span class="bold">HP:</span> {{ entry.system.attributes.hp.max }}</span>
 								<span class="ac"><span class="bold">AC:</span> {{ entry.system.attributes.ac.flat }}</span>
 							</div>
@@ -226,6 +227,7 @@ export default {
 			},
 			// Sorting.
 			sortBy: 'name',
+			direction: 'asc',
 			sortOptions: [
 				{ value: 'name', label: game.i18n.localize('Name') },
 				{ value: 'cr', label: game.i18n.localize('Challenge Rating') },
@@ -278,6 +280,7 @@ export default {
 		 */
 		 resetFilters() {
 			this.sortBy = 'name';
+			this.direction = 'asc';
 			this.name = '';
 			this.crRange = [0, 30];
 			this.legact = '';
@@ -289,13 +292,17 @@ export default {
 			this.size = [];
 			this.creatureType = [];
 		},
+		changeDirection() {
+			if (this.direction === "asc") this.direction = "desc";
+			else this.direction = "asc";
+		},
 		/**
 		 * Get multiselect options.
 		 */
 		getOptions(config) {
 			const options = {};
 			for (let [key, value] of Object.entries(config)) {
-				options[key] = value.label;
+				options[key] = value.label ?? value;
 			}
 			return options;
 		},
@@ -372,8 +379,7 @@ export default {
 				if (this.pager.lastIndex == 0) {
 					this.pager.lastIndex = this.pager.perPage - 1;
 				}
-			}
-			else {
+			} else {
 				this.pager.totalRows = 0;
 			}
 
@@ -381,14 +387,16 @@ export default {
 			result = result.sort((a, b) => {
 				// Add sorts here.
 				switch (this.sortBy) {
-					case 'name':
-						return a.name.localeCompare(b.name);
+					case 'cr':
+						return a.system.details.cr - b.system.details.cr;
 					case 'size':
 						return a.system.traits.size.localeCompare(b.system.traits.size);
 				}
-				// If no sorts match, sort by CR.
-				return a.system.details.cr - b.system.details.cr;
+				return a.name.localeCompare(b.name);
 			});
+			if (this.direction === "desc") {
+				result = result.reverse();
+			}
 
 			// Return results.
 			return this.pager.totalRows > 0
