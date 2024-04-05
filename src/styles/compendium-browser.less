@@ -307,11 +307,12 @@
 			li {
 				cursor: default;
 				vertical-align: middle;
-				// margin: 4px 0;
 				height: @line_size;
-				border-bottom: 1px solid var(--color-border-dark-3);
 				&:first-child {
 					border-top: none;
+				}
+				&:nth-child(odd) {
+					background-color: rgba(0, 0, 0, 0.12);
 				}
 
 				&:hover {

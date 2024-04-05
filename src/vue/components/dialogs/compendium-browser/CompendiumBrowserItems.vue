@@ -3,22 +3,7 @@
 		<section class="control-area flexcol">
 
 			<div class="controls">
-				<div class="filtercontainer">
-					<!-- Name filter. -->
-					<div class="filter">
-						<input type="text" name="compendiumBrowser.name" v-model="name" :placeholder="game.i18n.localize('Name')" />
-					</div>
-
-					<!-- Sort -->
-					<div class="form-group">
-						<label>{{ game.i18n.localize('Sort by:') }}</label>
-						<div class="form-fields">
-							<select class="sort" name="sortorder" v-model="sortBy">
-								<option v-for="(option, index) in sortOptions" :key="index" :value="option.value">{{ option.label }}</option>
-							</select>
-						</div>
-					</div>
-				</div>
+				<FilterNameSort v-model="name" :filters="sorts"/>
 
 				<div class="filtercontainer">
 					<h3>{{ game.i18n.localize('General') }}</h3>
@@ -44,6 +29,66 @@
 								:options="getOptions(CONFIG.DND5E.itemRarity)"
 							/>
 						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.activation">{{ game.i18n.localize('Activation') }}</label>
+							<Multiselect
+								v-model="activation"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.abilityActivationTypes)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.damageType">{{ game.i18n.localize('Damage Type') }}</label>
+							<Multiselect
+								v-model="damageType"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.damageTypes)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.uses">{{ game.i18n.localize('Has Limited Uses') }}</label>
+							<input type="checkbox" v-model="uses">
+						</div>
+					</div>
+				</div>
+
+				<div class="filtercontainer">
+					<h3>{{ game.i18n.localize('Subtypes') }}</h3>
+					<div class="filters" style="display: none;">
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.weaponTypes">{{ game.i18n.localize('Weapon Types') }}</label>
+							<Multiselect
+								v-model="weaponTypes"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.weaponTypes)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.equipmentTypes">{{ game.i18n.localize('Equipment Types') }}</label>
+							<Multiselect
+								v-model="equipmentTypes"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.equipmentTypes)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.consumableTypes">{{ game.i18n.localize('Consumable Types') }}</label>
+							<Multiselect
+								v-model="consumableTypes"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="getOptions(CONFIG.DND5E.consumableTypes)"
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -57,7 +102,7 @@
 			<!-- Items results. -->
 			<ul v-if="loaded" class="compendium-browser-results compendium-browser-items">
 				<!-- Individual items entries. -->
-				<li v-for="(equipment, equipmentKey) in entries" :key="equipmentKey" :class="`flexrow draggable compendium-browser-row${equipmentKey >= pager.lastIndex - 1 && equipmentKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''}  document item`" :data-document-id="equipment._id" @click="openDocument(equipment.uuid, 'Item')" @dragstart="startDrag($event, entry, 'Actor')" draggable="true">
+				<li v-for="(equipment, equipmentKey) in entries" :key="equipmentKey" :class="`flexrow draggable compendium-browser-row${equipmentKey >= pager.lastIndex - 1 && equipmentKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''}  document item`" :data-document-id="equipment._id" @click="openDocument(equipment.uuid, 'Item')" @dragstart="startDrag($event, equipment, 'Item')" draggable="true">
 					<!-- Both the image and title have drag events. These are primarily separated so that -->
 					<!-- if a user drags the token, it will only show the token as their drag preview. -->
 					<img :src="equipment.img" />
@@ -65,15 +110,13 @@
 						<!-- First row is the title. -->
 						<h4 class="name">{{ equipment.name }}</h4>
 						<!-- Second row is supplemental info. -->
-						<div class="tags flexrow">
-							<div v-if="equipment.system.properties.length">
-								<span v-for="(prop, index) of equipment.system.properties" :key="prop">
-									{{ prop }}<span v-if="index != Object.keys(equipment.system.properties).length - 1">, </span>
-								</span>
-							</div>
-							<div v-if="equipment.system.rarity && equipment.system.rarity !== 'common'">
-								<span class="rarity">{{ CONFIG.DND5E.itemRarity[equipment.system.rarity] }}</span>
-							</div>
+						<div class="tags">
+							<span v-if="equipment.system.rarity" class="rarity">
+								{{ CONFIG.DND5E.itemRarity[equipment.system.rarity] }}<span v-if="equipment.system.properties.length">, </span>
+							</span>
+							<span v-if="equipment.system.properties.length" v-for="(prop, index) of equipment.system.properties" :key="prop">
+								{{ CONFIG.DND5E.itemProperties[prop].label }}<span v-if="index != Object.keys(equipment.system.properties).length - 1">, </span>
+							</span>
 						</div>
 					</div>
 				</li>
@@ -89,6 +132,7 @@ import { onUpdated } from 'vue';
 // External components.
 import Slider from '@vueform/slider';
 import Multiselect from '@vueform/multiselect';
+import FilterNameSort from '@/components/dialogs/compendium-browser/filters/FilterNameSort.vue';
 // Helper methods.
 import {
 	getPackIndex,
@@ -105,7 +149,8 @@ export default {
 	// Imported components that need to be available in the <template>
 	components: {
 		Slider,
-		Multiselect
+		Multiselect,
+		FilterNameSort
 	},
 	setup() {
 		return {
@@ -133,22 +178,27 @@ export default {
 				lastIndex: 50,
 				totalRows: 0,
 			},
+			sorts: {
+				sortBy: 'name',
+				direction: 'asc',
+				sortOptions: [
+					{ value: 'name', label: game.i18n.localize('Name') },
+					// { value: 'type', label: game.i18n.localize('Type') },
+				],
+			},
 			// Sorting.
-			sortBy: 'name',
-			sortOptions: [
-				{ value: 'name', label: game.i18n.localize('Name') },
-				{ value: 'type', label: game.i18n.localize('Type') },
-			],
 			// Our list of pseudo documents returned from the compendium.
 			packIndex: [],
 			// Filters.
 			name: '',
 			type: [],
 			rarity: [],
-			chakra: [],
-			recharge: [],
-			bonuses: [],
-			powerUsage: [],
+			activation: [],
+			damageType: [],
+			uses: false,
+			weaponTypes: [],
+			consumableTypes: [],
+			equipmentTypes: [],
 		}
 	},
 	methods: {
@@ -179,30 +229,17 @@ export default {
 		 * Click event to reset our filters.
 		 */
 		 resetFilters() {
-			this.sortBy = 'name';
+			this.sorts.sortBy = 'name';
+			this.sorts.direction = 'asc';
 			this.name = '';
 			this.type = [];
 			this.rarity = [];
-			this.chakra = [];
-			this.recharge = [];
-			this.bonuses = [];
-			this.powerUsage = [];
-		},
-		getBonuses(equipment) {
-			let bonuses = {};
-			for (let [prop, value] of Object.entries(equipment.system.attributes)) {
-				if (value.bonus) {
-					bonuses[prop] = value.bonus
-				}
-				else if (prop == 'attack') {
-					for (let [atkProp, atkValue] of Object.entries(value)) {
-						if (atkValue.bonus) {
-							bonuses[atkProp] = atkValue.bonus;
-						}
-					}
-				}
-			}
-			return bonuses;
+			this.activation = [];
+			this.damageType = [];
+			this.uses = false;
+			this.weaponTypes = [];
+			this.consumableTypes = [];
+			this.equipmentTypes = [];
 		},
 		getOptions(config) {
 			const options = {};
@@ -328,48 +365,27 @@ export default {
 			if (Array.isArray(this.rarity) && this.rarity.length > 0) {
 				result = result.filter(entry => this.rarity.includes(entry.system.rarity));
 			}
-
-			// Handle multiselect filters, which use arrays as their values.
-			if (Array.isArray(this.chakra) && this.chakra.length > 0) {
-				// @todo chakra is misspelled in our data model. We need to fix that :(
-				result = result.filter(entry => this.chakra.includes(entry.system?.chackra));
+			if (Array.isArray(this.activation) && this.activation.length > 0) {
+				result = result.filter(entry => entry.system.activation && this.activation.includes(entry.system.activation.type))
 			}
-			if (Array.isArray(this.powerUsage) && this.powerUsage.length > 0) {
-				result = result.filter(entry => this.powerUsage.includes(entry.system?.powerUsage?.value ?? 'other'));
-			}
-
-			// Recharge.
-			if (Array.isArray(this.recharge) && this.recharge.length > 0) {
+			if (Array.isArray(this.damageType) && this.damageType.length > 0) {
 				result = result.filter(entry => {
-					let allowEntry = false;
-					for (let rechargeOption of this.rechargeOptions) {
-						if (this.recharge.includes(rechargeOption.value)) {
-							const rechargeEntry = parseInt(entry.system?.recharge?.value ?? 0);
-							if (rechargeEntry >= rechargeOption.value && rechargeEntry <= rechargeOption.next) {
-								allowEntry = true;
-								break;
-							}
-						}
-					}
-					return allowEntry;
-				});
+					if (!entry.system.damage) return false;
+					const damageTypes = entry.system.damage.parts.map((d) => d[1]);
+					return this.damageType.some((d) => damageTypes.includes(d));
+				})
 			}
-
-			// Bonus options.
-			if (Array.isArray(this.bonuses) && this.bonuses.length > 0) {
-				result = result.filter(entry => {
-					let allowEntry = false;
-					for (let bonusOption of this.bonusOptions) {
-						if (this.bonuses.includes(bonusOption.value)) {
-							const prop = this.foundry.utils.getProperty(entry, bonusOption.dataProp);
-							if (Number.isNumeric(prop) && prop !== 0) {
-								allowEntry = true;
-								break;
-							}
-						}
-					}
-					return allowEntry;
-				});
+			if (this.uses) {
+				result = result.filter(entry => entry.system.uses && entry.system.uses.max);
+			}
+			if (Array.isArray(this.weaponTypes) && this.weaponTypes.length > 0) {
+				result = result.filter(entry => entry.system.type && this.weaponTypes.includes(entry.system.type.value));
+			}
+			if (Array.isArray(this.consumableTypes) && this.consumableTypes.length > 0) {
+				result = result.filter(entry => entry.system.type && this.consumableTypes.includes(entry.system.type.value));
+			}
+			if (Array.isArray(this.equipmentTypes) && this.equipmentTypes.length > 0) {
+				result = result.filter(entry => entry.system.type && this.equipmentTypes.includes(entry.system.type.value));
 			}
 
 			// Reflow pager.
@@ -386,18 +402,13 @@ export default {
 			// Sort.
 			result = result.sort((a, b) => {
 				// Add sorts here.
-				switch (this.sortBy) {
-					case 'type':
-						return a.type.localeCompare(b.type);
-					case 'chakra':
-						return (a.system?.chackra ?? '').localeCompare((b.system?.chackra ?? ''));
-					case 'usage':
-						return (a.system?.powerUsage?.value ?? '').localeCompare((b.system?.powerUsage?.value ?? ''));
-					case 'recharge':
-						return (a.system?.recharge?.value ?? 0) - (b.system?.recharge?.value ?? 0);
+				switch (this.sorts.sortBy) {
 				}
 				return a.name.localeCompare(b.name);
 			});
+			if (this.sorts.direction === "desc") {
+				result = result.reverse();
+			}
 
 			// Return results.
 			return this.pager.totalRows > 0
@@ -415,13 +426,13 @@ export default {
 			'dnd5e.items',
 		], [
 			'system.activation.type',
-			'system.armor.type',
 			'system.container',
 			'system.damage',
 			'system.properties',
 			'system.rarity',
 			'system.source.book',
-			'system.type'
+			'system.type',
+			'system.uses',
 		]).then(packIndex => {
 			this.packIndex = packIndex.filter((e) => !e.system.container);
 			this.loaded = true;

@@ -38,7 +38,9 @@ export default {
 			game
 		}
 	},
-	data() {},
+	data() {
+		return {};
+	},
 	methods: {
 		// updateValue(event) {
 		// 	this.valueMutable = event.target.value;
