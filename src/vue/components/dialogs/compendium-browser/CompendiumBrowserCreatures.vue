@@ -2,26 +2,7 @@
 	<div class="actor-browser browser flexrow">
 		<section class="control-area flexcol">
 			<div class="controls">
-				<div class="filtercontainer">
-					<!-- Name filter. -->
-					<div class="filter">
-						<input type="text" name="compendiumBrowser.name" v-model="name" :placeholder="game.i18n.localize('Name')" />
-					</div>
-
-					<!-- Sort -->
-					<div class="form-group">
-						<label>{{ game.i18n.localize('Sort by:') }}</label>
-						<div class="form-fields">
-							<select class="sort" v-model="sortBy">
-								<option v-for="(option, index) in sortOptions" :key="index" :value="option.value">{{ option.label }}</option>
-							</select>
-							<a class="direction" data-direction="asc" @click="changeDirection()">
-								<i class="fa-solid fa-sort-numeric-up" v-if="direction === 'asc'"></i>
-								<i class="fa-solid fa-sort-numeric-down-alt" v-if="direction !== 'asc'"></i>
-							</a>
-						</div>
-					</div>
-				</div>
+				<FilterNameSort v-model="name" :filters="sorts"/>
 
 				<div class="filtercontainer">
 					<h3>{{ game.i18n.localize('General') }}</h3>
@@ -182,6 +163,7 @@ import { onUpdated } from 'vue';
 // External components.
 import Slider from '@vueform/slider';
 import Multiselect from '@vueform/multiselect';
+import FilterNameSort from '@/components/dialogs/compendium-browser/filters/FilterNameSort.vue';
 // Helper methods.
 import {
 	getPackIndex,
@@ -197,6 +179,7 @@ export default {
 	components: {
 		Slider,
 		Multiselect,
+		FilterNameSort,
 	},
 	setup() {
 		return {
@@ -226,13 +209,15 @@ export default {
 				totalRows: 0,
 			},
 			// Sorting.
-			sortBy: 'name',
-			direction: 'asc',
-			sortOptions: [
-				{ value: 'name', label: game.i18n.localize('Name') },
-				{ value: 'cr', label: game.i18n.localize('Challenge Rating') },
-				{ value: 'size', label: game.i18n.localize('Size') },
-			],
+			sorts: {
+				sortBy: 'name',
+				direction: 'asc',
+				sortOptions: [
+					{ value: 'name', label: game.i18n.localize('Name') },
+					{ value: 'cr', label: game.i18n.localize('Challenge Rating') },
+					{ value: 'size', label: game.i18n.localize('Size') },
+				],
+			},
 			// Our list of pseudo documents returned from the compendium.
 			packIndex: [],
 			// Filters.
@@ -279,8 +264,8 @@ export default {
 		 * Click event to reset our filters.
 		 */
 		 resetFilters() {
-			this.sortBy = 'name';
-			this.direction = 'asc';
+			this.sorts.sortBy = 'name';
+			this.sorts.direction = 'asc';
 			this.name = '';
 			this.crRange = [0, 30];
 			this.legact = '';
@@ -291,10 +276,6 @@ export default {
 			this.conditionImmunities= [];
 			this.size = [];
 			this.creatureType = [];
-		},
-		changeDirection() {
-			if (this.direction === "asc") this.direction = "desc";
-			else this.direction = "asc";
 		},
 		/**
 		 * Get multiselect options.
@@ -386,7 +367,7 @@ export default {
 			// Sort.
 			result = result.sort((a, b) => {
 				// Add sorts here.
-				switch (this.sortBy) {
+				switch (this.sorts.sortBy) {
 					case 'cr':
 						return a.system.details.cr - b.system.details.cr;
 					case 'size':
@@ -394,7 +375,7 @@ export default {
 				}
 				return a.name.localeCompare(b.name);
 			});
-			if (this.direction === "desc") {
+			if (this.sorts.direction === "desc") {
 				result = result.reverse();
 			}
 
