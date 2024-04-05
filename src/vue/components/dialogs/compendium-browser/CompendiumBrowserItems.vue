@@ -19,7 +19,7 @@
 							/>
 						</div>
 						<div class="filter">
-							<label class="unit-title" for="compendiumBrowser.rarity">{{ game.i18n.localize('Rarity') }}</label>
+							<label class="unit-title" for="compendiumBrowser.rarity">{{ game.i18n.localize('Magical Item') }}</label>
 							<Multiselect
 								v-model="rarity"
 								mode="tags"
@@ -102,21 +102,38 @@
 			<!-- Items results. -->
 			<ul v-if="loaded" class="compendium-browser-results compendium-browser-items">
 				<!-- Individual items entries. -->
-				<li v-for="(equipment, equipmentKey) in entries" :key="equipmentKey" :class="`flexrow draggable compendium-browser-row${equipmentKey >= pager.lastIndex - 1 && equipmentKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''}  document item`" :data-document-id="equipment._id" @click="openDocument(equipment.uuid, 'Item')" @dragstart="startDrag($event, equipment, 'Item')" draggable="true">
+				<li v-for="(equipment, equipmentKey) in entries" :key="equipmentKey"
+					:class="`flexrow draggable compendium-browser-row${equipmentKey >= pager.lastIndex - 1 && equipmentKey < pager.totalRows - 1
+						? ' compendium-browser-row-observe': ''}  document item`"
+						:data-document-id="equipment._id"
+						@click="openDocument(equipment.uuid, 'Item')"
+						@dragstart="startDrag($event, equipment, 'Item')"
+						draggable="true"
+				>
 					<!-- Both the image and title have drag events. These are primarily separated so that -->
 					<!-- if a user drags the token, it will only show the token as their drag preview. -->
 					<img :src="equipment.img" />
 					<div class="line">
 						<!-- First row is the title. -->
-						<h4 class="name">{{ equipment.name }}</h4>
+						<div class="flexrow">
+							<h4 class="name">{{ equipment.name }}</h4>
+							<h4 class="type">
+								<span>
+									<span v-if="equipment.system.rarity" class="rarity">{{ CONFIG.DND5E.itemRarity[equipment.system.rarity] }} </span>
+									{{ game.i18n.localize(`ITEM.Type${equipment.type.capitalize()}`) }}
+								</span>
+							</h4>
+						</div>
 						<!-- Second row is supplemental info. -->
-						<div class="tags">
-							<span v-if="equipment.system.rarity" class="rarity">
-								{{ CONFIG.DND5E.itemRarity[equipment.system.rarity] }}<span v-if="equipment.system.properties.length">, </span>
-							</span>
-							<span v-if="equipment.system.properties.length" v-for="(prop, index) of equipment.system.properties" :key="prop">
-								{{ CONFIG.DND5E.itemProperties[prop].label }}<span v-if="index != Object.keys(equipment.system.properties).length - 1">, </span>
-							</span>
+						<div class="tags flexrow">
+							<div>
+								<span v-if="equipment.system.properties.length" v-for="(prop, index) of equipment.system.properties" :key="prop">
+									{{ CONFIG.DND5E.itemProperties[prop].label }}<span v-if="index != Object.keys(equipment.system.properties).length - 1">, </span>
+								</span>
+							</div>
+							<div>
+								<span>{{ equipment.system.price.value }} {{ equipment.system.price.denomination }}</span>
+							</div>
 						</div>
 					</div>
 				</li>
@@ -183,7 +200,8 @@ export default {
 				direction: 'asc',
 				sortOptions: [
 					{ value: 'name', label: game.i18n.localize('Name') },
-					// { value: 'type', label: game.i18n.localize('Type') },
+					{ value: 'price', label: game.i18n.localize('Price') },
+					{ value: 'rarity', label: game.i18n.localize('Rarity') },
 				],
 			},
 			// Sorting.
@@ -403,6 +421,15 @@ export default {
 			result = result.sort((a, b) => {
 				// Add sorts here.
 				switch (this.sorts.sortBy) {
+					case "price":
+						const currencies = Object.keys(CONFIG.DND5E.currencies).reverse();
+						if (a.system.price.denomination === b.system.price.denomination) {
+							return a.system.price.value - b.system.price.value
+						}
+						return currencies.indexOf(a.system.price.denomination) - currencies.indexOf(b.system.price.denomination);
+					case "rarity":
+						const rarities = Object.keys(CONFIG.DND5E.itemRarity);
+						return rarities.indexOf(a.system.rarity) - rarities.indexOf(b.system.rarity);
 				}
 				return a.name.localeCompare(b.name);
 			});
@@ -429,6 +456,7 @@ export default {
 			'system.container',
 			'system.damage',
 			'system.properties',
+			'system.price',
 			'system.rarity',
 			'system.source.book',
 			'system.type',

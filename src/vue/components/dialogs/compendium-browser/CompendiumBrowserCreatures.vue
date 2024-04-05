@@ -131,7 +131,13 @@
 			<!-- <section class="section section--npcs section--main flexcol"> -->
 			<ul v-if="loaded" class="compendium-browser-results compendium-browser-npcs">
 				<!-- Individual creature entries. -->
-				<li v-for="(entry, entryKey) in entries" :key="entryKey" :class="`flexrow draggable compendium-browser-row${entryKey >= pager.lastIndex - 1 && entryKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''} document actor`" :data-document-id="entry._id" @click="openDocument(entry.uuid)" @dragstart="startDrag($event, entry, 'Actor')" draggable="true">
+				<li v-for="(entry, entryKey) in entries" :key="entryKey"
+					:class="`flexrow draggable compendium-browser-row${entryKey >= pager.lastIndex - 1 && entryKey < pager.totalRows - 1
+						? ' compendium-browser-row-observe': ''} document actor`"
+					:data-document-id="entry._id" @click="openDocument(entry.uuid)"
+					@dragstart="startDrag($event, entry, 'Actor')"
+					draggable="true"
+				>
 					<!-- Both the image and title have drag events. These are primarily separated so that -->
 					<!-- if a user drags the token, it will only show the token as their drag preview. -->
 					<img :src="entry.img ?? 'icons/svg/mystery-man.svg'"/>
@@ -145,7 +151,10 @@
 								<span class="ac"><span class="bold">AC:</span> {{ entry.system.attributes.ac.flat }}</span>
 							</div>
 							<div class="details flexrow">
-								<span>{{ CONFIG.DND5E.actorSizes?.[entry.system.traits.size].label ?? entry.system.traits.size }} {{ CONFIG.DND5E.creatureTypes?.[entry.system.details.type.value]?.label ?? entry.system.details.type.value }}</span>
+								<span>
+									{{ CONFIG.DND5E.actorSizes?.[entry.system.traits.size].label ?? entry.system.traits.size }}
+									{{ CONFIG.DND5E.creatureTypes?.[entry.system.details.type.value]?.label ?? entry.system.details.type.value }}
+								</span>
 							</div>
 						</div>
 					</div>
