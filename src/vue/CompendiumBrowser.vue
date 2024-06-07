@@ -16,8 +16,7 @@
 			</Tab>
 
 			<Tab group="primary" :tab="tabs.primary.powers" classes="container container--bottom flexrow">
-				<Stub>Spells</Stub>
-				<!-- <CompendiumBrowserPowers v-if="tabs.primary.powers.active || tabs.primary.powers.opened" :tab="tabs.primary.powers" :escalation="this.context.escalationDie"/> -->
+				<CompendiumBrowserPowers v-if="tabs.primary.powers.active || tabs.primary.powers.opened" :tab="tabs.primary.powers" :escalation="this.context.escalationDie"/>
 			</Tab>
 
 			<Tab group="primary" :tab="tabs.primary.items" classes="container container--bottom flexrow">
@@ -33,7 +32,7 @@
 import Tabs from '@/components/parts/Tabs.vue';
 import Tab from '@/components/parts/Tab.vue';
 import CompendiumBrowserCreatures from '@/components/dialogs/compendium-browser/CompendiumBrowserCreatures.vue';
-// import CompendiumBrowserPowers from '@/components/dialogs/compendium-browser/CompendiumBrowserPowers.vue';
+import CompendiumBrowserPowers from '@/components/dialogs/compendium-browser/CompendiumBrowserPowers.vue';
 import CompendiumBrowserItems from '@/components/dialogs/compendium-browser/CompendiumBrowserItems.vue';
 
 // Stub is an example component and should be removed once the others are all working.
@@ -47,7 +46,7 @@ export default {
 		Tab,
 		Stub,
 		CompendiumBrowserCreatures,
-		// CompendiumBrowserPowers,
+		CompendiumBrowserPowers,
 		CompendiumBrowserItems
 	},
 	setup() {
@@ -71,7 +70,7 @@ export default {
 					},
 					powers: {
 						key: 'powers',
-						label: game.i18n.localize('CMPBrowser.Tab.SpellBrowser'),
+						label: game.i18n.localize('CMPBrowser.Tab.FeatBrowser'),
 						active: this.context?.defaultTab === 'powers' ?? false,
 						opened: false
 					},

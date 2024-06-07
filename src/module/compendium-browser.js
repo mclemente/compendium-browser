@@ -1603,10 +1603,11 @@ Hooks.on("renderDocumentDirectory", (app, html, options) => {
 		const htmlElement = html[0];
 		let compendiumButton = "";
 
-		if (options.tabName == "items") {
+		if (options.tabName === "items") {
 			compendiumButton = `
 			<div class="flexrow">
-				<button type="button" class="open-compendium-browser" data-tab="powers"><i class="fas fa-atlas"></i>${game.i18n.localize("CMPBrowser.Tab.SpellBrowser")}</button>
+				<button type="button" class="open-compendium-browser" data-tab="powers"><i class="fas fa-star"></i>${game.i18n.localize("CMPBrowser.Tab.FeatBrowser")}</button>
+				<button type="button" class="open-compendium-browser" data-tab="spells"><i class="fas fa-atlas"></i>${game.i18n.localize("CMPBrowser.Tab.SpellBrowser")}</button>
 				<button type="button" class="open-compendium-browser" data-tab="items"><i class="fas fa-suitcase"></i>${game.i18n.localize("CMPBrowser.Tab.ItemBrowser")}</button>
 			</div>`;
 		}

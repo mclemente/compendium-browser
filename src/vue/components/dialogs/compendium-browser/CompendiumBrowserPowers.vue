@@ -1,118 +1,115 @@
 <template>
-	<section class="section section--sidebar flexcol filters">
+	<div class="feat-browser browser flexrow">
+		<section class="control-area flexcol">
+			<div class="controls">
+				<FilterNameSort v-model="name" :filters="sorts"/>
 
-		<!-- Sort. -->
-		<div class="unit unit--input">
-			<label for="compendiumBrowser.sort" class="unit-title">{{ localize('ARCHMAGE.sort') }}</label>
-			<select class="sort" name="compendiumBrowser.sort" v-model="sortBy">
-				<option v-for="(option, index) in sortOptions" :key="index" :value="option.value">{{ option.label }}</option>
-			</select>
-		</div>
-
-		<!-- Level range slider. -->
-		<div class="unit unit--input">
-			<label class="unit-title" for="compendiumBrowser.powerLevel">{{ localize('ARCHMAGE.level') }}</label>
-			<div class="level-range flexrow">
-				<div class="level-label"><span>{{ levelRange[0] }}</span><span v-if="levelRange[0] !== levelRange[1]"> - {{ levelRange[1] }}</span></div>
-				<div class="level-input slider-wrapper flexrow">
-					<Slider v-model="levelRange" :min="1" :max="10" :tooltips="false"/>
+				<div class="filtercontainer">
+					<h3>{{ game.i18n.localize('General') }}</h3>
+					<div class="filters">
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.classes">{{ game.i18n.localize('Classes') }}</label>
+							<Multiselect
+								v-model="classes"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="sortPackValues(game.compendiumBrowser.provider.classes)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.overall">{{ game.i18n.localize('Item Type') }}</label>
+							<Multiselect
+								v-model="subtypes"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="sortPackValues({
+									class: 'ITEM.TypeClass',
+									feat: 'ITEM.TypeFeat',
+									subclass: 'ITEM.TypeSubclass',
+									background: 'DND5E.Background',
+									race: 'DND5E.Race',
+								})"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.featureType">{{ game.i18n.localize('Feature Type') }}</label>
+							<Multiselect
+								v-model="featureTypes"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="sortPackValues(Object.keys(dnd5e.config.featureTypes).reduce(function (acc, current) {
+									acc[current] = dnd5e.config.featureTypes[current].label;
+									return acc;
+								}, {}))"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.featureType">{{ game.i18n.localize('Subfeature Type') }}</label>
+							<Multiselect
+								v-model="featureSubtype"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="sortPackValues(dnd5e.config.featureTypes.class.subtypes)"
+							/>
+						</div>
+					</div>
 				</div>
+
+				<div class="filtercontainer">
+					<h3>{{ game.i18n.localize('Game Mechanics') }}</h3>
+					<div class="filters">
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.activation">{{ game.i18n.localize('Activation') }}</label>
+							<Multiselect
+								v-model="activation"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="sortPackValues(CONFIG.DND5E.abilityActivationTypes)"
+							/>
+						</div>
+						<div class="filter">
+							<label class="unit-title" for="compendiumBrowser.damageType">{{ game.i18n.localize('Damage Type') }}</label>
+							<Multiselect
+								v-model="damageTypes"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
+							/>
+						</div>
+					</div>
+				</div>
+
+				<footer>
+					<!-- Reset. -->
+					<button type="reset" @click="resetFilters()">{{ game.i18n.localize('Reset Filters') }}</button>
+				</footer>
 			</div>
-		</div>
+		</section>
 
-		<!-- Filter name. -->
-		<div class="unit unit--input">
-			<label class="unit-title" for="compendiumBrowser.powerName">{{ localize('ARCHMAGE.name') }}</label>
-			<input type="text" name="compendiumBrowser.powerName" v-model="name" placeholder="Fireball"/>
-		</div>
-
-		<!-- Filter source. -->
-		<div class="unit unit--input">
-			<label class="unit-title" for="compendiumBrowser.powerSourceName">{{ localize('ARCHMAGE.CHAT.powerSourceName') }}</label>
-			<input type="text" name="compendiumBrowser.powerSourceName" v-model="powerSourceName" placeholder="Fighter"/>
-		</div>
-
-		<!-- Filter type. -->
-		<div class="unit unit--input">
-			<label class="unit-title" for="compendiumBrowser.powerType">{{ localize('ARCHMAGE.type') }}</label>
-			<Multiselect
-				v-model="powerType"
-				mode="tags"
-				:searchable="false"
-				:create-option="false"
-				:options="CONFIG.ARCHMAGE.powerTypes"
-			/>
-		</div>
-
-		<!-- Filter usage. -->
-		<div class="unit unit--input">
-			<label class="unit-title" for="compendiumBrowser.powerUsage">{{ localize('ARCHMAGE.CHAT.powerUsage') }}</label>
-			<Multiselect
-				v-model="powerUsage"
-				mode="tags"
-				:searchable="false"
-				:create-option="false"
-				:options="CONFIG.ARCHMAGE.powerUsages"
-			/>
-		</div>
-
-		<!-- Filter action. -->
-		<div class="unit unit--input">
-			<label class="unit-title" for="compendiumBrowser.actionType">{{ localize('ARCHMAGE.action') }}</label>
-			<Multiselect
-				v-model="actionType"
-				mode="tags"
-				:searchable="false"
-				:create-option="false"
-				:options="CONFIG.ARCHMAGE.actionTypes"
-			/>
-		</div>
-
-		<!-- Filter trigger. -->
-		<div class="unit unit--input">
-			<label class="unit-title" for="compendiumBrowser.trigger">{{ localize('ARCHMAGE.CHAT.trigger') }}</label>
-			<input type="text" name="compendiumBrowser.trigger" v-model="trigger" placeholder="Even hit"/>
-		</div>
-
-		<!-- Reset. -->
-		<div class="unit unit--input flexrow">
-			<button type="reset" @click="resetFilters()">{{ localize('Reset') }}</button>
-		</div>
-
-	</section>
-
-	<section class="section section--no-overflow">
-		<!-- Power results. -->
-		<section class="section section--powers section--main flexcol">
-			<ul v-if="loaded" class="compendium-browser-results compendium-browser-powers" :key="escalation">
-				<!-- Individual powers entries. -->
-				<li v-for="(entry, entryKey) in entries" :key="entryKey" :class="`power-summary ${powerUsageClass(entry)} compendium-browser-row${entryKey >= pager.lastIndex - 1 && entryKey < pager.totalRows - 1 ? ' compendium-browser-row-observe': ''} flexrow document item`" :data-document-id="entry._id" @click="openDocument(entry.uuid, 'Item')" :data-tooltip="CONFIG.ARCHMAGE.powerUsages[entry.system.powerUsage.value] ?? ''" data-tooltip-direction="RIGHT">
-					<!-- Both the image and title have drag events. These are primarily separated so that -->
-					<!-- if a user drags the token, it will only show the token as their drag preview. -->
-					<img :src="entry.img" @dragstart="startDrag($event, entry, 'Item')" draggable="true"/>
-					<div class="flexcol power-contents" @dragstart="startDrag($event, entry, 'Item')" draggable="true">
-						<!-- First row is the title and class/source. -->
-						<div class="power-title-wrapper">
-							<strong class="power-title"><span v-if="entry?.system?.powerLevel?.value">[{{ entry.system.powerLevel.value }}]</span> {{ entry?.name }}</strong>
-							<strong class="power-source" v-if="entry.system.powerSourceName.value">{{ entry.system.powerSourceName.value }}</strong>
-						</div>
-						<!-- Second row is supplemental info. -->
-						<div class="grid power-grid">
-							<div v-if="entry.system.trigger.value" class="power-trigger"><strong>Trigger:</strong> {{ entry.system.trigger.value }}</div>
-							<div class="power-feat-pips" :data-tooltip="localize('ARCHMAGE.feats')" v-if="hasFeats(entry)">
-								<ul class="feat-pips">
-									<li v-for="(feat, tier) in filterFeats(entry.system.feats)" :key="tier" :class="`feat-pip active`"></li>
-								</ul>
-							</div>
-							<div class="power-recharge" :data-tooltip="localize('ARCHMAGE.recharge')" v-if="entry.system.recharge.value && entry.system.powerUsage.value == 'recharge'">{{Number(entry.system.recharge.value) || 16}}+</div>
-							<div class="power-action" :data-tooltip="localize('ARCHMAGE.CHAT.actionTYpe')" v-if="entry.system.actionType.value">{{getActionShort(entry.system.actionType.value)}}</div>
-						</div>
+		<section class="list-area flexcol">
+			<ul v-if="loaded" class="compendium-browser-results compendium-browser-items">
+				<li v-for="(entry, entryKey) in entries" :key="entryKey"
+						:class="`flexrow draggable compendium-browser-row${entryKey >= pager.lastIndex - 1 && entryKey < pager.totalRows - 1
+							? ' compendium-browser-row-observe': ''} document item`"
+						:data-document-id="entry._id" @click="openDocument(entry.uuid, 'Item')"
+						@dragstart="startDrag($event, entry, 'Item')"
+						draggable="true"
+					>
+					<img :src="entry.img"/>
+					<div class="line">
+						<h4 class="name">{{ entry.name }}</h4>
 					</div>
 				</li>
 			</ul>
-			<div v-else class="compendium-browser-loading"><p><i class="fas fa-circle-notch fa-spin"></i>Please wait, loading...</p></div>
 		</section>
-	</section>
+	</div>
+
 </template>
 
 <script>
@@ -121,11 +118,12 @@ import { onUpdated } from 'vue';
 // External components.
 import Slider from '@vueform/slider';
 import Multiselect from '@vueform/multiselect';
+import FilterNameSort from '@/components/dialogs/compendium-browser/filters/FilterNameSort.vue';
 // Helper methods.
 import {
 	getPackIndex,
-	localize,
 	openDocument,
+	sortPackValues,
 	startDrag,
 } from '@/methods/Helpers.js';
 
@@ -135,18 +133,21 @@ export default {
 	// Imported components that need to be available in the <template>
 	components: {
 		Slider,
-		Multiselect
+		Multiselect,
+		FilterNameSort
 	},
 	setup() {
 		return {
 			// Imported methods that need to be available in the <template>
-			localize,
 			openDocument,
+			sortPackValues,
 			startDrag,
 			// Foundry base props and methods.
 			CONFIG,
 			game,
-			getDocumentClass
+			getDocumentClass,
+			// System-specific props and methods
+			dnd5e
 		}
 	},
 	data() {
@@ -161,25 +162,24 @@ export default {
 				totalRows: 0,
 			},
 			// Sorting.
-			sortBy: 'level',
-			sortOptions: [
-				{ value: 'level', label: game.i18n.localize('ARCHMAGE.level') },
-				{ value: 'name', label: game.i18n.localize('ARCHMAGE.name') },
-				{ value: 'source', label: game.i18n.localize('ARCHMAGE.CHAT.powerSourceName') },
-				{ value: 'type', label: game.i18n.localize('ARCHMAGE.type') },
-				{ value: 'usage', label: game.i18n.localize('ARCHMAGE.GROUPS.powerUsage') },
-				{ value: 'action', label: game.i18n.localize('ARCHMAGE.action') },
-			],
+			sorts: {
+				sortBy: 'name',
+				direction: 'asc',
+				sortOptions: [
+				{ value: 'name', label: game.i18n.localize('Name') },
+				{ value: 'level', label: game.i18n.localize('TYPES.Item.class') },
+				],
+			},
 			// Our list of pseudo documents returned from the compendium.
 			packIndex: [],
 			// Filters.
 			name: '',
-			levelRange: [1, 10],
-			actionType: [],
-			powerType: [],
-			powerSourceName: '',
-			powerUsage: [],
-			trigger: '',
+			classes: [],
+			subtypes: [],
+			featureTypes: [],
+			featureSubtype: [],
+			activation: [],
+			damageTypes: [],
 		}
 	},
 	methods: {
@@ -206,63 +206,23 @@ export default {
 		 * Click event to reset our filters.
 		 */
 		resetFilters() {
-			this.sortBy = 'level';
+			this.sorts.sortBy = 'name';
+			this.sorts.direction = 'asc';
 			this.name = '';
-			this.levelRange = [1, 10];
-			this.actionType = [];
-			this.powerType = [];
-			this.powerSourceName = '';
-			this.powerUsage = [];
-			this.trigger = '';
+			this.classes = [];
+			this.subtypes = [];
+			this.featureTypes = [];
+			this.featureSubtype = [];
+			this.activation = [];
+			this.damageTypes = [];
 		},
-		/**
-		 * Retrieve the abbreviated action type, such as 'STD' or 'QCK'.
-		 */
-		 getActionShort(actionType) {
-			if (CONFIG.ARCHMAGE.actionTypesShort[actionType]) {
-				return CONFIG.ARCHMAGE.actionTypesShort[actionType];
+		applyFilter(property, entries, result) {
+    		if (property.length) {
+				property.forEach(value => {
+					result = result.filter(entry => entry.system.traits[entries].value.includes(value));
+				});
 			}
-			return CONFIG.ARCHMAGE.actionTypesShort['standard'];
-		},
-		/**
-		 * Compute CSS class to assign based on special usage
-		 */
-		 powerUsageClass(power) {
-			let use = power.system.powerUsage.value ? power.system.powerUsage.value : 'other';
-			if (['daily', 'daily-desperate'].includes(use)) use = 'daily';
-			else if (use == 'cyclic') {
-				if (this.escalation > 0
-					&& this.escalation % 2 == 0) {
-					use = 'at-will cyclic';
-				} else use = 'once-per-battle cyclic';
-			}
-			return use;
-		},
-		/**
-		 * Determine if this power has one or more feats.
-		 */
-		 hasFeats(power) {
-			let hasFeats = false;
-			if (power && power.system && power.system.feats) {
-				for (let [id, feat] of Object.entries(power.system.feats)) {
-					if (feat.description.value || feat.isActive.value) {
-						hasFeats = true;
-						break;
-					}
-				}
-			}
-			return hasFeats;
-		},
-		/**
-		 * Filter empty feats
-		 */
-		filterFeats(feats) {
-			if (!feats) return {};
-			let res = {};
-			for (let [index, feat] of Object.entries(feats)) {
-				if (feat.description.value) res[index] = feat;
-			}
-			return res;
+    		return result;
 		},
 	},
 	computed: {
@@ -283,35 +243,50 @@ export default {
 				result = result.filter(entry => entry.name.toLocaleLowerCase().includes(name));
 			}
 
-			// Filter by level.
-			if (this.levelRange.length == 2) {
+			if (Array.isArray(this.classes) && this.classes.length > 0) {
 				result = result.filter(entry =>
-					entry.system.powerLevel.value >= this.levelRange[0] &&
-					entry.system.powerLevel.value <= this.levelRange[1]
+					{
+						if (
+							this.classes.includes(entry.system?.classIdentifier)
+							|| this.classes.includes(entry.system?.identifier)
+						) return true;
+						const reqString = entry.system?.requirements?.replace(/\d/g, "").trim();
+						if (reqString) {
+							for (const [key, classData] of Object.entries(game.compendiumBrowser.provider.classes)) {
+								if (!this.classes.includes(key)) continue;
+								const isClassMatch = reqString.includes(classData.label);
+								const isSubclassMatch = !isClassMatch && Object.values(classData.subclasses).some(
+									(label) => reqString.includes(label)
+								);
+								if (isClassMatch || isSubclassMatch) return true;
+							}
+						}
+					}
 				);
 			}
 
-			// Filter by power source.
-			if (this.powerSourceName && this.powerSourceName.length > 0) {
-				const name = this.powerSourceName.toLocaleLowerCase();
-				result = result.filter(entry => entry.system.powerSourceName.value.toLocaleLowerCase().includes(name));
+			if (Array.isArray(this.subtypes) && this.subtypes.length > 0) {
+				result = result.filter(entry => this.subtypes.includes(entry.type));
 			}
 
-			// Filter by triger.
-			if (this.trigger && this.trigger.length > 0) {
-				const name = this.trigger.toLocaleLowerCase();
-				result = result.filter(entry => entry.system.trigger.value && entry.system.trigger.value.toLocaleLowerCase().includes(name));
+			if (Array.isArray(this.featureTypes) && this.featureTypes.length > 0) {
+				result = result.filter(entry => this.featureTypes.includes(entry.system?.type?.value));
 			}
 
-			// Handle multiselect filters, which use arrays as their values.
-			if (Array.isArray(this.powerType) && this.powerType.length > 0) {
-				result = result.filter(entry => this.powerType.includes(entry.system.powerType.value));
+			if (Array.isArray(this.featureSubtype) && this.featureSubtype.length > 0) {
+				result = result.filter(entry => this.featureSubtype.includes(entry.system?.type?.subtype));
 			}
-			if (Array.isArray(this.powerUsage) && this.powerUsage.length > 0) {
-				result = result.filter(entry => this.powerUsage.includes(entry.system.powerUsage.value));
+
+			if (Array.isArray(this.damageTypes) && this.damageTypes.length > 0) {
+				result = result.filter(entry => {
+					if (!entry.system.damage) return false;
+					const damageTypes = entry.system.damage.parts.map((d) => d[1]);
+					return this.damageTypes.some((d) => damageTypes.includes(d));
+				})
 			}
-			if (Array.isArray(this.actionType) && this.actionType.length > 0) {
-				result = result.filter(entry => this.actionType.includes(entry.system.actionType.value));
+
+			if (Array.isArray(this.activation) && this.activation.length > 0) {
+				result = result.filter(entry => this.activation.includes(entry.system?.activation?.type));
 			}
 
 			// Reflow pager.
@@ -327,19 +302,13 @@ export default {
 
 			// Sort.
 			result = result.sort((a, b) => {
-				switch (this.sortBy) {
-					case 'name':
-						return a.name.localeCompare(b.name);
-					case 'source':
-						return a.system?.powerSourceName?.value.localeCompare(b.system?.powerSourceName?.value);
+				switch (this.sorts.sortBy) {
+					case 'class':
+						return a.system?.identifier.localeCompare(b.system?.identifier);
 					case 'type':
-						return a.system?.powerType?.value.localeCompare(b.system?.powerType?.value);
-					case 'usage':
-						return a.system?.powerUsage?.value.localeCompare(b.system?.powerUsage?.value);
-					case 'action':
-						return a.system?.actionType?.value.localeCompare(b.system?.actionType?.value);
+						return a.type.localeCompare(b.type);
 				}
-				return a.system.powerLevel.value - b.system.powerLevel.value;
+				return a.name.localeCompare(b.name);
 			});
 
 			// Return results.
@@ -347,6 +316,9 @@ export default {
 				? result.slice(this.pager.firstIndex, this.pager.lastIndex)
 				: result;
 		},
+		yesNo() {
+			return { "yes": { label: "Yes" }, "no": { label: "No" }};
+		}
 	},
 	watch: {},
 	// Handle created hook.
@@ -354,31 +326,19 @@ export default {
 		console.log("Creating compendium browser powers tab...");
 		// Load the pack index with the fields we need.
 		getPackIndex([
-			'archmage.barbarian',
-			'archmage.bard',
-			'archmage.cleric',
-			'archmage.fighter',
-			'archmage.paladin',
-			'archmage.ranger',
-			'archmage.animal-companion',
-			'archmage.rogue',
-			'archmage.sorcerer',
-			'archmage.wizard',
-			'archmage.chaosmage',
-			'archmage.commander',
-			'archmage.druid',
-			'archmage.monk',
-			'archmage.necromancer',
-			'archmage.occultist',
+			'dnd5e.backgrounds',
+			'dnd5e.classes',
+			'dnd5e.subclasses',
+			'dnd5e.classfeatures',
+			'dnd5e.races',
 		], [
-			'system.powerSourceName.value',
-			'system.powerType.value',
-			'system.powerLevel.value',
-			'system.powerUsage.value',
-			'system.actionType.value',
-			'system.recharge.value',
-			'system.trigger.value',
-			'system.feats'
+			'system.activation.type',
+			'system.classIdentifier',
+			'system.damage',
+			'system.identifier',
+			'system.level',
+			'system.requirements',
+			'system.type',
 		]).then(packIndex => {
 			this.packIndex = packIndex;
 			this.loaded = true;

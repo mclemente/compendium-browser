@@ -25,7 +25,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.actorSizes)"
+								:options="sortPackValues(CONFIG.DND5E.actorSizes)"
 							/>
 						</div>
 						<div class="filter">
@@ -34,7 +34,7 @@
 								v-model="legact"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(yesNo)"
+								:options="sortPackValues(yesNo)"
 							/>
 						</div>
 						<div class="filter">
@@ -43,7 +43,7 @@
 								v-model="legres"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(yesNo)"
+								:options="sortPackValues(yesNo)"
 							/>
 						</div>
 						<div class="filter">
@@ -53,7 +53,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.creatureTypes)"
+								:options="sortPackValues(CONFIG.DND5E.creatureTypes)"
 							/>
 						</div>
 					</div>
@@ -84,7 +84,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.damageTypes)"
+								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
 							/>
 						</div>
 						<div class="filter">
@@ -94,7 +94,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.damageTypes)"
+								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
 							/>
 						</div>
 						<div class="filter">
@@ -104,7 +104,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.damageTypes)"
+								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
 							/>
 						</div>
 						<div class="filter">
@@ -114,7 +114,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.conditionTypes)"
+								:options="sortPackValues(CONFIG.DND5E.conditionTypes)"
 							/>
 						</div>
 					</div>
@@ -126,7 +126,7 @@
 			</footer>
 		</section>
 
-		<div class="list-area flexcol">
+		<section class="list-area flexcol">
 			<!-- Creatures results. -->
 			<!-- <section class="section section--npcs section--main flexcol"> -->
 			<ul v-if="loaded" class="compendium-browser-results compendium-browser-npcs">
@@ -162,7 +162,7 @@
 			</ul>
 			<div v-else class="compendium-browser-loading"><p><i class="fas fa-circle-notch fa-spin"></i>Please wait, loading...</p></div>
 			<!-- </section> -->
-		</div>
+		</section>
 	</div>
 </template>
 
@@ -178,6 +178,7 @@ import {
 	getPackIndex,
 	getActorModuleArt,
 	openDocument,
+	sortPackValues,
 	startDrag,
 } from '@/methods/Helpers.js';
 
@@ -195,6 +196,7 @@ export default {
 			// Imported methods that need to be available in the <template>
 			getActorModuleArt,
 			openDocument,
+			sortPackValues,
 			startDrag,
 			// Foundry base props and methods. These need to be included here if you
 			// want to access them in the template section above.
@@ -285,16 +287,6 @@ export default {
 			this.conditionImmunities= [];
 			this.size = [];
 			this.creatureType = [];
-		},
-		/**
-		 * Get multiselect options.
-		 */
-		getOptions(config) {
-			const options = {};
-			for (let [key, value] of Object.entries(config)) {
-				options[key] = value.label ?? value;
-			}
-			return options;
 		},
 		applyFilter(property, entries, result) {
     		if (property.length) {

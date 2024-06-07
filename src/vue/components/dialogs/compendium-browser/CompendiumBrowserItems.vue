@@ -15,7 +15,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(itemTypes)"
+								:options="sortPackValues(itemTypes)"
 							/>
 						</div>
 						<div class="filter">
@@ -26,7 +26,7 @@
 								:class="{ 'rarity': true }"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.itemRarity)"
+								:options="sortPackValues(CONFIG.DND5E.itemRarity)"
 							/>
 						</div>
 						<div class="filter">
@@ -36,7 +36,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.abilityActivationTypes)"
+								:options="sortPackValues(CONFIG.DND5E.abilityActivationTypes)"
 							/>
 						</div>
 						<div class="filter">
@@ -46,7 +46,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.damageTypes)"
+								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
 							/>
 						</div>
 						<div class="filter">
@@ -66,7 +66,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.weaponTypes)"
+								:options="sortPackValues(CONFIG.DND5E.weaponTypes)"
 							/>
 						</div>
 						<div class="filter">
@@ -76,7 +76,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.equipmentTypes)"
+								:options="sortPackValues(CONFIG.DND5E.equipmentTypes)"
 							/>
 						</div>
 						<div class="filter">
@@ -86,7 +86,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="getOptions(CONFIG.DND5E.consumableTypes)"
+								:options="sortPackValues(CONFIG.DND5E.consumableTypes)"
 							/>
 						</div>
 					</div>
@@ -104,7 +104,7 @@
 				<!-- Individual items entries. -->
 				<li v-for="(equipment, equipmentKey) in entries" :key="equipmentKey"
 					:class="`flexrow draggable compendium-browser-row${equipmentKey >= pager.lastIndex - 1 && equipmentKey < pager.totalRows - 1
-						? ' compendium-browser-row-observe': ''}  document item`"
+						? ' compendium-browser-row-observe': ''} document item`"
 						:data-document-id="equipment._id"
 						@click="openDocument(equipment.uuid, 'Item')"
 						@dragstart="startDrag($event, equipment, 'Item')"
@@ -157,6 +157,7 @@ import {
 	// localizeEquipmentBonus,
 	numberFormat,
 	openDocument,
+	sortPackValues,
 	startDrag
 } from '@/methods/Helpers.js';
 
@@ -176,6 +177,7 @@ export default {
 			// localizeEquipmentBonus,
 			numberFormat,
 			openDocument,
+			sortPackValues,
 			startDrag,
 			// Foundry base props and methods.
 			CONFIG,
@@ -259,13 +261,6 @@ export default {
 			this.consumableTypes = [];
 			this.equipmentTypes = [];
 		},
-		getOptions(config) {
-			const options = {};
-			for (let [key, value] of Object.entries(config)) {
-				options[key] = value.label ?? value;
-			}
-			return options;
-		}
 	},
 	computed: {
 		itemTypes() {
