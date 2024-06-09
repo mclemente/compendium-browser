@@ -112,14 +112,15 @@ export function startDrag(event, entry, type = "Actor") {
   }));
 }
 
-export function sortPackValues(packValue) {
-  const sortable = Object.entries(packValue)
+export function sortPackValues(packValue, sort = true) {
+  let sortable = Object.entries(packValue)
     .filter(([key, data]) => key !== undefined && data !== undefined)
     .map(([key, data]) => {
       if (typeof data === "string") return [key, game.i18n.localize(data)];
       return [key, data.label];
-    })
-    .sort((a, b) => a[1].localeCompare(b[1]));
+    });
+
+  if (sort) sortable = sortable.sort((a, b) => a[1].localeCompare(b[1]));
 
   return sortable.reduce((acc, item) => {
     acc[item[0]] = item[1];
