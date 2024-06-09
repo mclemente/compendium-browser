@@ -355,9 +355,6 @@ export default {
 			const result = {};
 			return result;
 		},
-		nightmode() {
-			return game.settings.get("archmage", "nightmode") ? 'nightmode' : '';
-		},
 		entries() {
 			// Build our results array. Exit early if the length is 0.
 			let result = this.packIndex;

@@ -16,7 +16,7 @@
 			</Tab>
 
 			<Tab group="primary" :tab="tabs.primary.powers" classes="container container--bottom flexrow">
-				<CompendiumBrowserPowers v-if="tabs.primary.powers.active || tabs.primary.powers.opened" :tab="tabs.primary.powers" :escalation="this.context.escalationDie"/>
+				<CompendiumBrowserPowers v-if="tabs.primary.powers.active || tabs.primary.powers.opened" :tab="tabs.primary.powers" />
 			</Tab>
 
 			<Tab group="primary" :tab="tabs.primary.items" classes="container container--bottom flexrow">

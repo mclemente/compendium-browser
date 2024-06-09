@@ -129,7 +129,7 @@ import {
 
 export default {
 	name: 'CompendiumBrowserPowers',
-	props: ['tab', 'escalation'],
+	props: ['tab'],
 	// Imported components that need to be available in the <template>
 	components: {
 		Slider,
@@ -166,8 +166,8 @@ export default {
 				sortBy: 'name',
 				direction: 'asc',
 				sortOptions: [
-				{ value: 'name', label: game.i18n.localize('Name') },
-				{ value: 'level', label: game.i18n.localize('TYPES.Item.class') },
+					{ value: 'name', label: game.i18n.localize('Name') },
+					{ value: 'class', label: game.i18n.localize('TYPES.Item.class') },
 				],
 			},
 			// Our list of pseudo documents returned from the compendium.
@@ -226,9 +226,6 @@ export default {
 		},
 	},
 	computed: {
-		nightmode() {
-			return game.settings.get("archmage", "nightmode") ? 'nightmode' : '';
-		},
 		entries() {
 			// Build our results array. Exit early if the length is 0.
 			let result = this.packIndex;
