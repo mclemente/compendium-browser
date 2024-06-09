@@ -395,24 +395,25 @@ export default {
 		console.log("Creating compendium browser creatures tab...");
 
 		// Load the pack index with the fields we need.
-		getPackIndex([
-			'dnd5e.monsters',
-			// insert additional packs as needed.
-		], [
-			'system.attributes.ac',
-			'system.attributes.hp',
-			'system.abilities',
-			'system.details.cr',
-			'system.details.type',
-			'system.resources.legact',
-			'system.resources.legres',
-			'system.traits.di.value',
-			'system.traits.dr.value',
-			'system.traits.dv.value',
-			'system.traits.ci.value',
-			'system.traits.size'
-			// insert additional properties as needed.
-		]).then(packIndex => {
+		getPackIndex({
+			fields: [
+				'system.attributes.ac',
+				'system.attributes.hp',
+				'system.abilities',
+				'system.details.cr',
+				'system.details.type',
+				'system.resources.legact',
+				'system.resources.legres',
+				'system.traits.di.value',
+				'system.traits.dr.value',
+				'system.traits.dv.value',
+				'system.traits.ci.value',
+				'system.traits.size'
+				// insert additional properties as needed.
+			],
+			types: ["Actor"],
+			subTypes: ["npc"]
+		}).then(packIndex => {
 			// Loading a new index blows away the module art that was loaded by the system.
 			// Step through the records and reassign their pack art.
 			if (!game.dnd5e?.moduleArt?.suppressArt && game.dnd5e?.moduleArt?.map?.size > 0) {

@@ -53,15 +53,27 @@ export function getActorModuleArt(actor) {
  * @param {Array} fields Array of field paths to include in the index.
  * @returns Combined entries from the queried compendiums.
  */
-export async function getPackIndex(packNames = [], fields = []) {
+export async function getPackIndex({ packNames = [], fields = [], types = [], subTypes = [] } = {}) {
   if (!packNames || !fields || fields.length < 1) return [];
 
   let packs = [];
 
+  if (!packNames.length) {
+    packNames = game.packs.contents
+      .filter((p) => !types.length || types.includes(p.metadata.type))
+      .map((p) => p.metadata.id);
+  }
+
+  if (subTypes.length && !fields.includes("type")) {
+    fields.push("type");
+  }
+
   for (let packName of packNames) {
     const pack = game.packs.get(packName);
-    const packIndex = await pack.getIndex({fields: fields});
-    packs = packs.concat(packIndex.contents);
+    const packIndex = await pack.getIndex({ fields });
+    const filteredIndexes = packIndex.contents
+      .filter((i) => !subTypes.length || subTypes.includes(i.type));
+    packs = packs.concat(filteredIndexes);
   }
 
   return packs;

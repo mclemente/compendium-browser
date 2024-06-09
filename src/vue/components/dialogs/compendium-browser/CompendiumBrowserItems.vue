@@ -441,19 +441,21 @@ export default {
 		console.log("Creating compendium browser magic items tab...");
 
 		// Load the pack index with the fields we need.
-		getPackIndex([
-			'dnd5e.items',
-		], [
-			'system.activation.type',
-			'system.container',
-			'system.damage',
-			'system.properties',
-			'system.price',
-			'system.rarity',
-			'system.source.book',
-			'system.type',
-			'system.uses',
-		]).then(packIndex => {
+		getPackIndex({
+			fields: [
+				'system.activation.type',
+				'system.container',
+				'system.damage',
+				'system.properties',
+				'system.price',
+				'system.rarity',
+				'system.source.book',
+				'system.type',
+				'system.uses',
+			],
+			types: ["Item"],
+			subTypes: ["consumable", "container", "equipment", "loot", "tool", "weapon"]
+		}).then(packIndex => {
 			this.packIndex = packIndex.filter((e) => !e.system.container);
 			this.loaded = true;
 		});

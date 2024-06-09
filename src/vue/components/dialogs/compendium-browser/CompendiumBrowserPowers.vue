@@ -322,21 +322,26 @@ export default {
 	async created() {
 		console.log("Creating compendium browser powers tab...");
 		// Load the pack index with the fields we need.
-		getPackIndex([
-			'dnd5e.backgrounds',
-			'dnd5e.classes',
-			'dnd5e.subclasses',
-			'dnd5e.classfeatures',
-			'dnd5e.races',
-		], [
-			'system.activation.type',
-			'system.classIdentifier',
-			'system.damage',
-			'system.identifier',
-			'system.level',
-			'system.requirements',
-			'system.type',
-		]).then(packIndex => {
+		getPackIndex({
+			// [
+			// 	'dnd5e.backgrounds',
+			// 	'dnd5e.classes',
+			// 	'dnd5e.subclasses',
+			// 	'dnd5e.classfeatures',
+			// 	'dnd5e.races',
+			// ],
+			fields: [
+				'system.activation.type',
+				'system.classIdentifier',
+				'system.damage',
+				'system.identifier',
+				'system.level',
+				'system.requirements',
+				'system.type',
+			],
+			types: ["Item"],
+			subTypes: ["background", "class", "feature", "race", "subclass"]
+		}).then(packIndex => {
 			this.packIndex = packIndex;
 			this.loaded = true;
 		});
