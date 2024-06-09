@@ -85,12 +85,11 @@
 						/>
 					</div>
 				</div>
-
-				<footer>
-					<!-- Reset. -->
-					<button type="reset" @click="resetFilters()">{{ game.i18n.localize('Reset Filters') }}</button>
-				</footer>
 			</div>
+			<footer>
+				<!-- Reset. -->
+				<button type="reset" @click="resetFilters()">{{ game.i18n.localize('Reset Filters') }}</button>
+			</footer>
 		</section>
 
 		<section class="list-area flexcol">
