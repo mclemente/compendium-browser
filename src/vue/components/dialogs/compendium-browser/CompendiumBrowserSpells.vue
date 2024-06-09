@@ -166,7 +166,7 @@ export default {
 				direction: 'asc',
 				sortOptions: [
 					{ value: 'name', label: game.i18n.localize('Name') },
-					{ value: 'class', label: game.i18n.localize('TYPES.Item.class') },
+					{ value: 'level', label: game.i18n.localize('DND5E.Level') },
 				],
 			},
 			// Our list of pseudo documents returned from the compendium.
