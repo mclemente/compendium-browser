@@ -103,7 +103,15 @@
 					>
 					<img :src="entry.img"/>
 					<div class="line">
-						<h4 class="name">{{ entry.name }}</h4>
+						<div class="flexrow">
+							<h4 class="name">{{ entry.name }}</h4>
+							<h4 style="flex: 0; margin: 0;">
+								<span v-if="entry.system.level !== 0">{{ entry.system.level }}</span>
+								<span v-else>{{ game.i18n.localize('DND5E.SpellCantrip') }}</span>
+							</h4>
+						</div>
+						<div class="tags">
+						</div>
 					</div>
 				</li>
 			</ul>
