@@ -30,14 +30,7 @@ export function registerSettings() {
 		hint: game.i18n.localize("CMPBrowser.SETTING.Maxload.HINT"),
 		scope: "world",
 		config: true,
-		default: 600,
-		type: Number,
-		range: {
-			// If range is specified, the resulting setting will be a range slider
-			min: 200,
-			max: 2000,
-			step: 100,
-		},
+		type: new foundry.data.fields.NumberField({ required: true, min: 200, max: 2000, step: 100, initial: 600 }),
 	});
 	game.settings.register("compendium-browser", "extraButtonsGlobal", {
 		name: game.i18n.localize("CMPBrowser.SETTING.extraButtonsGlobal.NAME"),
