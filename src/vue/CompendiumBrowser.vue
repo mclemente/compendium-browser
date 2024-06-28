@@ -27,6 +27,10 @@
 				<CompendiumBrowserItems v-if="tabs.primary.items.active || tabs.primary.items.opened" :tab="tabs.primary.items"/>
 			</Tab>
 
+			<Tab group="primary" :tab="tabs.primary.settings" classes="container container--bottom flexrow">
+				<CompendiumBrowserSettings v-if="tabs.primary.settings.active || tabs.primary.settings.opened" :tab="tabs.primary.settings"/>
+			</Tab>
+
 		</section>
 	</div>
 </template>
@@ -39,6 +43,7 @@ import CompendiumBrowserCreatures from '@/components/dialogs/compendium-browser/
 import CompendiumBrowserSpells from '@/components/dialogs/compendium-browser/CompendiumBrowserSpells.vue';
 import CompendiumBrowserPowers from '@/components/dialogs/compendium-browser/CompendiumBrowserPowers.vue';
 import CompendiumBrowserItems from '@/components/dialogs/compendium-browser/CompendiumBrowserItems.vue';
+import CompendiumBrowserSettings from '@/components/dialogs/compendium-browser/CompendiumBrowserSettings.vue';
 
 // Stub is an example component and should be removed once the others are all working.
 import Stub from '@/components/dialogs/compendium-browser/Stub.vue';
@@ -53,7 +58,8 @@ export default {
 		CompendiumBrowserCreatures,
 		CompendiumBrowserSpells,
 		CompendiumBrowserPowers,
-		CompendiumBrowserItems
+		CompendiumBrowserItems,
+		CompendiumBrowserSettings
 	},
 	setup() {
 		return {
@@ -90,6 +96,12 @@ export default {
 						key: 'items',
 						label: game.i18n.localize('CMPBrowser.Tab.ItemBrowser'),
 						active: this.context?.defaultTab === 'items' ?? false,
+						opened: false
+					},
+					settings: {
+						key: 'settings',
+						label: game.i18n.localize("CMPBrowser.Tab.Settings"),
+						active: this.context?.defaultTab === "settings" ?? false,
 						opened: false
 					}
 				}
