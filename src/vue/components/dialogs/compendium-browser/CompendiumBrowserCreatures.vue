@@ -5,117 +5,108 @@
 				<FilterNameSort v-model="name" :filters="sorts"/>
 
 				<div class="filtercontainer">
-					<h3>{{ game.i18n.localize('General') }}</h3>
 					<div class="filters">
 						<!-- Level range slider. -->
-						<div class="filter">
+						<div class="filter level-range flexrow">
 							<label class="unit-title" for="compendiumBrowser.level">{{ game.i18n.localize('Challenge Rating') }}</label>
-							<div class="level-range flexrow">
-								<div class="level-label"><span>{{ crRange[0] }}</span><span v-if="crRange[0] !== crRange[1]"> - {{ crRange[1] }}</span></div>
+								<div class="level-label">
+									<span>{{ crRange[0] }}</span>
+									<span v-if="crRange[0] !== crRange[1]"> - {{ crRange[1] }}</span>
+								</div>
 								<div class="level-input slider-wrapper flexrow">
 									<Slider v-model="crRange" :min="0" :max="30" :tooltips="false"/>
 								</div>
 							</div>
 						</div>
 						<!-- Size filter. -->
-						<div class="filter">
-							<label class="unit-title" for="compendiumBrowser.size">{{ game.i18n.localize('Size') }}</label>
-							<Multiselect
+						<Multiselect
+								:placeholder="game.i18n.localize('CMPBrowser.size')"
 								v-model="size"
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.actorSizes)"
+								:closeOnSelect="false"
+								openDirection="bottom"
 							/>
-						</div>
-						<div class="filter">
-							<label class="unit-title" for="compendiumBrowser.legact">{{ game.i18n.localize('Legendary Actions') }}</label>
-							<Multiselect
+						<Multiselect
+								:placeholder="game.i18n.localize('CMPBrowser.legAct')"
 								v-model="legact"
 								:searchable="false"
 								:create-option="false"
-								:options="sortPackValues(yesNo)"
+								:options="sortPackValues(options.legAct)"
+								openDirection="bottom"
 							/>
-						</div>
-						<div class="filter">
-							<label class="unit-title" for="compendiumBrowser.legres">{{ game.i18n.localize('Legendary Resistances') }}</label>
-							<Multiselect
+						<Multiselect
+								:placeholder="game.i18n.localize('CMPBrowser.legRes')"
 								v-model="legres"
 								:searchable="false"
 								:create-option="false"
-								:options="sortPackValues(yesNo)"
+								:options="sortPackValues(options.legRes)"
+								openDirection="bottom"
 							/>
-						</div>
-						<div class="filter">
-							<label class="unit-title" for="compendiumBrowser.creatureType">{{ game.i18n.localize('Creature Type') }}</label>
-							<Multiselect
+						<Multiselect
+								:placeholder="game.i18n.localize('CMPBrowser.DND5E.CreatureType')"
 								v-model="creatureType"
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.creatureTypes)"
+								:closeOnSelect="false"
+								openDirection="bottom"
 							/>
-						</div>
-					</div>
-				</div>
-
-				<div class="filtercontainer">
-					<h3>{{ game.i18n.localize('Ability Scores') }}</h3>
-					<div class="filters" style="display: none;">
-						<div v-for="(ability, key) in abilities" class="filter">
+					<h3>{{ game.i18n.localize('DND5E.AbilityScorePl') }}</h3>
+					<div class="filters">
+						<div v-for="(ability, key) in abilities" class="filter level-range flexrow">
 							<label class="unit-title" for="compendiumBrowser.str">{{ ability.label }}</label>
-							<div class="level-range flexrow">
-								<div class="level-label"><span>{{ ability.range[0] }}</span><span v-if="ability.range[0] !== ability.range[1]"> - {{ ability.range[1] }}</span></div>
-								<div class="level-input slider-wrapper flexrow">
-									<Slider v-model="abilities[key].range" :min="1" :max="30" :tooltips="false"/>
-								</div>
+							<div class="level-label">
+								<span>{{ ability.range[0] }}</span>
+								<span v-if="ability.range[0] !== ability.range[1]"> - {{ ability.range[1] }}</span>
+							</div>
+							<div class="level-input slider-wrapper flexrow">
+								<Slider v-model="abilities[key].range" :min="1" :max="30" :tooltips="false" />
 							</div>
 						</div>
 					</div>
-				</div>
-
-				<div class="filtercontainer">
-					<h3>{{ game.i18n.localize('Damage & Conditions') }}</h3>
-					<div class="filters" style="display: none;">
-						<div class="filter">
-							<label class="unit-title" for="compendiumBrowser.damageImmunities">{{ game.i18n.localize('Damage Immunities') }}</label>
-							<Multiselect
+					<h3>{{ game.i18n.localize('CMPBrowser.DND5E.DamageAndConditions') }}</h3>
+					<div class="filters">
+						<Multiselect
+								:placeholder="game.i18n.localize('CMPBrowser.DND5E.DamageImmunities')"
 								v-model="damageImmunities"
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
+								openDirection="bottom"
 							/>
-						</div>
-						<div class="filter">
-							<label class="unit-title" for="compendiumBrowser.damageResistances">{{ game.i18n.localize('Damage Resistances') }}</label>
-							<Multiselect
+						<Multiselect
+								:placeholder="game.i18n.localize('CMPBrowser.DND5E.DamageResistances')"
 								v-model="damageResistances"
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
+								openDirection="bottom"
 							/>
-						</div>
+						<Multiselect
+							:placeholder="game.i18n.localize('CMPBrowser.DND5E.DamageVulnerabilities')"
+							v-model="damageVulnerabilities"
+							mode="tags"
+							:searchable="false"
+							:create-option="false"
+							:options="sortPackValues(CONFIG.DND5E.damageTypes)"
+							openDirection="bottom"
+							/>
 						<div class="filter">
-							<label class="unit-title" for="compendiumBrowser.damageVulnerabilities">{{ game.i18n.localize('Damage Vulnerabilities') }}</label>
 							<Multiselect
-								v-model="damageVulnerabilities"
-								mode="tags"
-								:searchable="false"
-								:create-option="false"
-								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
-							/>
-						</div>
-						<div class="filter">
-							<label class="unit-title" for="compendiumBrowser.conditionImmunities">{{ game.i18n.localize('Condition Immunities') }}</label>
-							<Multiselect
-								v-model="conditionImmunities"
-								mode="tags"
-								:searchable="false"
-								:create-option="false"
-								:options="sortPackValues(CONFIG.DND5E.conditionTypes)"
-							/>
+									:placeholder="game.i18n.localize('CMPBrowser.DND5E.ConditionImmunities')"
+									v-model="conditionImmunities"
+									mode="tags"
+									:searchable="false"
+									:create-option="false"
+									:options="sortPackValues(CONFIG.DND5E.conditionTypes)"
+									openDirection="bottom"
+								/>
 						</div>
 					</div>
 				</div>
@@ -385,8 +376,11 @@ export default {
 				? result.slice(this.pager.firstIndex, this.pager.lastIndex)
 				: result;
 		},
-		yesNo() {
-			return { "yes": { label: "Yes" }, "no": { label: "No" }};
+		options() {
+			return {
+				legAct: { "yes": { label: game.i18n.localize("CMPBrowser.hasLegAct") }, no: { label: game.i18n.localize("CMPBrowser.hasNoLegAct") } },
+				legRes: { "yes": { label: game.i18n.localize("CMPBrowser.hasLegRes") }, no: { label: game.i18n.localize("CMPBrowser.hasNoLegRes") } },
+			}
 		}
 	},
 	watch: {},

@@ -1585,7 +1585,7 @@ Hooks.once("ready", () => {
 	document.addEventListener("click", (event) => {
 		if (event?.target?.classList && event.target.classList.contains("open-compendium-browser")) {
 			// Retrieve the existing compendium browser, if any.
-			let compendiumBrowser = Object.values(ui.windows).find((app) => app.constructor.name == "CompendiumBrowserVueApplication");
+			let compendiumBrowser = Object.values(ui.windows).find((app) => app.constructor.name === "CompendiumBrowserVueApplication");
 			// Otherwise, build a new one.
 			if (!compendiumBrowser) {
 				compendiumBrowser = new CompendiumBrowserVueApplication({ defaultTab: event.target.dataset.tab ?? "creatures" });

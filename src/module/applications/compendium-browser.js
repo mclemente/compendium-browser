@@ -39,7 +39,7 @@ export class CompendiumBrowserVueApplication extends Application {
 			id: "compendium-browser",
 			title: game.i18n.localize("CMPBrowser.compendiumBrowser"),
 			width: 730,
-			height: 730,
+			height: 750,
 			resizable: true,
 		};
 	}
@@ -145,11 +145,5 @@ export class CompendiumBrowserVueApplication extends Application {
 	 */
 	activateVueListeners(repeat = false) {
 		this.vueListenersActive = true;
-
-		// Place one-time executions after this line.
-		if (repeat) return;
-
-		// Input listeners.
-		this.element.find(".filtercontainer h3").click(async (ev) => await $(ev.target.nextElementSibling).toggle(100));
 	}
 }

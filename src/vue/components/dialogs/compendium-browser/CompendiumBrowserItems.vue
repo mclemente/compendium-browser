@@ -16,6 +16,7 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(itemTypes)"
+								:closeOnSelect="false"
 							/>
 						</div>
 						<div class="filter">
@@ -27,6 +28,7 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.itemRarity)"
+								:closeOnSelect="false"
 							/>
 						</div>
 						<div class="filter">
@@ -37,6 +39,7 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.abilityActivationTypes)"
+								:closeOnSelect="false"
 							/>
 						</div>
 						<div class="filter">
@@ -47,6 +50,7 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
+								:closeOnSelect="false"
 							/>
 						</div>
 						<div class="filter">
@@ -58,7 +62,7 @@
 
 				<div class="filtercontainer">
 					<h3>{{ game.i18n.localize('Subtypes') }}</h3>
-					<div class="filters" style="display: none;">
+					<div class="filters">
 						<div class="filter">
 							<label class="unit-title" for="compendiumBrowser.weaponTypes">{{ game.i18n.localize('Weapon Types') }}</label>
 							<Multiselect
@@ -67,6 +71,7 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.weaponTypes)"
+								:closeOnSelect="false"
 							/>
 						</div>
 						<div class="filter">
@@ -77,6 +82,7 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.equipmentTypes)"
+								:closeOnSelect="false"
 							/>
 						</div>
 						<div class="filter">
@@ -87,6 +93,7 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.consumableTypes)"
+								:closeOnSelect="false"
 							/>
 						</div>
 					</div>
@@ -463,7 +470,7 @@ export default {
 		// Create our intersection observer for infinite scroll.
 		this.observer = new IntersectionObserver(this.infiniteScroll, {
 			root: this.$el,
-			threshold: 0.5,
+			threshold: 0.1,
 		});
 	},
 	// Handle mounted hook.

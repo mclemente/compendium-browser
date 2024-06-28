@@ -20,6 +20,7 @@
 	min-width: 630px;
 	min-height: 500px;
 	.window-content {
+		padding: 0;
 		overflow-y: hidden !important;
 		height: 100%;
 		.parent {
@@ -31,6 +32,9 @@
 				.tab {
 					overflow-y: hidden !important;
 					height: 100%;
+					.active {
+						text-shadow: 0 0 8px var(--color-shadow-primary);
+					}
 					.browser {
 						overflow-y: hidden !important;
 						height: 100%;
@@ -61,23 +65,21 @@
 		}
 	}
 	.control-area {
+		padding: 0 0 1rem 1rem;
 		height: 100%;
 		flex: 2;
 		.controls {
 			overflow: hidden auto;
 			.filtercontainer {
-				border: 1px solid #bbb;
-				border-radius: 5px;
-				margin-top: 5px;
 				padding: 2px;
 				h3 {
 					margin: 0;
-					cursor: pointer;
+					border: none;
 				}
 				dl {
 					margin: 5px 0;
 				}
-				div {
+				div.filter {
 					margin: 5px 0;
 				}
 				dt {
@@ -99,11 +101,31 @@
 					vertical-align: middle;
 					line-height: 32px;
 					margin: 2px 0;
+
 					label {
 						padding: 5px;
 					}
 					input {
 						vertical-align: middle;
+					}
+					.multiselect--active {
+						z-index: 10;
+					}
+					.multiselect-wrapper {
+						min-height: initial;
+					}
+				}
+				.slider-tooltip {
+					background: rgba(0, 0, 0, 0.1);
+					border-color: 1px solid var(--color-border-light-highlight);
+					color: #000;
+				}
+				.level-label {
+					flex: 0 0 43px;
+					text-align: center;
+
+					&.spell {
+						flex: 0 0 75px
 					}
 				}
 				.small-input {
@@ -126,14 +148,10 @@
 		}
 		footer {
 			flex: 0;
-			padding: 1rem 0 3px;
 		}
 		button {
-			background: rgba(0, 0, 0, 0.05);
-			border: 1px solid #bbb;
-			border-radius: 5px;
-			margin-top: 5px;
-			padding: 2px;
+			background: rgba(0, 0, 0, 0.1);
+			border: 2px groove var(--color-border-light-highlight);
 		}
 	}
 	.list-area {

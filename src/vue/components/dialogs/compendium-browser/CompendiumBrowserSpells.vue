@@ -7,10 +7,10 @@
 				<div class="filtercontainer">
 					<h3>{{ game.i18n.localize('General') }}</h3>
 					<div class="filters">
-						<div class="filter">
+						<div class="filter level-range flexrow">
 							<label class="unit-title" for="compendiumBrowser.levelRange">{{ game.i18n.localize('DND5E.Level') }}</label>
 							<div class="level-range flexrow">
-								<div class="level-label">
+								<div class="level-label spell">
 									<span v-if="levelRange[0] === 0">Cantrip</span>
 									<span v-else>{{ levelRange[0] }}</span>
 									<span v-if="levelRange[0] !== levelRange[1]"> - {{ levelRange[1] }}</span>

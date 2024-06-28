@@ -15,6 +15,7 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(game.compendiumBrowser.provider.classes)"
+								:closeOnSelect="false"
 							/>
 						</div>
 						<div class="filter">
@@ -31,6 +32,7 @@
 									background: 'DND5E.Background',
 									race: 'DND5E.Race',
 								})"
+								:closeOnSelect="false"
 							/>
 						</div>
 						<div class="filter">
@@ -44,6 +46,7 @@
 									acc[current] = dnd5e.config.featureTypes[current].label;
 									return acc;
 								}, {}))"
+								:closeOnSelect="false"
 							/>
 						</div>
 						<div class="filter">
@@ -54,6 +57,7 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(dnd5e.config.featureTypes.class.subtypes)"
+								:closeOnSelect="false"
 							/>
 						</div>
 					</div>
@@ -70,6 +74,7 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.abilityActivationTypes)"
+								:closeOnSelect="false"
 							/>
 						</div>
 						<div class="filter">
@@ -80,6 +85,7 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
+								:closeOnSelect="false"
 							/>
 						</div>
 					</div>
@@ -311,9 +317,6 @@ export default {
 			return this.pager.totalRows > 0
 				? result.slice(this.pager.firstIndex, this.pager.lastIndex)
 				: result;
-		},
-		yesNo() {
-			return { "yes": { label: "Yes" }, "no": { label: "No" }};
 		}
 	},
 	watch: {},
