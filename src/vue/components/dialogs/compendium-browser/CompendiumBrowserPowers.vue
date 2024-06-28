@@ -92,7 +92,7 @@
 		</section>
 
 		<section class="list-area flexcol">
-			<ul v-if="loaded" class="compendium-browser-results compendium-browser-items">
+			<ul v-if="loaded" class="compendium-browser-results compendium-browser-features">
 				<li v-for="(entry, entryKey) in entries" :key="entryKey"
 						:class="`flexrow draggable compendium-browser-row${entryKey >= pager.lastIndex - 1 && entryKey < pager.totalRows - 1
 							? ' compendium-browser-row-observe': ''} document item`"
@@ -361,7 +361,7 @@ export default {
 		// Adjust our observers whenever the results of the compendium browser
 		// are updated.
 		onUpdated(() => {
-			const target = document.querySelector('.compendium-browser-powers .compendium-browser-row-observe');
+			const target = document.querySelector('.compendium-browser-features .compendium-browser-row-observe');
 			if (target) {
 				this.observer.observe(target);
 			}
