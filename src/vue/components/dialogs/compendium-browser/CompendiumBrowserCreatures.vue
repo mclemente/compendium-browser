@@ -27,7 +27,6 @@
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.actorSizes)"
 								:closeOnSelect="false"
-								openDirection="bottom"
 							/>
 						<Multiselect
 								:placeholder="game.i18n.localize('CMPBrowser.legAct')"
@@ -35,7 +34,6 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(options.legAct)"
-								openDirection="bottom"
 							/>
 						<Multiselect
 								:placeholder="game.i18n.localize('CMPBrowser.legRes')"
@@ -43,7 +41,6 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(options.legRes)"
-								openDirection="bottom"
 							/>
 						<Multiselect
 								:placeholder="game.i18n.localize('CMPBrowser.DND5E.CreatureType')"
@@ -53,7 +50,6 @@
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.creatureTypes)"
 								:closeOnSelect="false"
-								openDirection="bottom"
 							/>
 					<h3>{{ game.i18n.localize('DND5E.AbilityScorePl') }}</h3>
 					<div class="filters">
@@ -77,7 +73,6 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
-								openDirection="bottom"
 							/>
 						<Multiselect
 								:placeholder="game.i18n.localize('CMPBrowser.DND5E.DamageResistances')"
@@ -86,28 +81,23 @@
 								:searchable="false"
 								:create-option="false"
 								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
-								openDirection="bottom"
 							/>
 						<Multiselect
-							:placeholder="game.i18n.localize('CMPBrowser.DND5E.DamageVulnerabilities')"
-							v-model="damageVulnerabilities"
-							mode="tags"
-							:searchable="false"
-							:create-option="false"
-							:options="sortPackValues(CONFIG.DND5E.damageTypes)"
-							openDirection="bottom"
+								:placeholder="game.i18n.localize('CMPBrowser.DND5E.DamageVulnerabilities')"
+								v-model="damageVulnerabilities"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="sortPackValues(CONFIG.DND5E.damageTypes)"
 							/>
-						<div class="filter">
-							<Multiselect
-									:placeholder="game.i18n.localize('CMPBrowser.DND5E.ConditionImmunities')"
-									v-model="conditionImmunities"
-									mode="tags"
-									:searchable="false"
-									:create-option="false"
-									:options="sortPackValues(CONFIG.DND5E.conditionTypes)"
-									openDirection="bottom"
-								/>
-						</div>
+						<Multiselect
+								:placeholder="game.i18n.localize('CMPBrowser.DND5E.ConditionImmunities')"
+								v-model="conditionImmunities"
+								mode="tags"
+								:searchable="false"
+								:create-option="false"
+								:options="sortPackValues(CONFIG.DND5E.conditionTypes)"
+							/>
 					</div>
 				</div>
 			</div>
