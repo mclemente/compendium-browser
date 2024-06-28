@@ -32,9 +32,6 @@
 				.tab {
 					overflow-y: hidden !important;
 					height: 100%;
-					.active {
-						text-shadow: 0 0 8px var(--color-shadow-primary);
-					}
 					.browser {
 						overflow-y: hidden !important;
 						height: 100%;
@@ -55,6 +52,10 @@
 	.tabs {
 		max-height: 2em;
 		border-bottom: 1px solid var(--color-border-light-primary);
+
+		.active {
+			text-shadow: 0 0 8px var(--color-shadow-primary);
+		}
 	}
 	.tabContainer {
 		height: calc(100% - 2em);
