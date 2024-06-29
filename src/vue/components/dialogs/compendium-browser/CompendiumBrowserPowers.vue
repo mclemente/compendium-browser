@@ -14,7 +14,7 @@
 								mode="tags"
 								:searchable="false"
 								:create-option="false"
-								:options="sortPackValues(game.compendiumBrowser.provider.classes)"
+								:options="sortPackValues(this.classList)"
 								:closeOnSelect="false"
 							/>
 						</div>
@@ -179,6 +179,7 @@ export default {
 			packIndex: [],
 			// Filters.
 			name: '',
+			classList: {},
 			classes: [],
 			subtypes: [],
 			featureTypes: [],
@@ -228,7 +229,7 @@ export default {
 				});
 			}
     		return result;
-		},
+		}
 	},
 	computed: {
 		entries() {
@@ -254,7 +255,7 @@ export default {
 						) return true;
 						const reqString = entry.system?.requirements?.replace(/\d/g, "").trim();
 						if (reqString) {
-							for (const [key, classData] of Object.entries(game.compendiumBrowser.provider.classes)) {
+							for (const [key, classData] of Object.entries(this.classList)) {
 								if (!this.classes.includes(key)) continue;
 								const isClassMatch = reqString.includes(classData.label);
 								const isSubclassMatch = !isClassMatch && Object.values(classData.subclasses).some(
@@ -345,6 +346,43 @@ export default {
 			subTypes: ["background", "class", "feature", "race", "subclass"]
 		}).then(packIndex => {
 			this.packIndex = packIndex;
+			const classes = packIndex.filter((entry) => entry.type === "class" && entry.system.identifier);
+			const subclasses = {};
+			if (classes.length) {
+				classes.map((entry) => {
+					return {
+						label: entry.name,
+						identifier: entry.system.identifier
+					};
+				})
+				.forEach((c) => {
+					this.classList[c.identifier] = {
+						label: c.label,
+						subclasses: {}
+					};
+				});
+			}
+			const _subclasses = packIndex.filter((entry) => entry.type === "subclass" && entry.system.classIdentifier);
+			if (_subclasses.length) {
+				_subclasses.map((entry) => {
+						return {
+							name: entry.name,
+							identifier: entry.system.identifier,
+							classId: entry.system.classIdentifier
+						};
+					})
+					.forEach((subclass) => {
+						if (subclasses[subclass.classId]) {
+							subclasses[subclass.classId].subclasses[subclass.identifier] = subclass.name;
+						} else {
+							subclasses[subclass.classId] = {
+								subclasses: {
+									[subclass.identifier]: subclass.name
+								}
+							};
+						}
+					});
+			}
 			this.loaded = true;
 		});
 

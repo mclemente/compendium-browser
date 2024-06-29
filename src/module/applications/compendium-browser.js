@@ -50,7 +50,7 @@ export class CompendiumBrowserVueApplication extends Application {
 		// is loaded in the create() method of their respective components.
 		return {
 			// @todo add more default options, like saved filters.
-			defaultTab: this.options.defaultTab ?? "creatures",
+			activeTab: this.options.activeTab,
 		};
 	}
 

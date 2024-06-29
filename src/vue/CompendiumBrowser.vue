@@ -77,31 +77,31 @@ export default {
 					creatures: {
 						key: 'creatures',
 						label: game.i18n.localize('CMPBrowser.Tab.NPCBrowser'),
-						active: this.context?.defaultTab === 'creatures' ?? false,
+						active: this.context?.activeTab === 'creatures' ?? false,
 						opened: false
 					},
 					spells: {
 						key: 'spells',
 						label: game.i18n.localize('CMPBrowser.Tab.SpellBrowser'),
-						active: this.context?.defaultTab === 'spells' ?? false,
+						active: this.context?.activeTab === 'spells' ?? false,
 						opened: false
 					},
 					powers: {
 						key: 'powers',
 						label: game.i18n.localize('CMPBrowser.Tab.FeatBrowser'),
-						active: this.context?.defaultTab === 'powers' ?? false,
+						active: this.context?.activeTab === 'powers' ?? false,
 						opened: false
 					},
 					items: {
 						key: 'items',
 						label: game.i18n.localize('CMPBrowser.Tab.ItemBrowser'),
-						active: this.context?.defaultTab === 'items' ?? false,
+						active: this.context?.activeTab === 'items' ?? false,
 						opened: false
 					},
 					settings: {
 						key: 'settings',
 						label: game.i18n.localize("CMPBrowser.Tab.Settings"),
-						active: this.context?.defaultTab === "settings" ?? false,
+						active: this.context?.activeTab === "settings" ?? false,
 						opened: false
 					}
 				}

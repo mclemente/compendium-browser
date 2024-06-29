@@ -1,22 +1,4 @@
 export function registerSettings() {
-	game.compendiumBrowser.readCompendiums = {
-		loadedSpellCompendium: {},
-		loadedNpcCompendium: {},
-	};
-	for (const compendium of game.packs) {
-		if (compendium.documentName === "Item") {
-			game.compendiumBrowser.readCompendiums.loadedSpellCompendium[compendium.collection] = {
-				load: true,
-				name: `${compendium.metadata.label} (${compendium.collection})`,
-			};
-		}
-		if (compendium.documentName === "Actor") {
-			game.compendiumBrowser.readCompendiums.loadedNpcCompendium[compendium.collection] = {
-				load: true,
-				name: `${compendium.metadata.label} (${compendium.collection})`,
-			};
-		}
-	}
 	// creating game setting container
 	game.settings.register("compendium-browser", "tabVisibility", {
 		name: "Compendium Browser Settings",
