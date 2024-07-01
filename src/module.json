@@ -5,20 +5,21 @@
 	"authors": [
 		{
 			"name": "Matheus Clemente",
-			"discord": "mclemente#5524"
+			"discord": "mclemente"
 		}
 	],
-	"url": "This is auto replaced",
 	"readme": "https://github.com/mclemente/compendium-browser/blob/master/README.md",
 	"bugs": "https://github.com/mclemente/compendium-browser/issues",
 	"changelog": "https://github.com/mclemente/compendium-browser/blob/master/Patchnotes.md",
-	"version": "This is auto replaced",
 	"compatibility": {
-		"minimum": "11",
-		"verified": "11"
+		"minimum": "12",
+		"verified": "12"
 	},
 	"esmodules": ["module/compendium-browser.js"],
-	"styles": ["styles/compendium-browser.css"],
+	"styles": [
+		"styles/compendium-browser.css",
+		"components/styles.vue.css"
+	],
 	"languages": [
 		{
 			"lang": "en",
@@ -54,15 +55,16 @@
 	"relationships": {
 		"systems": [{
 			"id": "dnd5e",
-			"type": "system",
-			"compatibility": {
-				"minimum": "3.0.0",
-				"verified": "3.0.3"
-			}
+			"type": "system"
 		}],
 		"requires": [],
-		"conflicts": []
+		"conflicts": [{
+			"id": "pf2e",
+			"type": "system"
+		}]
 	},
+	"url": "This is auto replaced",
+	"version": "This is auto replaced",
 	"manifest": "This is auto replaced",
 	"download": "This is auto replaced"
 }

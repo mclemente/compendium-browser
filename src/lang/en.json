@@ -10,6 +10,8 @@
 		"compSettingsSpell": "Item Compendium Settings",
 		"compSettingsNpc": "NPC Compendium Settings",
 		"load": "Load",
+		"LoadingComplete": "Loading Complete",
+		"LoadingPack": "Loading {pack}",
 		"castingTime": "Casting Time",
 		"spellType": "Spell Type",
 		"damageType": "Damage Type",
@@ -26,12 +28,17 @@
 		"ItemsPacksMonsterHunter": "Monster Hunter's Pack",
 		"ItemsPacksPriest": "Priest's Pack",
 		"ItemsPacksScholar": "Scholar's Pack",
+		"size": "Size",
 		"general": "General",
 		"overall": "Overall Type",
 		"subfeature": "Subfeature Type",
 		"hasSpells": "Has Spells",
+		"legAct": "Legendary Actions",
 		"hasLegAct": "Has Legendary Actions",
-		"hasLegRes": "Has Legendary Resistance",
+		"hasNoLegAct": "Has No Legendary Actions",
+		"legRes": "Legendary Resistances",
+		"hasLegRes": "Has Legendary Resistances",
+		"hasNoLegRes": "Has No Legendary Resistances",
 		"dmgInteraction": "Damage Interaction",
 		"dmgDealt": "Damage Dealt",
 		"Tab": {
@@ -77,6 +84,16 @@
 			"background": "Missing a Background, click to open list",
 			"class": "Missing a Class, click to open list"
 		},
-		"Filters.ResetFilters": "Reset Filters"
+		"Filters": {
+			"ResetFilters": "Reset Filters"
+		},
+		"DND5E": {
+			"DamageAndConditions": "Damage & Conditions",
+			"ConditionImmunities": "Condition Immunities",
+			"CreatureType": "Creature Type",
+			"DamageImmunities": "Damage Immunities",
+			"DamageResistances": "Damage Resistances",
+			"DamageVulnerabilities": "Damage Vulnerabilities"
+		}
 	}
 }

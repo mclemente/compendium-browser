@@ -25,6 +25,9 @@ foundryconfig.json
 # Distribution files
 dist
 
+# Compiled Vue files
+src/components
+
 # ESLint
 .eslintcache
 
