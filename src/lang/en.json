@@ -10,6 +10,8 @@
 		"compSettingsSpell": "Item Compendium Settings",
 		"compSettingsNpc": "NPC Compendium Settings",
 		"load": "Load",
+		"LoadingComplete": "Loading Complete",
+		"LoadingPack": "Loading {pack}",
 		"castingTime": "Casting Time",
 		"spellType": "Spell Type",
 		"damageType": "Damage Type",

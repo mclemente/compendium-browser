@@ -1,3 +1,5 @@
+import { Progress } from "../../module/progress.js";
+
 export function getSafeValue(property, defaultValue) {
   if (property) return property.value;
   return defaultValue;
@@ -63,6 +65,7 @@ export async function getPackIndex({ packNames = [], fields = [], types = [], su
       .filter((p) => !types.length || types.includes(p.metadata.type))
       .map((p) => p.metadata.id);
   }
+  const progress = new Progress({ max: packNames.length });
 
   if (subTypes.length && !fields.includes("type")) {
     fields.push("type");
@@ -74,7 +77,9 @@ export async function getPackIndex({ packNames = [], fields = [], types = [], su
     const filteredIndexes = packIndex.contents
       .filter((i) => !subTypes.length || subTypes.includes(i.type));
     packs = packs.concat(filteredIndexes);
+    progress.advance({ label: game.i18n.format("CMPBrowser.LoadingPack", { pack: pack.metadata.label })});
   }
+  progress.close({ label: game.i18n.localize("CMPBrowser.LoadingComplete") });
 
   return packs;
 }
