@@ -4,7 +4,6 @@ export function registerSettings() {
 		name: "Compendium Browser Settings",
 		hint: "",
 		default: {
-			actors: false,
 			features: false,
 			items: false,
 			spells: false
