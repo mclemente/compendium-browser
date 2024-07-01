@@ -124,8 +124,8 @@
 // onUpdated() is used for the infinite scroll intersection observer.
 import { onUpdated } from 'vue';
 // External components.
-import Slider from '@vueform/slider';
 import Multiselect from '@vueform/multiselect';
+import Slider from '@vueform/slider';
 // Helper methods.
 import FilterNameSort from '@/components/dialogs/compendium-browser/filters/FilterNameSort.vue';
 import {
@@ -235,7 +235,10 @@ export default {
 			// Filter by name.
 			if (this.name && this.name.length > 0) {
 				const name = this.name.toLocaleLowerCase();
-				result = result.filter(entry => entry.name.toLocaleLowerCase().includes(name));
+				result = result.filter(entry =>
+					entry.originalName?.toLocaleLowerCase().includes(name)
+					|| entry.name.toLocaleLowerCase().includes(name)
+				);
 			}
 
 			// Filter by level.
