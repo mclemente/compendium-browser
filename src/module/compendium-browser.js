@@ -40,7 +40,7 @@ class CompendiumBrowser extends Application {
 	}
 
 	static get defaultOptions() {
-		return mergeObject(super.defaultOptions, {
+		return foundry.utils.mergeObject(super.defaultOptions, {
 			title: "CMPBrowser.compendiumBrowser",
 			tabs: [{ navSelector: ".tabs", contentSelector: ".content", initial: "spell" }],
 			classes: [COMPENDIUM_BROWSER],
