@@ -900,7 +900,7 @@ class CompendiumBrowser extends Application {
 		}
 
 		if (item.type === "spell") {
-			const cleanSpellName = item.name.slugify({replacement: "", strict: true});
+			const cleanSpellName = (item.originalName ?? item.name).slugify({replacement: "", strict: true});
 			if (this.classList[cleanSpellName]) {
 				let classes = this.classList[cleanSpellName];
 				item.classes = classes.split(",");
